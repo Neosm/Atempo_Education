@@ -1,0 +1,37 @@
+    {% extends 'base.html.twig' %}
+
+{% set queryParams = app.request.query.all %}
+
+{% block title %}Actualités - Atempo Education{% endblock %}
+
+{% block content %}
+    {% if is_granted('ROLE_SUPERTEACHER') %}
+    <a href="{{ path('admin_articles_ajout') }}" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> Ajouter Actualité</a>
+    {% endif %}
+    <h1 class="h3 mb-3">Actualités</h1>
+
+    <form id="filters">
+        {% for categorie in categories %}
+            {# On vérifie si la catégorie est dans les paramètres #}
+            {% if queryParams is not empty and queryParams.categories is defined %}
+                {% set checked = (categorie.id in queryParams.categories) ? "checked" : "" %}
+            {% else %}
+                {% set checked = "" %}
+            {% endif %}
+            <input type="checkbox" autocomplete="off" name="categories[]" id="cat{{categorie.id}}" value="{{categorie.id}}" class="btn-check" {{checked}}>
+            <label for="cat{{categorie.id}}" class="btn btn-lg btn-primary">{{categorie.name}}</label>
+        {% endfor %}
+            <input type="hidden" name="page" value="{{ page }}">
+    </form>
+    <br>
+        <div class="row row-cols-1 row-cols-md-2 g-4" id="actualitesFiltre">
+            {% include "actualites/_content.html.twig" %}
+        </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="{{ asset('assets/js/filters.js') }}"></script>
+{% endblock %}
+
+
+
+

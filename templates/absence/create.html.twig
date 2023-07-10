@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer une absence{% endblock %}
+
+{% block content %}
+    <h1>Créer une absence</h1>
+
+    {{ form_start(form) }}
+    {{ form_row(form.student) }}
+
+    <button type="submit" class="btn btn-primary">Valider</button>
+    {{ form_end(form) }}
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier programme{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.0.0/dist/css/tom-select.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Éditer le programme : {{ programme.nom }}</h1>
+
+{{ form_start(form) }}
+
+{{ form_row(form.nom) }}
+{{ form_row(form.image) }}
+{{ form_row(form.ProgrammesLecons) }}
+{{ form_row(form.users) }}
+{{ form_row(form.submit) }}
+
+{{ form_end(form) }}
+
+{% endblock %}
+
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.0.0/dist/js/tom-select.complete.min.js"></script>
+<script src="{{ asset('assets/js/appApi.js')}}"></script>
+
+    <script>
+        let Camoufle = document.querySelector("#edit_programmes_users");
+        let ParentCamoufle = Camoufle.parentElement;
+        // On va chercher le type de programmes
+        let ProgrammesLecons = document.querySelector("#edit_programmes_ProgrammesLecons");
+
+        let data = ProgrammesLecons.name + "=" + ProgrammesLecons.value;
+        if (data !== 'edit_programmes[ProgrammesLecons]=2') {
+            ParentCamoufle.classList.add('d-none');
+        } else {
+            ParentCamoufle.classList.remove('d-none');
+        }
+
+        window.onload = () => {
+            ProgrammesLecons.addEventListener("change", function () {
+                let form = this.closest("form");
+                let data = this.name + "=" + this.value;
+                if (data !== 'edit_programmes[ProgrammesLecons]=2') {
+                    ParentCamoufle.classList.add('d-none');
+                } else {
+                    ParentCamoufle.classList.remove('d-none');
+                }
+            });
+        }
+    </script>
+
+{% endblock %}

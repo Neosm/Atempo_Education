@@ -1,0 +1,76 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Emploi du temps{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullEvent@5.9.0/main.min.css" integrity="sha256-FjyLCG3re1j4KofUTQQXmaWJw13Jdb7LQvXlkFxTDJI=" crossorigin="anonymous">
+{% endblock %}
+
+
+{% block content %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('admin_agenda_new') }}" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> Ajouter un évènement</a>
+    {% endif %}
+        <h1 class="h3 mb-3">Agenda</h1>
+        <div class="card">
+            <div class="card-body">
+                <div id="calendrier"></div>
+            </div>
+        </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/fullEvent@5.9.0/main.min.js" integrity="sha256-8nl2O4lMNahIAmUnxZprMxJIBiPv+SzhMuYwEuinVM0=" crossorigin="anonymous"></script>
+    <script>
+        window.onload = () => {
+            let EventElement = document.querySelector('#calendrier');
+            let Event = new FullEvent.Event(EventElement, {
+                themeSystem: 'bootstrap',
+                initialView: 'dayGridMonth',
+                locale: 'fr',
+                timeZone: 'Europe/Paris',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                eventClick: function(e) {
+                    window.open(`/admin/agenda/${e.event.id}`,"_self")
+                },
+                navLinks: true,
+                buttonText:{
+                    today: 'Aujourd\'hui',
+                    month: 'Mois',
+                    week: 'Semaine',
+                    day: 'Jour',
+                    list: 'Liste'
+                },
+                events: {{ dataEvents|raw }},
+
+            {% if is_granted('ROLE_ADMIN') %}
+                editable: true
+            {% endif %}
+            })
+
+            Event.on('eventChange', (e) => {
+                let url = `/admin/agenda/api/${e.event.id}/edit`
+                let donnees = {
+                    "title": e.event.title,
+                    "description": e.event.extendedProps.description,
+                    "start": e.event.start,
+                    "end": e.event.end,
+                    "backgroundColor": e.event.backgroundColor,
+                    "borderColor": e.event.borderColor,
+                    "textColor": e.event.textColor,
+                    "allDay": e.event.allDay
+                }
+                let xhr = new XMLHttpRequest
+                xhr.open("PUT", url)
+                xhr.send(JSON.stringify(donnees))
+            })
+
+            Event.render();
+        }
+    </script>
+{% endblock %}

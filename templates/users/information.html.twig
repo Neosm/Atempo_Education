@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier ses informations{% endblock %}
+
+{% block content %}
+    <h1>Modifier les informations personnelles</h1>
+    <a href="{{ path('users') }}">Retourner sur son compte</a><br><br>
+    Bienvenue {{ app.user.firstname }} dans votre espace modification d'informations.<br>
+
+    <hr>
+    {{ form(form) }}
+    <hr>
+{% endblock %}

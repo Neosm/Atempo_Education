@@ -1,0 +1,523 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Atempo Education{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.css" integrity="sha256-FjyLCG3re1j4KofUTQQXmaWJw13Jdb7LQvXlkFxTDJI=" crossorigin="anonymous">
+{% endblock %}
+
+{% block content %}
+        <div class="row mb-2 mb-xl-3">
+            <div class="col-auto d-none d-sm-block">
+                <h1 class="h2">Accueil</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                <div class="card illustration flex-fill">
+                    <div class="card-body p-0 d-flex flex-fill">
+                        <div class="row g-0 w-100">
+                            <div class="col-6">
+                                <div class="illustration-text p-3 m-1">
+                                    <h2 class="illustration-text">Bon retour {{ app.user.firstname }}</h2>
+                                    <p class="mb-0">Dashboard Atempo.Education</p>
+                                </div>
+                            </div>
+                            <div class="col-6 align-self-end text-end">
+                                <img src="\uploads\images\customer-support.png" alt="Customer Support" class="img-fluid illustration-img">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-body py-4">
+                        <div class="align-items-start">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-2">Prochains cours</h2>
+                                {% set today = "now"|date("Y-m-d H:i", 'Europe/Paris') %}
+                                {% set nextEvents = [] %}
+                                {% if not is_granted('ROLE_TEACHER') %}
+                                    {% for event in app.user.events %}
+                                        {% if event.start|date("Y-m-d H:i") >= today %}
+                                            {% set nextEvents = nextEvents|merge([event]) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if app.user.studentClass is not null %}
+                                        {% for event in app.user.studentClass.events %}
+                                            {% if event.start|date("Y-m-d H:i") >= today %}
+                                                {% set nextEvents = nextEvents|merge([event]) %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% elseif is_granted('ROLE_TEACHER') %}
+                                    {% for event in app.user.eventsteacher %}
+                                        {% if event.start|date("Y-m-d H:i") >= today %}
+                                            {% set nextEvents = nextEvents|merge([event]) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if app.user.studentClass is not null %}
+                                        {% for event in app.user.studentClass.events %}
+                                            {% if event.start|date("Y-m-d H:i") >= today %}
+                                                {% set nextEvents = nextEvents|merge([event]) %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endif %}
+                                
+                                
+
+                                {% set nextEvents = nextEvents|sort((a, b) => a.start <=> b.start)|slice(0, 2) %}
+                                {% if nextEvents|length > 0 %}
+                                    {% for event in nextEvents %}
+                                        <p class="mb-2">{{ event.title }} - {{ event.teacher.username }}</p>
+                                        <div class="mb-0">
+                                            <span class="badge badge-soft-success me-2">
+                                                {{ event.start|date("H:i") }}
+                                            </span>
+                                            <span class="text-muted">Salle : {{ event.room.name }}</span>
+                                        </div> <hr>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>PAS DE PROCHAIN COURS POUR LE MOMENT</p>
+                                {% endif %}
+                            </div>
+                            <a href="{{ path('agenda_home') }}?view=list" class="btn btn-bitbucket text-center text-uppercase w-100 mt-1">Voir ses prochains cours</a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-body py-4">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-2">Travail à faire</h2>
+                                <p class="mb-2">Titre du prochain travail à rendre</p>
+                                <div class="mb-0">
+                                    <span class="badge badge-soft-danger me-2"> Compte à rebours </span>
+                                    <span class="text-muted">Pour quand ?</span>
+                                </div>
+                            </div>
+                            <div class="d-inline-block ms-3">
+                                <div class="stat">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag align-middle text-danger"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xxl-3 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-body py-4">
+                        <div class="align-items-start">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-2">Assiduité</h2>
+                                <p class="mb-2"><strong style="font-size: 1rem">Dernière absence :</strong>
+                                {% if app.user.absences|length > 0 %}
+                                    {% set lastAbsenceIndex = app.user.absences|length - 1 %}
+                                    {{ app.user.absences[lastAbsenceIndex].event.title }} - {{ app.user.absences[lastAbsenceIndex].absenceDate|date('d/m/Y') }}
+                                {% else %}
+                                    Aucune.
+                                {% endif %}
+                                </p>
+
+                                <p class="mb-2"><strong style="font-size: 1rem">Dernier retard :</strong> 
+                                {% if app.user.delays|length > 0 %}
+                                    {% set lastDelayIndex = app.user.delays|length - 1 %}
+                                    {{ app.user.delays[lastDelayIndex].event.title }} - {{ app.user.delays[lastDelayIndex].event.start|date('d/m/Y H:i') }} <br> Durée : {{ app.user.delays[lastDelayIndex].delayMinutes }} minutes
+                                {% else %}
+                                    Aucun retard.
+                                {% endif %}
+
+                                </p>
+                                <div class="mb-0">
+                                {% set totalDelayMinutes = 0 %}
+                                {% set totalAbsenceMinutes = 0 %}
+
+                                {% for delay in app.user.delays %}
+                                    {% set totalDelayMinutes = totalDelayMinutes + delay.delayMinutes %}
+                                {% endfor %}
+
+                                {% for absence in app.user.absences %}
+                                    {% set totalAbsenceMinutes = totalAbsenceMinutes + absence.event.duration %}
+                                {% endfor %}
+
+                                {% set totalAbsenceHours = (totalAbsenceMinutes + totalDelayMinutes) // 60 %}
+                                {% set totalAbsenceMinutes = (totalAbsenceMinutes + totalDelayMinutes) % 60 %}
+
+                                    <span class="badge badge-soft-danger me-2"> <i class="mdi mdi-arrow-bottom-right"></i> ABSENCE TOTALE</span>
+                                    <span class="text-muted"> {{ totalAbsenceHours }} heures et {{ totalAbsenceMinutes }} minutes</span>
+                                </div>
+                            </div>
+                            <a href="{{ path('user_assiduity') }}" class="btn btn-bitbucket text-center text-uppercase w-100 mt-1">Voir son assiduité</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 col-lg-8 d-flex">
+                <div class="card flex-fill w-100">
+                    <div class="card-header">
+                        <h2 class="  mb-0">Agenda</h2>
+                    </div>
+                    <div class="card-body d-flex">
+                        <div class="chart">
+                            <div id="calendrier"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 d-flex">
+                <div class="card flex-fill w-100">
+                    <div class="card-header">
+                        <h2 class="  mb-0">Dernières notes</h2>
+                    </div>
+                    <div class="card-body">
+                        {% for note in app.user.notes|slice(0, 5) %}
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <strong>{{ note.matiere }}</strong> {{ note.note }}<br>
+                                    <small class="text-muted">{{ note.date|date('d-m-Y') }}</small>
+                                </div>
+                            </div>
+                            <hr>
+                        {% endfor %}
+                        <div class="d-grid">
+                            <a href="{{ path('app_resultat') }}" class="btn btn-bitbucket text-center text-uppercase w-100 mt-1">Voir toutes les dernières notes</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 col-lg-6 col-xl-4 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <div class="card-actions float-end">
+                            
+                        <form>
+                            <div class="form-group">
+                                <select class="form-control" id="matiereDropdown" onchange="updateHeuresPassees()">
+                                    <option value="0">Sélectionnez une matière</option>
+                                    {% for matiere in matieres %}
+                                        <option value="{{ matiere.id }}">{{ matiere.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                        </div>
+                        <h2 class="  mb-0">Récapitulatif des heures</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="historiqueHeures"></div>
+                        <div class="d-grid">
+                            <a href="{{ path('app_matieres') }}" class="btn btn-bitbucket text-center text-uppercase w-100 mt-1">Voir toutes les matières</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-4 d-none d-xl-flex">
+                <div class="card flex-fill w-100">
+                    <div class="card-header">
+                        <h2 class="  mb-0">Évolution de la moyenne</h2>
+                    </div>
+                    <div class="card-body d-flex">
+                        <div class="align-self-center w-100">
+                            <div class="py-3">
+                                <div class="chart chart-xs">
+                                    <canvas id="chart" ></canvas>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <a href="{{ path('app_resultat') }}" class="btn btn-bitbucket text-center text-uppercase w-100 mt-1">Voir toutes les résultats</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6 col-xl-4 d-flex">
+                <div class="card flex-fill w-100">
+                    <div class="card-header">
+                        <h2 class="  mb-0">Dernières Actualités</h2>
+                    </div>
+                    <div class="card-body">
+                        <ul class="timeline">
+                        {% if articles %}
+                            {% for article in articles|slice(0,2) %}
+                                <li class="timeline-item">
+                                    <strong>{{ article.title }}</strong>
+                                    <span class="float-end text-muted text-sm">{{ article.categories }} - Le {{ article.createdAt|date }}</span>
+                                    <p>{{ article.content|striptags|u.truncate(150, '...')|raw }}</p>
+                                    {% if is_granted("IS_AUTHENTICATED_FULLY") %}
+                                    {% set isFavorite = false %}
+                                    {% for favoris in article.favoris %}
+                                        {% if favoris.id == app.user.id %}
+                                            {% set isFavorite = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                <div class="card-footer bg-transparent d-flex justify-content-between">
+                                    {% if is_granted("IS_AUTHENTICATED_FULLY") %}
+                                        {% if isFavorite %}
+                                            <a href="{{ path('actualites_retrait_favoris', {id: article.id}) }}">
+                                                <i class="fas fa-heart fa-2x" style="color: #ff6b6b;"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ path('actualites_ajout_favoris', {id: article.id}) }}">
+                                                <i class="far fa-heart fa-2x" style="color: #ff6b6b;"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                    <a href="{{ path('actualites_details', {slug: article.slug}) }}" class="text-decoration-none btn btn-outline-primary">
+                                        Lire l'actu
+                                    </a>
+                                </div>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                        </ul>
+                        <div class="d-grid">
+                            <a href="{{ path('actualites_home') }}" class="btn btn-bitbucket text-center text-uppercase w-100 mt-1">Voir toutes les actualités</a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="card flex-fill">
+            <div class="card-header">
+                {% if is_granted ('ROLE_TEACHER') %}
+                <h2 class="  mb-0">Mes élèves</h2>
+                {% elseif not is_granted ('ROLE_TEACHER') %}
+                <h2 class="  mb-0">Mes professeurs</h2>
+                {% endif %}
+            </div>
+            <div id="datatables-dashboard-projects_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table id="table_id" class="table is-striped my-0 dataTable no-footer">
+                            <thead>
+                                <tr role="row">
+                                    <th  tabindex="0" rowspan="1" colspan="1" style="width: 17px;">
+                                        
+                                    </th>
+                                    <th tabindex="0" rowspan="1" colspan="1" style="width: 115px;" >
+                                        Nom
+                                    </th>
+                                    <th tabindex="0" rowspan="1" colspan="1" style="width: 85px;">
+                                        Téléphone
+                                    </th>
+                                    <th tabindex="0" rowspan="1" colspan="1" style="width: 155px;">
+                                        Email
+                                    </th>
+                                    {% if is_granted ('ROLE_TEACHER') %}
+                                    <th tabindex="0" rowspan="1" colspan="1" style="width: 47px;">
+                                        Classe
+                                    </th>
+                                    {% elseif is_granted ('ROLE_STUDENT')%}
+                                    <th tabindex="0" rowspan="1" colspan="1" style="width: 47px;">
+                                        matière
+                                    </th>
+                                    {% endif %}
+                                    <th tabindex="0" rowspan="1" colspan="1" style="width: 47px;">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if is_granted ('ROLE_TEACHER') %}
+                                    {% for student in userStudent %}
+                                        <tr>
+                                            <td class="dtr-control"><img src="{{ asset('/uploads/profile_pics/' ~ student.thumbnail)|imagine_filter('thumbnail') }}" width="32" height="32" class="rounded-circle my-n1" alt="Avatar"></td>
+                                            <td class="sorting_1">{{ student.name }}</td>
+                                            <td>{{ student.telephone }}</td>
+                                            <td>{{ student.email }}</td>
+                                            <td><span class="badge bg-success">{{ student.studentClass }}</span></td>
+                                            <td><a href="{{ path('student_show', {id: student.id}) }}">Voir</a></td>
+                                        </tr>
+                                    {% endfor %}
+                                {% elseif not is_granted ('ROLE_TEACHER') %}
+                                    {% for teacher in userTeacher %}
+                                        <tr class="even">
+                                            <td class="dtr-control" tabindex="0"><img src="{{ asset('/uploads/profile_pics/' ~ teacher.thumbnail)|imagine_filter('thumbnail') }}" width="32" height="32" class="rounded-circle my-n1" alt="Avatar"></td>
+                                            <td class="sorting_1">{{ teacher.name }}</td>
+                                            <td>{{ teacher.telephone }}</td>
+                                            <td>{{ teacher.email }}</td>
+                                            {% set uniqueMatieres = [] %}
+                                            {% for event in teacher.eventsteacher %}
+                                                {% set matiere = event.matieres %}
+                                                {% if matiere is not null and matiere not in uniqueMatieres %}
+                                                    {% set uniqueMatieres = uniqueMatieres|merge([matiere]) %}
+                                                {% endif %} 
+                                            {% endfor %}
+                                            <td><span class="badge bg-success">{% for matiere in uniqueMatieres %}
+                                                {{ matiere }} {% if not loop.last %},{% endif %}
+                                            {% endfor %}</span></td>
+                                            <td><a href="{{ path('teacher_show', {id: teacher.id}) }}">Voir</a></td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.js" integrity="sha256-8nl2O4lMNahIAmUnxZprMxJIBiPv+SzhMuYwEuinVM0=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        window.onload = () => {
+            let calendarElement = document.querySelector('#calendrier');
+            let calendar = new FullCalendar.Calendar(calendarElement, {
+                themeSystem: 'bootstrap',
+                initialView: 'dayGridWeek',
+                height: 400,
+                locale: 'fr',
+                timeZone: 'Europe/Paris',
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek,dayGridDay'
+                },
+                eventClick: function(e) {
+                    window.open(`/agenda/event/${e.event.id}`,"_self")
+                },
+                firstDay: 1,
+                allDaySlot: false,
+                navLinks: true,
+                buttonText:{
+                    today: 'Aujourd\'hui',
+                    month: 'Mois',
+                    week: 'Semaine',
+                    day: 'Jour',
+                    list: 'Liste'
+                },
+                events: {{ dataEvents|raw }},
+
+            })
+            
+            calendar.render();
+
+            $('#table_id').DataTable({
+                language: {
+                    processing:     "Traitement en cours...",
+                    search:         "Rechercher&nbsp;:",
+                    lengthMenu:    "Afficher _MENU_ &eacute;l&eacute;ments",
+                    info:           "Affichage de l'&eacute;lement _START_ &agrave; _END_ sur _TOTAL_ &eacute;l&eacute;ments",
+                    infoEmpty:      "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
+                    infoFiltered:   "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
+                    infoPostFix:    "",
+                    loadingRecords: "Chargement en cours...",
+                    zeroRecords:    "Aucun &eacute;l&eacute;ment &agrave; afficher",
+                    emptyTable:     "Aucune donnée disponible dans le tableau",
+                    paginate: {
+                        first:      "Premier",
+                        previous:   "Pr&eacute;c&eacute;dent",
+                        next:       "Suivant",
+                        last:       "Dernier"
+                    },
+                    aria: {
+                        sortAscending:  ": activer pour trier la colonne par ordre croissant",
+                        sortDescending: ": activer pour trier la colonne par ordre décroissant"
+                    }
+                }
+            });
+
+var ctx = document.getElementById('chart').getContext('2d');
+var chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ months|raw }},
+        datasets: [
+            {
+                label: 'Moyenne Générale',
+                data: {{ averageValues|raw }},
+                borderColor: 'blue',
+                fill: false
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 20,
+                stepSize: 2
+            }
+        }
+    }
+});
+
+
+
+
+
+        }
+
+        function updateHeuresPassees() {
+            var matiereId = document.getElementById('matiereDropdown').value;
+            var historiqueHeuresElement = document.getElementById('historiqueHeures');
+
+            if (matiereId !== "0") {
+                // Faire une requête AJAX pour obtenir les informations mises à jour
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        historiqueHeuresElement.innerHTML = generateHistoriqueHeuresHTML(response);
+                    }
+                };
+                xhr.open('GET', '/historique/heure/endpoint?matiereId=' + matiereId, true);
+                xhr.send();
+            } else {
+                // Afficher un message indiquant qu'aucune matière n'a été sélectionnée
+                historiqueHeuresElement.innerHTML = "Veuillez sélectionner une matière.";
+            }
+        }
+
+        function generateHistoriqueHeuresHTML(data) {
+            var html = '<h3>Historique des heures pour la matière sélectionnée :</h3>';
+            html += '<div>';
+
+            // Matière
+            html += '<strong>Matière:</strong> ' + data.matiere + '<br>';
+
+            // Temps total
+            html += '<strong>Temps total:</strong> ' + data.tempsTotal + '<br>';
+
+            // Temps passé
+            html += '<strong>Temps passé:</strong> ' + data.tempsPasse + '<br>';
+
+            // Moyenne des notes classe
+            html += '<strong>Moyenne de la classe:</strong> ' + data.moyenneNotes + '<br>';
+
+            // Moyenne des notes utilisateur
+            html += '<strong>Moyenne:</strong> ' + data.moyenneNotesUtilisateur + '<br>';
+
+            // Nom du professeur
+            html += '<strong>Nom du professeur:</strong> ' + data.nomProfesseur + '<br>';
+
+            html += '</div>';
+
+            return html;
+
+        }
+
+    </script>
+{% endblock %}

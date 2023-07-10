@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Actualités - Atempo Education{% endblock %}
+
+{% block content %}
+    <div class="card mb-3">
+        <img class="card-img-top" src="{{ asset('/uploads/articles/' ~ article.illustrations)|imagine_filter('banniere') }}" alt="Atempo-Education | {{ article.illustrations }}">
+    </div>
+    <div class="row g-0">
+        <div class="col-lg-8 pe-lg-2">
+            <div class="card mb-3 mb-lg-0">
+                <div class="card-body">
+                    <h1 class="fs-0 mb-3">{{ article.title }}</h1>
+                    {{ article.content|raw }}
+                    <p class="fs-0 mt-5 mb-2 h3">Autre fonction</p>
+                    <a class="badge border link-secondary me-1 text-decoration-none" href="" style="color:black">un badge ici </a>
+                    <h5 class="fs-0 mt-5 mb-2">Partagez avec vos amis</h5>
+                    <div class="icon-group">
+                        <a class="icon-item text-facebook" href="">
+                            <span class="fab fa-facebook-f fa-lg"></span>
+                        </a>
+                        <a class="icon-item text-twitter" href="#!">
+                           <span class="fab fa-twitter fa-lg"></span></a>
+                        <a class="icon-item text-linkedin" href="#!">
+                            <span class="fab fa-linkedin-in fa-lg"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 ps-lg-2">
+            <div class="sticky-sidebar">
+                <div class="card mb-3 fs--1">
+                    <div class="card-body">
+                        <p class="h4">Écrit par</p>
+                        <p class="mb-1">{{ article.users.firstname }} {{ article.users.lastname }}</p>
+                        <p class="h4 mt-4">Catégorie</p>
+                        <p class="mb-1">{{ article.categories }}</p>
+                        <p class="mt-4 h6 mb-1">Le {{ article.createdAt|date }}</p>
+                    </div>
+                </div>
+                <div class="card mb-3 mb-lg-0">
+                    <div class="card-header bg-light">
+                        <h2 class="mb-0">Vous aimerez aussi</h2>
+                    </div>
+                    <div class="card-body fs--1">
+                        {% for article in article.categories.articles|sort((a, b) => b.id <=> a.id)|slice(0,3) %}
+                            <div class="d-flex btn-reveal-trigger">
+                                <div class="flex-1 position-relative ps-3">
+                                    <h6 class="fs-0 mb-0"><a href="">{{ article.title }}</a></h6>
+                                    <p class="mb-1">Écrit par <a href="#!" class="text-700">{{ article.users.firstname }} {{ article.users.lastname }}</a></p>
+                                    <p class="text-1000 mb-0">Catégorie : {{ article.categories }}</p>
+                                    <div class="calendar">
+                                    <span class="calendar-day">{{ article.createdAt|date("d") }}</span>
+                                    <span class="calendar-month"> {{ article.createdAt|format_datetime(pattern='MMMM', locale='fr') }}</span>
+                                </div>
+                                </div>
+                            </div>
+                            <br>
+                        {% endfor %}
+                    </div>
+                    <div class="card-footer bg-light p-0 border-top">
+                        <a class="btn btn-link d-block w-100" href="{{ path('actualites_home') }}">
+                            Tous les articles
+                            <span class="fas fa-chevron-right ms-1 fs--2 fa-lg"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+
+

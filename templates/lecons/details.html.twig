@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ lecon.nom }}{% endblock %}
+
+{% block content %}
+        <h1 class="h3 mb-3">{{ lecon.nom }}</h1>
+
+        <div class="row">
+            <div class="col-lg-6 col-xl-3 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-body my-0 pt-0">
+                        <div class="row d-flex align-items-center mb-3">
+                            <div class="col-8">
+                                <img src="{{ asset('/uploads/lecons/images/' ~ lecon.thumbnails)|imagine_filter('illustration') }}" alt="Atempo-Education | {{ lecon.thumbnails }}" class="rounded-start">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xl-3 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-body my-0 pt-0">
+                        <div class="row d-flex align-items-center mb-3">
+                            <div class="col-8">
+                                <div class="card-header">
+                                    <h2 class="card-title mb-0 mt-2 h5">PDF</h2>
+                                </div>
+                                <div class="card-body my-0 pt-0">
+                                    <div class="row d-flex align-items-center mb-3">
+                                        <div class="col-8">
+                                            <h3 class="d-flex align-items-center mb-0 fw-light">
+                                            {% if lecon.pdf %}
+                                                <a href="{{ path('lecons_pdf_download', {slug: lecon.slug} ) }}"> <i class="bi bi-file-earmark-pdf text-primary" style="font-size: 8rem;"></i> Télécharger</a>
+                                            {% endif %}
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xl-3 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-body my-0 pt-0">
+                        <div class="row d-flex align-items-center mb-3">
+                            <div class="col-8">
+                                <div class="card-header">
+                                    <h2 class="card-title mb-0 mt-2 h5">Vidéo</h2>
+                                </div>
+                                <div class="card-body my-0 pt-0">
+                                    <div class="row d-flex align-items-center mb-3">
+                                        <div class="col-8">
+                                            <h3 class="d-flex align-items-center mb-0 fw-light">
+                                            {% if lecon.video %}
+                                                <a href="{{ lecon.video }}"><i class="bi bi-camera-video-fill text-primary" style="font-size: 8rem;"></i> Voir la vidéo</a>
+                                            {% endif %}
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xl-3 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-body my-0 pt-0">
+                        <div class="row d-flex align-items-center mb-3">
+                            <div class="col-8">
+                                <div class="card-header">
+                                    <h2 class="card-title mb-0 mt-2 h5">Audio</h2>
+                                </div>
+                                <div class="card-body my-0 pt-0">
+                                    <div class="row d-flex align-items-center mb-3">
+                                        <div class="col-8">
+                                            <h3 class="d-flex align-items-center mb-0 fw-light">
+                                            {% if lecon.audio %}
+                                                <a href="{{ lecon.audio }}"><i class="bi bi-volume-up-fill text-primary" style="font-size: 8rem;"></i> Écouter l'audio</a>
+                                            {% endif %}
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 col-xxl-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-actions float-end">
+                            <div class="dropdown show">
+                                <a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal align-middle"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    {% if is_granted('ROLE_TEACHER') %}
+                                    <a class="dropdown-item" href="{{ path('lecons_modifier', {id: lecon.id}) }}">Modifier</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="badge bg-info my-2"><a href="{{ path('programmes_details', {slug: lecon.programmes.slug} )}}" class="text-white">{{ lecon.programmes.nom }}</a></div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <h2 class="h5">Contenu de la leçon</h2>
+                        {{ lecon.contenu|raw }}
+                        <div>
+                            <h2>Documents liés</h2>
+                            {% if lecon.video or lecon.pdf or lecon.audio %}
+                                {% if lecon.pdf %}
+                                    <h3>PDF</h3>
+                                    <a href="{{ path('lecons_pdf_download', {slug: lecon.slug} ) }}"> <i class="bi bi-file-earmark-pdf text-primary" style="font-size: 2rem;"></i></a>
+                                {% endif %}
+                                {% if lecon.video %}
+                                    <h3>Vidéo</h3>
+                                    <a href="{{ lecon.video }}"><i class="bi bi-camera-video-fill text-primary" style="font-size: 2rem;"></i></a>
+                                {% endif %}
+                                {% if lecon.audio %}
+                                    <h3>Audio</h3>
+                                    <a href="{{ lecon.audio }}"><i class="bi bi-volume-up-fill text-primary" style="font-size: 2rem;"></i></a>
+                                {% endif %}
+                            {% else %}Il n'y à aucun document relié à cette leçon. Pour tout problème veuillez contacter votre professeur ou l'administration
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xxl-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title mb-0">Informations</h2>
+                    </div>
+                    <div class="card-body">
+
+                        <dl class="row">
+                            <dt class="col-4 col-xxl-3">Documents joints</dt>
+                            <dd class="col-8 col-xxl-9">
+                                {% if lecon.video or lecon.pdf or lecon.audio %}
+                                    {% if lecon.pdf %}
+                                        <a href="{{ path('lecons_pdf_download', {slug: lecon.slug} ) }}">PDF</a>
+                                    {% endif %}
+                                    {% if lecon.video %}
+                                        <a href="{{ lecon.video }}">Vidéo</a>
+                                    {% endif %}
+                                    {% if lecon.audio %}
+                                        <a href="{{ lecon.audio }}">Audio</a>
+                                    {% endif %}
+                                {% else %}Il n'y à aucun document relié à cette leçon. Pour tout problème veuillez contacter votre professeur ou l'administration
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-4 col-xxl-3 mb-0">Type de leçon</dt>
+                            <dd class="col-8 col-xxl-9 mb-0">
+                                {% if lecon.ProgrammesLecons.id == 2 %}
+                                    Privée{% else %}Publique
+                                {% endif %}
+                            </dd>
+                        </dl>
+
+                        <hr>
+
+                        <dl class="row">
+                            <dt class="col-4 col-xxl-3">Créer le :</dt>
+                            <dd class="col-8 col-xxl-9">
+                                <p class="mb-1">{{ lecon.createdAt|date }}</p>
+                            </dd>
+                        </dl>
+
+                        <hr>
+
+                        <dl class="row">
+                            <dt class="col-4 col-xxl-3 mb-0">Programme</dt>
+                            <dd class="col-8 col-xxl-9 mb-0">
+                                <p class="mb-0">{{ lecon.programmes.nom }}</p>
+                            </dd>
+                        </dl>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+
+
+

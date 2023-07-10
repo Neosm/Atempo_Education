@@ -1,0 +1,16 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Inscription sur Atempo{% endblock %}
+
+{% block content %}
+    {% for flashError in app.flashes('verify_email_error') %}
+        <div class="alert alert-danger" role="alert">{{ flashError }}</div>
+    {% endfor %}
+
+    <h1 class="h2">Formulaire d'inscription</h1>
+    {% if notification %}
+        <div class="alert alert-info">{{ notification }}</div>
+    {% endif %}
+    {{ form(RegisterForm) }}
+
+{% endblock %}

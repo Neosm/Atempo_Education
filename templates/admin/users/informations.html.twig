@@ -1,0 +1,11 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Modifier les informations de {{user.lastname}} {{user.firstname}}{% endblock %}
+
+{% block content %}
+    <h1>Modifier les informations personnelles de {{user.lastname}} {{user.firstname}}</h1>
+
+    <hr>
+    {{ form(form) }}
+    <hr>
+{% endblock %}

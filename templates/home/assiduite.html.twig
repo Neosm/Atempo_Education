@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'assiduité{% endblock %}
+
+{% block content %}
+    <h1>Assiduité</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Absences</h2>
+                    {% if app.user.absences|length > 0 %}
+                        <ul>
+                            {% for absence in app.user.absences %}
+                                <li>{{ absence.event.title }} - {{ absence.absenceDate|date('d/m/Y') }} - {{ absence.event.duration }} minutes</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>Aucune absence enregistrée pour cet utilisateur.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Retards</h2>
+                    {% if app.user.delays|length > 0 %}
+                        <ul>
+                            {% for delay in app.user.delays %}
+                                <li>{{ delay.event.title }} - {{ delay.event.start|date('d/m/Y H:i') }} - Durée : {{ delay.delayMinutes }}minutes</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>Aucun retard enregistré pour cet utilisateur.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

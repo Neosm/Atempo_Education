@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes données - Atempo Education{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="h2">Mes données personnelles</h1>
+
+        <br>
+        <hr>
+        <br>
+        <h2 class="h3">Articles créés</h2>
+        {% if app.user.articles %}
+            <div class="row">
+                {% for articles in app.user.articles|reverse %}
+                    <div class="col-sm-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ articles.title }}</h3>
+                                <p class="card-text">{{ articles.content|striptags|raw }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <br>
+        <hr>
+        <br>
+        <h2 class="h3">Articles partagés</h2>
+        {% if app.user.favoris %}
+            <div class="row">
+                {% for articles in app.user.articles|reverse %}
+                    <div class="col-sm-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ articles.title }}</h3>
+                                <p class="card-text">{{ articles.content|striptags|raw }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <br>
+        <hr>
+        <br>
+        <h2 class="h3">Articles en Favoris</h2>
+        {% if app.user.favoris %}
+            <div class="row">
+                {% for articles in app.user.favoris|reverse %}
+                    <div class="col-sm-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ articles.title }}</h3>
+                                <p class="card-text">{{ articles.content|striptags|raw }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <br>
+        <hr>
+        <br>
+        <h2 class="h3">Messages reçus</h2>
+        {% if app.user.received %}
+            <div class="row">
+                {% for messages in app.user.received|reverse %}
+                    <div class="col-sm-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-title">{{ messages.sender }}</p>
+                                <p class="card-text">{{ messages.message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <br>
+        <hr>
+        <br>
+        <h2 class="h3">Messages envoyés</h2>
+        {% if app.user.sent %}
+            <div class="row">
+                {% for messages in app.user.sent|reverse %}
+                    <div class="col-sm-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-title">{{ messages.recipient }}</p>
+                                <p class="card-text">{{ messages.message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

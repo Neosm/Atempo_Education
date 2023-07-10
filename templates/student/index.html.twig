@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste de mes élève{% endblock %}
+
+{% block content %}
+        <h1 class="h3 mb-3">Élèves</h1>
+
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="card">
+                    <div class="card-header">
+                        
+                        <h2 class="card-title mb-0">Mes élèves</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="datatables-clients_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table id="table_id" class="table is-striped my-0 dataTable no-footer">
+                                        <thead>
+                                            <tr role="row">
+                                                <th  tabindex="0" rowspan="1" colspan="1" style="width: 17px;">
+                                                    #
+                                                </th>
+                                                <th tabindex="0" rowspan="1" colspan="1" style="width: 115px;" >
+                                                    Nom
+                                                </th>
+                                                <th tabindex="0" rowspan="1" colspan="1" style="width: 85px;">
+                                                    Téléphone
+                                                </th>
+                                                <th tabindex="0" rowspan="1" colspan="1" style="width: 155px;">
+                                                    Email
+                                                </th>
+                                                <th tabindex="0" rowspan="1" colspan="1" style="width: 47px;">
+                                                    Classe
+                                                </th>
+                                                <th tabindex="0" rowspan="1" colspan="1" style="width: 47px;">
+                                                    Action
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for student in userStudent %}
+                                                <tr>
+                                                    <td class="dtr-control"><img src="{{ asset('/uploads/profile_pics/' ~ student.thumbnail)|imagine_filter('thumbnail') }}" width="32" height="32" class="rounded-circle my-n1" alt="Avatar"></td>
+                                                    <td class="sorting_1">{{ student.name }}</td>
+                                                    <td>{{ student.telephone }}</td>
+                                                    <td>{{ student.email }}</td>
+                                                    <td><span class="badge bg-success">{{ student.studentClass }}</span></td>
+                                                    <td><a href="{{ path('student_show', {id: student.id}) }}">Voir</a></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if app.request.attributes.get('_route') == 'student_show' %}
+                {{ include('student/_content.html.twig') }}
+            {% endif %}
+        </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $(document).ready( function () {
+        $('#table_id').DataTable({
+            language: {
+                processing:     "Traitement en cours...",
+                search:         "Rechercher&nbsp;:",
+                lengthMenu:    "Afficher _MENU_ &eacute;l&eacute;ments",
+                info:           "Affichage de l'&eacute;lement _START_ &agrave; _END_ sur _TOTAL_ &eacute;l&eacute;ments",
+                infoEmpty:      "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
+                infoFiltered:   "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
+                infoPostFix:    "",
+                loadingRecords: "Chargement en cours...",
+                zeroRecords:    "Aucun &eacute;l&eacute;ment &agrave; afficher",
+                emptyTable:     "Aucune donnée disponible dans le tableau",
+                paginate: {
+                    first:      "Premier",
+                    previous:   "Pr&eacute;c&eacute;dent",
+                    next:       "Suivant",
+                    last:       "Dernier"
+                },
+                aria: {
+                    sortAscending:  ": activer pour trier la colonne par ordre croissant",
+                    sortDescending: ": activer pour trier la colonne par ordre décroissant"
+                }
+            }
+        });
+    } );
+</script
+
+
+{% endblock %}

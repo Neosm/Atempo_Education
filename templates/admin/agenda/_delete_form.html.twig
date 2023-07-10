@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('admin_agenda_delete', {'id': Event.id}) }}" onsubmit="return confirm('Êtes vous sur de vouloir supprimer l\'évènement ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ Event.id) }}">
+    <button class="btn btn-danger">Supprimer</button>
+</form>

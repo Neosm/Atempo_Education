@@ -1,0 +1,13 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Modifier l'évènement{% endblock %}
+
+{% block content %}
+    <h1>Modifier l'évènement {{ Event.title }} {{ Event.start|date('d M y - H:i')}}</h1>
+
+    {{ include('admin/agenda/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+
+    <a href="{{ path('admin_agenda_home') }}" class="btn btn-secondary float-end ms-3">Retour à l'agenda</a>
+
+    <div class="float-end">{{ include('admin/agenda/_delete_form.html.twig') }}</div>
+{% endblock %}

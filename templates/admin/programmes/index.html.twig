@@ -1,0 +1,124 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}
+    Tous les programmes Atempo-Education
+{% endblock %}
+
+
+
+{% block content %}
+    <h1 class="h2">
+        Tous les programmes
+    </h1>
+    <a href="{{ path('admin_programmes_ajouter') }}" class="btn btn-info float-lg-right">
+        Ajouter un programme
+    </a>
+    <br>
+    <br>
+        {% for message in app.flashes('notice') %}
+            <div class="alert alert-danger p-2 text-center">
+                <p class="text-white text-center">{{ message }}</p>
+            </div>
+        {% endfor %}
+        <br><br>
+    <table class="table table-striped table-hover text-center">
+        <thead>
+            <tr>
+                <th>
+                    Nom
+                </th>
+                <th>
+                    Id
+                </th>
+                <th>
+                    Publique
+                </th>
+                <th>
+                    Slug
+                </th>
+                <th>
+                    Nombre de leçons
+                </th>
+                <th>
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for programme in programmes|sort((a, b) => b.id <=> a.id) %}
+                <tr>
+                    <td>
+                        <img src="{{ asset('/uploads/lecons/images/' ~ programme.image) }}" width="48" height="48" class="rounded-circle me-2" alt="{{ programme.image }}">
+                        {{ programme.nom }}
+                    </td>
+                    <td>
+                        {{ programme.id }}
+                    </td>
+                    <td>
+                        {{ programme.ProgrammesLecons.name }}
+                    <td>
+                        {{ programme.slug }}
+                    </td>
+                    <td>
+                        {{ programme.lecons|length }}
+                    </td>
+                    <td class="table-action">
+                        <a href="{{ path ('admin_programmes_edit', {id: programme.id} ) }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2 align-middle">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class=" modal-trigger" type="button" data-bs-toggle="modal"
+                        data-bs-target="#modal-delete" data-target="modal-delete" data-id="{{programme.id}}" data-titre="{{programme.nom}}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+<div class="modal fade" id="modal-delete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="modal-title" id="exampleModalLabel">Supprimer un programme</h3>
+				<br>
+			</div>
+			<div class="modal-body">
+				<h4 class="h5"></h4><br>
+				<p></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-info" data-bs-dismiss="modal">Annuler</button>
+				<a href="" type="button" class="btn btn-danger">Supprimer</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock %}
+
+
+
+{% block javascripts %}
+<script>
+	let supprimer = document.querySelectorAll(".modal-trigger")
+    for(let bouton of supprimer) {
+        bouton.addEventListener("click", function () {
+            document.querySelector(".modal-footer a").href = `/admin/programmes/supprimer/${this.dataset.id}`
+            document.querySelector(".modal-body h4").innerText = `Êtes vous sûr(e) de vouloir supprimer le programme "${this.dataset.titre}" ?`
+            document.querySelector(".modal-body p").innerText = `Cette action ne sera pas réversible, et le programme sera totalement perdu. `
+        })
+    }
+</script>
+{% endblock %}
+
+                

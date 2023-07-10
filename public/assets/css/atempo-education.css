@@ -1,0 +1,131 @@
+.bg-auth-circle-shape{
+    position: absolute;
+    right: -8.75rem;
+    top: -5.125rem;
+}
+
+.bg-auth-circle-shape-2 {
+    position: absolute;
+    left: -6.25rem;
+    bottom: -2.4375rem;
+}
+
+.flex-center{
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+}
+
+.bg-holder {
+    position: absolute;
+    width: 100%;
+    min-height: 100%;
+    top: 0;
+    left: 0;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    will-change: transform,opacity,filter;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    background-repeat: no-repeat;
+    z-index: 0;
+}
+
+.bg-auth-card-shape {
+    background-position: 0 100%;
+}
+
+.reset-password-texte{
+    font-family: "Poppins",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    font-weight: 800 !important;
+    font-size: 2.48832rem !important;
+    display: inline-block !important;
+}
+.white-hamburger{
+    position: relative;
+}
+.white-hamburger, .white-hamburger:after, .white-hamburger:before {
+    background: white;
+    border-radius: 1px;
+    content: "";
+    cursor: pointer;
+    display: block;
+    height: 3px;
+    transition: background .1s ease-in-out,color .1s ease-in-out;
+    width: 24px;
+}
+.white-hamburger:before {
+    position: absolute;
+    top: -8px;
+    width: 20px;
+}
+.white-hamburger:after {
+    bottom: -8px;
+    position: absolute;
+    width: 16px;
+}
+
+.dropdown-toggle-atempo{
+    white-space: nowrap;
+}
+
+.nav-link.active{
+    color: #fff;
+    background-color: #0d6efd;
+}
+
+.dataTables_length{
+    padding: 0.6rem 1.25rem;
+}
+
+.dataTables_filter{
+    padding: 0.6rem 1.25rem;
+}
+
+.custom-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.custom-switch-input {
+    display: none;
+}
+
+.custom-switch-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px; /* ajustez la largeur selon vos besoins */
+    height: 30px; /* ajustez la hauteur selon vos besoins */
+    background-color: #dee2e6;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.custom-switch-input:checked + .custom-switch-label {
+    background-color: #6c757d;
+}
+
+.custom-switch-label:before {
+    content: "";
+    position: absolute;
+    top: 4px; /* ajustez la position verticale selon vos besoins */
+    left: 4px; /* ajustez la position horizontale selon vos besoins */
+    width: 22px; /* ajustez la largeur selon vos besoins */
+    height: 22px; /* ajustez la hauteur selon vos besoins */
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.12);
+    transition: transform 0.3s ease;
+}
+
+.custom-switch-input:checked + .custom-switch-label:before {
+    transform: translateX(26px);
+}

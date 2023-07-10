@@ -1,0 +1,40 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}{{ Event.title }}{% endblock %}
+
+{% block content %}
+    <h1>{{ Event.title }} {{ Event.start|date('d M y - H:i')}}</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Nom de l'évènement</th>
+                <td>{{ Event.title }}</td>
+            </tr>
+            {% if Event.allDay %}
+            <tr>
+                <th>Début</th>
+                <td>{{ Event.start ? Event.start|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Fin</th>
+                <td>{{ Event.end ? Event.end|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Description</th>
+                <td>{{ Event.description }}</td>
+            </tr>
+            <tr>
+                <th>Toute la journée ?</th>
+                <td>{{ Event.allDay ? 'Oui' : 'Non' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('admin_agenda_home') }}" class="btn btn-primary float-start">Retour à l'agenda</a>
+
+    <a href="{{ path('admin_agenda_edit', {'id': Event.id}) }}" class="btn btn-secondary float-end ms-3">Modifier</a>
+
+    <div class="float-end">{{ include('admin/agenda/_delete_form.html.twig') }}</div>
+{% endblock %}

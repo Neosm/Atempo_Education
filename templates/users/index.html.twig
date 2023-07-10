@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte - Atempo Education{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="h2">Mon compte</h1>
+        {# {% for message_alert in app.flashes('message_alert') %}
+            <div class="alert alert-danger">{{ message_alert }}</div>
+        {% endfor %}
+        {% for message_sucess in app.flashes('message_sucess') %}
+            <div class="alert alert-success">{{ message_sucess }}</div>
+        {% endfor %} #}
+        <p class="h6">Bienvenue {{ app.user.firstname }} sur votre espace membre</p>
+
+        {# <div class="d-md-flex justify-content-md-end">
+            <button type="button" class="btn btn-info position-relative">
+            <a href="{{ path('messages_home') }}" class="text-decoration-none text-dark">Messagerie</a>
+                {% set unread = 0 %}
+                {% for message in app.user.received|filter(message => message.isRead == 0) %}
+                    {% set unread = unread+1 %}
+                {% endfor %}
+                {% if unread > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                    <span class="visually-hidden">New alerts</span>
+                </span>
+                {% endif %}
+            </button>
+        </div> #}
+        <br>
+        <hr>
+        <div class="row text-center">
+            <div class="col-sm-4">
+                <b>Nom</b>
+            </div>
+            <div class="col-sm-4">
+                <b>Email</b>
+            </div>
+            <div class="col-sm-4">
+                <b>Téléphone</b>
+            </div>
+            <div class="col-sm-4">
+                {{ app.user.lastname }} {{ app.user.firstname }}
+            </div>
+            <div class="col-sm-4">
+                {{ app.user.email }}
+            </div>
+            <div class="col-sm-4">
+                {{ app.user.telephone }}
+            </div>
+
+            <br><br><br>
+            <div class="col-sm-3"><a href="{{ path('users_informations') }}" class="btn btn-info"> Modifier ses informations </a> </div>
+            <div class="col-sm-3"><a href="{{ path('users_data') }}" class="btn btn-secondary"> Voir ses informations </a> </div>
+            <div class="col-sm-3"><a href="{{ path('users_data_download') }}" class="btn btn-secondary"> Télécharger ses informations </a> </div>
+            <div class="col-sm-3"><a href="{{ path('users_password') }}" class="btn btn-info"> Modifier le mot de passe </a> </div>
+        </div>
+        <hr>
+        <br><br>
+        <h2 class="h3">Mes prochains cours</h2>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Special title treatment</h5>
+                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                        <a href="#" class="btn btn-info">Go somewhere</a>
+                    </div>
+                </div>
+            </div>
+            <a href="{{ path('agenda_home') }}" class="link-info"><p class="text-end">Voir l'Agenda</p></a>
+        </div>
+        <hr>
+        <br>
+        <h2 class="h3">Derniers articles écrits</h2>
+        {% if app.user.articles %}
+            <div class="row">
+                {% for articles in app.user.articles|reverse|slice(0,3) %}
+                    <div class="col-sm-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ articles.title }}</h3>
+                                <p class="card-text">{{ articles.content|striptags|u.truncate(275, '...')|raw }}</p>
+                                <a href="{{ path('actualites_details', {slug: articles.slug}) }}" class="btn btn-info">Lire plus</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <br>
+            <hr>
+            <br>
+        {% endif %}
+        <h2 class="h3">Articles en Favoris</h2>
+        {% if app.user.favoris %}
+            <div class="row">
+                {% for articles in app.user.favoris|reverse|slice(0,3) %}
+                    <div class="col-sm-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ articles.title }}</h3>
+                                <p class="card-text">{{ articles.content|striptags|u.truncate(275, '...')|raw }}</p>
+                                <a href="{{ path('actualites_details', {slug: articles.slug}) }}" class="btn btn-info">Lire plus</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <a href="" class="link-info"><p class="text-end">Voir plus</p></a>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

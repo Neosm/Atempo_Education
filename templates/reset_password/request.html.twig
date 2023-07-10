@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Atempo Education Musique">
+    <meta name="author" content="">
+    <meta name="generator" content="">
+    <meta charset="UTF-8">
+    <title>{% block title %}Réinitialisation de votre mot de passe{% endblock %}</title>
+
+
+
+    {% block stylesheets %}
+
+    {% endblock %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&amp;display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <link href="{{ asset('assets/css/light.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/css/atempo-education.css') }}" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+</head>
+
+
+
+{% block content %}
+<body style="background: #edf2f9">
+<main class="main" id="top">
+    <div class="container" data-layout="container">
+        <script>
+            var isFluid = JSON.parse(localStorage.getItem('isFluid'));
+            if (isFluid) {
+                var container = document.querySelector('[data-layout]');
+                container.classList.remove('container');
+                container.classList.add('container-fluid');
+            }
+        </script>
+        <div class="row flex-center min-vh-100 py-6 text-center">
+            <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+                <a class="d-flex flex-center mb-4" href="{{ path('home') }}">
+                    <!-- //TODO: NE PAS OUBLIER LE FAVICON DU SITE -->
+                    <img class="me-2" src="" alt="" width="58">
+                    <span class="reset-password-texte">atempo</span>
+                </a>
+                <div class="card">
+                    <div class="card-body p-4 p-sm-5">
+                        <h1 class="mb-0 h3">Mot de passe oublié?</h1><small>Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.</small>
+                        {% for flashError in app.flashes('reset_password_error') %}
+                            <div class="alert alert-danger" role="alert">{{ flashError }}</div>
+                        {% endfor %}
+                            {{ form_start(requestForm) }}
+                            {{ form_widget(requestForm.email) }}
+                            <div class="mb-3"></div>
+                            <button class="btn btn-primary d-block w-100 mt-3">Envoyer</button>
+                        {{ form_end(requestForm) }}
+                        <a class="fs--1 text-600" href="#!">Je ne peux pas modifier mon mot de passe
+                            <span class="d-inline-block ms-1">→</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+
+
+
+{% block javascripts %} {% endblock %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{{ asset('assets/js/settings.js')}}"></script>
+<script src="{{ asset('assets/js/app.js')}}"></script>
+
+
+
+</body>
+</html>
+

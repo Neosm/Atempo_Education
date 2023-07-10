@@ -1,0 +1,11 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Ajouter un nouvel évènement{% endblock %}
+
+{% block content %}
+    <h1>Ajouter un évènement</h1>
+
+    {{ include('admin/agenda/_form.html.twig') }}
+
+    <a href="{{ path('admin_agenda_home') }}" class="btn btn-secondary float-end">Retour à l'agenda</a>
+{% endblock %}

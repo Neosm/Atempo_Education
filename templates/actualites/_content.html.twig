@@ -1,0 +1,84 @@
+{% for article in articles %}
+	<div class="col">
+		<div class="card mb-2 rounded-3" >
+			<div class="row g-0">
+				<div class="col-md-4">
+					<img src="{{ asset('/uploads/articles/' ~ article.illustrations)|imagine_filter('square') }}" class="img-fluid rounded-start" alt="Atempo-Education | {{ article.illustrations }}">
+				</div>
+				<div class="col-md-8">
+					<div class="card-body">
+						<h2 class="card-title h4 text-center list-unstyled">
+							<li>{{ article.title }}</li>
+						</h2>
+						<p class="card-text m-3">{{ article.content|striptags|u.truncate(200, '...')|raw }}</p>
+						<p class="card-text text-center text-muted">{{ article.categories }}
+							-
+							{{ article.createdAt|date }}
+							|
+							{{ article.users.firstname }}
+							{{ article.users.lastname }}</p>
+
+						{% if is_granted("IS_AUTHENTICATED_FULLY") %}
+							{% set isFavorite = false %}
+							{% for favoris in article.favoris %}
+								{% if favoris.id == app.user.id %}
+									{% set isFavorite = true %}
+								{% endif %}
+							{% endfor %}
+						{% endif %}
+
+						<div class="card-footer bg-transparent d-flex justify-content-between">
+
+							{% if is_granted("IS_AUTHENTICATED_FULLY") %}
+								{% if isFavorite %}
+									<a href="{{ path('actualites_retrait_favoris', {id: article.id}) }}">
+										<i class="fas fa-heart fa-2x" style="color: #ff6b6b;"></i>
+									</a>
+								{% else %}
+									<a href="{{ path('actualites_ajout_favoris', {id: article.id}) }}">
+										<i class="far fa-heart fa-2x" style="color: #ff6b6b;"></i>
+									</a>
+								{% endif %}
+
+							{% endif %}
+							<a href="{{ path('actualites_details', {slug: article.slug}) }}" class="text-decoration-none btn btn-outline-primary">
+								Lire l'actu
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endfor %}
+
+{% set queryParams = app.request.query.all %}
+{% set querystring = queryParams|filter((v, k) => k != "page" and k != "ajax")|url_encode %}
+
+{% set pages = (totalarticles / limit)|round(0, 'ceil') %}
+<nav aria-label="Page navigation example" style="width: 100%">
+	<ul class="pagination justify-content-center mt-3">
+		<li class="{{ (page == 1) ? 'disabled' : ''}} page-item">
+			<a class="page-link" href="?page=1&{{ querystring }}" tabindex="-1" aria-disabled="true">
+				<i class="bi bi-skip-backward-fill"></i>
+			</a>
+		</li>
+		<li class="{{ (page == 1) ? 'disabled' : ''}} page-item">
+			<a class="page-link" href="{{ (page>1) ? '?page=' ~ (page - 1) : '' }}&{{ querystring }}" tabindex="-1" aria-disabled="true">Précedente</a>
+		</li>
+		{% for item in 1..(pages) %}
+			<li class="{{ (page == item) ? 'active' : ''}} page-item" aria-current="page">
+				<a class="page-link" href="?page={{ item }}&{{ querystring }}">{{ item }}</a>
+			</li>
+		{% endfor %}
+		<li class="{{ (page == pages) ? 'disabled' : ''}} page-item">
+			<a class="page-link" href="{{ (page != pages) ? '?page=' ~ (page + 1) : '' }}&{{ querystring }}">Suivante</a>
+		</li>
+		<li class="{{ (page == pages) ? 'disabled' : ''}} page-item">
+			<a class="page-link" href="?page={{pages}}&{{ querystring }}" tabindex="-1" aria-disabled="true">
+				<i class="bi bi-skip-forward-fill"></i>
+			</a>
+		</li>
+	</ul>
+</nav>
+

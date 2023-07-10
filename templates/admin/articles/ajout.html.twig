@@ -1,0 +1,25 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Ajouter un Article{% endblock %}
+
+{% block content %}
+
+    {% if app.request.attributes.get('_route') == 'admin_articles_modifier' %}
+        <h1>Modifier l'article {{ articles.title }}</h1>
+    {% else %}
+        <h1>Ajouter un nouvel article</h1>
+    {% endif %}
+    {{ form_start(ArticleForm) }}
+    {{ form_row(ArticleForm.title) }}
+    {{ form_row(ArticleForm.illustrations) }}
+    {% if app.request.attributes.get('_route') == 'admin_articles_modifier' %}
+        <div>
+            <img src="/uploads/articles/{{articles.illustrations}}" alt="Atempo-Education | {{ articles.illustrations }}" height="150">
+        </div>
+    {% endif %}
+    {{ form_row(ArticleForm.content) }}
+    {{ form_row(ArticleForm.categories) }}
+    <br>
+    {{ form_row(ArticleForm.submit) }}
+    {{ form_end(ArticleForm) }}
+{% endblock %}

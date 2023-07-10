@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Atempo Education Musique">
+		<meta name="author" content="">
+		<meta name="generator" content="">
+		<meta charset="UTF-8">
+		<title>
+			{% block title %}Page en construction
+			{% endblock %}
+		</title>
+
+
+		{% block stylesheets %}{% endblock %}
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&amp;display=swap" rel="stylesheet">
+		<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css' rel='stylesheet'>
+		<link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>
+		<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+		<link href="{{ asset('assets/css/light.css') }}" rel="stylesheet">
+		<link href="{{ asset('assets/css/atempo-education.css') }}" rel="stylesheet">
+	</head>
+
+
+	<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-behavior="sticky">
+		<div class="wrapper">
+			{% if is_granted("IS_AUTHENTICATED_FULLY") %}
+				<nav id="sidebar" class="sidebar">
+					<div class="sidebar-content js-simplebar" data-simplebar="init">
+						<div class="simplebar-wrapper" style="margin: 0px;">
+							<div class="simplebar-height-auto-observer-wrapper">
+								<div class="simplebar-height-auto-observer"></div>
+							</div>
+							<div class="simplebar-mask">
+								<div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+									<div class="simplebar-content-wrapper" style="height: 100%; overflow: hidden scroll;">
+										<div class="simplebar-content" style="padding: 0px;">
+											<a class="sidebar-brand" href="{{ path('home') }}">
+												<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="20px" viewbox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve">
+													<path d="M19.4,4.1l-9-4C10.1,0,9.9,0,9.6,0.1l-9,4C0.2,4.2,0,4.6,0,5s0.2,0.8,0.6,0.9l9,4C9.7,10,9.9,10,10,10s0.3,0,0.4-0.1l9-4C19.8,5.8,20,5.4,20,5S19.8,4.2,19.4,4.1z"></path>
+													<path d="M10,15c-0.1,0-0.3,0-0.4-0.1l-9-4c-0.5-0.2-0.7-0.8-0.5-1.3c0.2-0.5,0.8-0.7,1.3-0.5l8.6,3.8l8.6-3.8c0.5-0.2,1.1,0,1.3,0.5c0.2,0.5,0,1.1-0.5,1.3l-9,4C10.3,15,10.1,15,10,15z"></path>
+													<path d="M10,20c-0.1,0-0.3,0-0.4-0.1l-9-4c-0.5-0.2-0.7-0.8-0.5-1.3c0.2-0.5,0.8-0.7,1.3-0.5l8.6,3.8l8.6-3.8c0.5-0.2,1.1,0,1.3,0.5c0.2,0.5,0,1.1-0.5,1.3l-9,4C10.3,20,10.1,20,10,20z"></path>
+												</svg>
+
+												<span class="align-middle me-3">Atempo.Education</span>
+											</a>
+											<ul class="sidebar-nav">
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'home' %}active{% endif %}">
+													<a href="{{ path('home') }}" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
+															<path d="M3 9l9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9zm9 7V5"></path>
+														</svg>
+														<span class="align-middle">Accueil</span>
+													</a>
+												</li>
+												<li class="sidebar-item">
+													<a href="#" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send">
+															<line x1="22" y1="2" x2="11" y2="13"></line>
+															<polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+														</svg>
+
+														<span class="align-middle">Messagerie Plus fonctionnel</span>
+													</a>
+												</li>
+												{% if is_granted('ROLE_TEACHER') %}
+													<li class="sidebar-item {% if (app.request.attributes.get('_route') == 'student_home') or (app.request.attributes.get('_route') == 'student_show') %}active{% endif %}">
+														<a href="{{ path('student_home') }}" class="sidebar-link">
+															<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users">
+																<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+																<circle cx="9" cy="7" r="4"></circle>
+																<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+																<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+															</svg>
+															<span class="align-middle">Mes élèves</span>
+														</a>
+													</li>
+												{% endif %}
+
+												{% if not is_granted('ROLE_TEACHER') %}
+													<li class="sidebar-item {% if (app.request.attributes.get('_route') == 'teacher_home') or (app.request.attributes.get('_route') == 'teacher_show') %}active{% endif %}">
+														<a href="{{ path('teacher_home') }}" class="sidebar-link">
+															<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users">
+																<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+																<circle cx="9" cy="7" r="4"></circle>
+																<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+																<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+															</svg>
+															<span class="align-middle">Mes professeurs</span>
+														</a>
+													</li>
+												{% endif %}
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'agenda_home' %}active{% endif %}">
+													<a href="{{ path('agenda_home') }}" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+															<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+															<line x1="16" y1="2" x2="16" y2="6"></line>
+															<line x1="8" y1="2" x2="8" y2="6"></line>
+															<line x1="3" y1="10" x2="21" y2="10"></line>
+														</svg>
+														<span class="align-middle">Agenda</span>
+													</a>
+												</li>
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'lecons_home' %}active{% endif %}">
+													<a href="{{ path('lecons_home') }}" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+														<span class="align-middle">Leçons</span>
+													</a>
+												</li>
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'programmes_home' %}active{% endif %}">
+													<a href="{{ path('programmes_home') }}" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder">
+															<path d="M20 18v-8a2 2 0 0 0-2-2h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2z"></path>
+														</svg>
+														<span class="align-middle">Programmes</span>
+													</a>
+												</li>
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'app_matieres' %}active{% endif %}">
+													<a href="{{ path('app_matieres') }}" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-layers">
+															<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+															<polyline points="2 17 12 22 22 17"></polyline>
+															<polyline points="2 12 12 17 22 12"></polyline>
+														</svg>
+														<span class="align-middle">Mes Matières</span>
+													</a>
+												</li>
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'app_resultat' %}active{% endif %}">
+													<a href="{{ path('app_resultat') }}" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-award">
+															<circle cx="12" cy="8" r="7"></circle>
+															<polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+														</svg>
+														<span class="align-middle">Résultats</span>
+													</a>
+												</li>
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'user_assiduity' %}active{% endif %}">
+													<a href="{{ path('user_assiduity') }}" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-activity">
+															<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+														</svg>
+														<span class="align-middle">Vie scolaire</span>
+													</a>
+												</li>
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'app_matieres' %}active{% endif %}">
+													<a href="{{ path('app_matieres') }}" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square">
+															<polyline points="9 11 12 14 22 4"></polyline>
+															<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
+														</svg>
+														<span class="align-middle">Travail à faire</span>
+													</a>
+												</li>
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'actualites_home' %}active{% endif %}">
+													<a href="{{ path('actualites_home') }}" class="sidebar-link">
+														<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewbox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve" width="24" height="24">
+															<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" d="M18.75 19.5H5.25c-1.275 0 -2.25 -0.975 -2.25 -2.25V4.5h13.5v5.25"/><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" d="M18.75 19.5c-1.275 0 -2.25 -0.975 -2.25 -2.25V9.75h4.5v7.5c0 1.275 -0.975 2.25 -2.25 2.25z"/><path x="8" y="10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" width="10" height="3" d="M6 7.5H13.5V9.75H6V7.5z"/><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" x1="7" y1="16" x2="12" y2="16" d="M5.25 12L9 12"/><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" x1="14" y1="16" x2="19" y2="16" d="M10.5 12L14.25 12"/><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" x1="7" y1="19" x2="12" y2="19" d="M5.25 14.25L9 14.25"/><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" x1="14" y1="19" x2="19" y2="19" d="M10.5 14.25L14.25 14.25"/><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" x1="7" y1="22" x2="12" y2="22" d="M5.25 16.5L9 16.5"/><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" x1="14" y1="22" x2="19" y2="22" d="M10.5 16.5L14.25 16.5"/></svg>
+														<span class="align-middle">Actualités</span>
+													</a>
+												</li>
+												<li class="sidebar-item">
+													<a href="" class="sidebar-link">
+														<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+														<span class="align-middle">Notifications Pas de liens</span>
+													</a>
+												</li>
+
+												<li class="sidebar-header">
+													Informations générales
+												</li>
+												<li class="sidebar-item {% if app.request.attributes.get('_route') == 'faq' %}active{% endif %}">
+													<a href="{{ path('faq') }}" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square align-middle">
+															<polyline points="9 11 12 14 22 4"></polyline>
+															<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+														</svg>
+														<span class="align-middle">FAQ</span>
+													</a>
+												</li>
+												<li class="sidebar-item">
+													<a href="" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-list align-middle">
+															<line x1="8" y1="6" x2="21" y2="6"></line>
+															<line x1="8" y1="12" x2="21" y2="12"></line>
+															<line x1="8" y1="18" x2="21" y2="18"></line>
+															<line x1="3" y1="6" x2="3.01" y2="6"></line>
+															<line x1="3" y1="12" x2="3.01" y2="12"></line>
+															<line x1="3" y1="18" x2="3.01" y2="18"></line>
+														</svg>
+														<span class="align-middle">Ressources Pas de liens</span>
+													</a>
+												</li>
+												<li class="sidebar-item">
+													<a href="" class="sidebar-link">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-pie-chart align-middle">
+															<path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+															<path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+														</svg>
+														<span class="align-middle">Paramètres Pas de liens</span>
+													</a>
+												</li>
+											</ul>
+											<div class="sidebar-cta">
+												<div class="sidebar-cta-content">
+													<strong class="d-inline-block mb-2">V1 de l'application Atempo.Education</strong>
+													<div class="mb-3 text-sm">
+														De nouvelles mises à jour arrivent vites
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="simplebar-placeholder" style="width: auto; height: 1061px;"></div>
+						</div>
+						<div class="simplebar-track simplebar-horizontal" style="visibility: hidden;">
+							<div class="simplebar-scrollbar" style="width: 0px; display: none;"></div>
+						</div>
+						<div class="simplebar-track simplebar-vertical" style="visibility: visible;">
+							<div class="simplebar-scrollbar" style="height: 884px; transform: translate3d(0px, 0px, 0px); display: block;"></div>
+						</div>
+					</div>
+				</nav>
+			{% endif %}
+			<div class="main">
+				{% if is_granted("IS_AUTHENTICATED_FULLY") %}
+					<nav class="navbar navbar-expand navbar-light navbar-bg">
+						<a class="sidebar-toggle" id="sidebarToggle">
+							<i class="hamburger align-self-center"></i>
+						</a>
+
+						<form class="d-none d-sm-inline-block">
+							<div class="input-group input-group-navbar">
+								<input type="search" aria-label="Search" id="AutocompleteHeader">
+							</div>
+						</form>
+						<div class="selection"></div>
+						<div class="navbar-collapse collapse">
+							<ul
+								class="navbar-nav navbar-align">
+								{# {% set unread = 0 %}
+																                    {% for message in app.user.received|filter(message => message.isRead == 0) %}
+																                        {% set unread = unread+1 %}
+																                    {% endfor %}
+																                    <li class="nav-item dropdown">
+																                        <a class="nav-icon dropdown-toggle" href="#" id="messagesDropdown" data-bs-toggle="dropdown">
+																                            <div class="position-relative">
+																                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle align-middle"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+																                                {% if unread > 0%}
+																                                    <span class="indicator">{{ unread }}</span>
+																                                {% endif %}
+																                            </div>
+																                        </a>
+																                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="messagesDropdown">
+																                            <div class="dropdown-menu-header">
+																                                <div class="position-relative">
+																                                    {{ unread }} message{% if unread > 1%}s  {% endif %} non lu{% if unread > 1%}s  {% endif %}
+																                                </div>
+																                            </div>
+																                            <div class="list-group">
+																                                {% for message in app.user.received|filter(message => message.isRead == 0)|sort((a, b) => b.createdAt <=> a.createdAt)|slice(0,3) %}
+																                                    <a href="{{ path("messages_conversation", {slug: message.conversations.slug}) }}" class="list-group-item">
+																                                        <div class="row g-0 align-items-center">
+																                                            <div class="col-2">
+																                                                <img src="{{ asset('/uploads/profile_pics/' ~ message.sender.thumbnail)|imagine_filter('thumbnail') }}" class="avatar img-fluid rounded-circle" alt="{{ message.sender.firstname }}">
+																                                            </div>
+																                                            <div class="col-10 ps-2">
+																                                                <div class="text-dark">{{ message.sender.name }}</div>
+																                                                <div class="text-muted small mt-1">{{ message.message|u.truncate(30, '...') }}</div>
+																                                                <div class="text-muted small mt-1">{{ message.createdAt|date }}</div>
+																                                            </div>
+																                                        </div>
+																                                    </a>
+																                                {% endfor %}
+																                            </div>
+																                            <div class="dropdown-menu-footer">
+																                                <a href="{{ path('messages_home') }}" class="text-muted">Voir tous les messages</a>
+																                            </div>
+																                        </div>
+																                    </li> #}
+								<li class="nav-item dropdown">
+									<a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
+										<div class="position-relative">
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell-off align-middle">
+												<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+												<path d="M18.63 13A17.89 17.89 0 0 1 18 8"></path>
+												<path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"></path>
+												<path d="M18 8a6 6 0 0 0-9.33-5"></path>
+												<line x1="1" y1="1" x2="23" y2="23"></line>
+											</svg>
+										</div>
+									</a>
+									<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="alertsDropdown">
+										<div class="dropdown-menu-header">
+											4 Nouvelles Notifications
+										</div>
+										<div class="list-group">
+											<a href="#" class="list-group-item">
+												<div class="row g-0 align-items-center">
+													<div class="col-2">
+														<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-circle text-danger">
+															<circle cx="12" cy="12" r="10"></circle>
+															<line x1="12" y1="8" x2="12" y2="12"></line>
+															<line x1="12" y1="16" x2="12.01" y2="16"></line>
+														</svg>
+													</div>
+													<div class="col-10">
+														<div class="text-dark">Update completed</div>
+														<div class="text-muted small mt-1">Restart server 12 to complete the update.</div>
+														<div class="text-muted small mt-1">2h ago</div>
+													</div>
+												</div>
+											</a>
+										</div>
+										<div class="dropdown-menu-footer">
+											<a href="#" class="text-muted">Voir toutes les notifications</a>
+										</div>
+									</div>
+								</li>
+								<li class="nav-item dropdown">
+									<a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-bs-toggle="dropdown">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings align-middle">
+											<circle cx="12" cy="12" r="3"></circle>
+											<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+										</svg>
+									</a>
+
+									<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
+										<img src="{{ asset('/uploads/profile_pics/' ~ app.user.thumbnail)|imagine_filter('thumbnail') }}" class="avatar img-fluid rounded-circle me-1" alt="Photo de profile de {{ app.user.firstname }}">
+										<span class="text-dark">{{ app.user.firstname }}</span>
+									</a>
+									<div class="dropdown-menu dropdown-menu-end">
+										<a class="dropdown-item" href="{{ path('users') }}">
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user align-middle me-1">
+												<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+												<circle cx="12" cy="7" r="4"></circle>
+											</svg>
+											Profile
+										</a>
+										{% if is_granted('ROLE_SUPERTEACHER') %}
+											<a class="dropdown-item" href="{{ path('admin_home') }}">
+												<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-pie-chart align-middle me-1">
+													<path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+													<path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+												</svg>
+												Administration
+											</a>
+										{% endif %}
+										<div class="dropdown-divider"></div>
+										{# <a class="dropdown-item" href="{{ path('messages_home') }}">Messagerie</a> #}
+										<a class="dropdown-item" href="{{ path('users_password') }}">Changer de mot de passe</a>
+										<a class="dropdown-item" href="{{ path('users_data_download') }}">Télécharger ses informations</a>
+										<a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</nav>
+				{% endif %}
+				<main class="content">
+					<div class="container-fluid p-0"> {% block content %}{% endblock %}
+						</div>
+					</main>
+
+					{% block footer %}
+						<footer class="footer">
+							<div class="container-fluid">
+								<div class="row text-muted">
+									<div class="col-6 text-start">
+										<ul class="list-inline">
+											<li class="list-inline-item">
+												<a class="text-muted" href="#">Support</a>
+											</li>
+											<li class="list-inline-item">
+												<a class="text-muted" href="#">Centre d'aide</a>
+											</li>
+											<li class="list-inline-item">
+												<a class="text-muted" href="#">Confidentialité</a>
+											</li>
+											<li class="list-inline-item">
+												<a class="text-muted" href="#">Conditions d'utilisation</a>
+											</li>
+											<li class="list-inline-item">
+												<a class="text-muted" href="#">Mentions légales</a>
+											</li>
+										</ul>
+									</div>
+									<div class="col-6 text-end">
+										<p class="mb-0">
+											© 2021 -
+											<script>
+												document.write(new Date().getFullYear())
+											</script>
+											-
+											<a href="{{ path('home') }}" class="text-muted">Atempo.Education</a>
+										</p>
+									</div>
+								</div>
+							</div>
+						</footer>
+					{% endblock %}
+
+				</div>
+			</div>
+
+
+			<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+			<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
+			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/" crossorigin="anonymous"></script>
+			<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+			<script src="{{ asset('assets/js/search.js')}}"></script>
+			<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+			<script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+			<script>
+				let sidebar = document.querySelector('#sidebarToggle');
+
+sidebar.addEventListener("click", function () {
+let getIdCollapsed = document.getElementById('sidebar');
+
+if (getIdCollapsed.classList.contains("collapsed")) {
+getIdCollapsed.classList.remove("collapsed");
+} else {
+getIdCollapsed.classList.add("collapsed");
+}
+})
+			</script>
+
+
+			{% block javascripts %}{% endblock %}
+
+		</body>
+	</html>

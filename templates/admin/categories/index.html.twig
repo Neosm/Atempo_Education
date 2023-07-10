@@ -1,0 +1,77 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Toutes les catégories Atempo-Education{% endblock %}
+
+{% block content %}
+<h1 class="h2">Toutes les catégories</h1>
+    <br>
+    {% for message in app.flashes('message') %}
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+    {% endfor %}
+    <a href="{{ path('admin_categories_ajout') }}" class="btn btn-info float-lg-right">Ajouter une catégorie</a>
+    <br>
+    <br>
+    <div class="container">
+        <table class="table table-striped table-light text-center">
+            <thead>
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Catégorie Parente</th>
+                    <th scope="col">Slug</th>
+                    <th scope="col">Total d'article</th>
+                    <th scope="col" colspan="2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for categorie in categories %}
+                <tr>
+                    <th scope="row">{{ categorie.id }}</th>
+                    <td>{{ categorie.name }}</td>
+                    <td>{{ categorie.parent }}</td>
+                    <td>{{ categorie.slug }}</td>
+                    <td>{{ categorie.id }}</td>
+                    <td><a href="{{ path('admin_categories_modifier', {id: categorie.id}) }}" class="btn btn-secondary">Modifier</a></td>
+                    <td><a href="#" class="btn btn-danger modal-trigger" type="button" data-bs-toggle="modal"
+                           data-bs-target="#modal-delete" data-target="modal-delete" data-id="{{categorie.id}}" data-titre="{{categorie.name}}">Supprimer</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="modal fade" id="modal-delete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="exampleModalLabel">Supprimer une catégorie</h3>
+                        <br>
+                    </div>
+                    <div class="modal-body">
+                        <h4 class="h5"></h4><br>
+                        <p></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-info" data-bs-dismiss="modal">Annuler</button>
+                        <a href="" type="button" class="btn btn-danger">Supprimer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        window.onload = () => {
+            let supprimer = document.querySelectorAll(".modal-trigger")
+            for(let bouton of supprimer) {
+                bouton.addEventListener("click", function () {
+                    document.querySelector(".modal-footer a").href = `/admin/categories/supprimer/${this.dataset.id}`
+                    document.querySelector(".modal-body h4").innerText = `Êtes vous sûr(e) de vouloir supprimer la catégorie "${this.dataset.titre}" ?`
+                    document.querySelector(".modal-body p").innerText = `Cette action ne sera pas réversible, et la catégorie sera totalement supprimée. `
+                })
+            }
+        }
+    </script>
+{% endblock %}

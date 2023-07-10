@@ -1,0 +1,168 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un nouvel évènement{% endblock %}
+
+
+{% block stylesheets %}
+{% endblock %}
+
+
+{% block content %}
+    <h1>Ajouter un évènement</h1>
+    
+    {{ include('agenda/_form.html.twig') }}
+
+    <a href="{{ path('agenda_home') }}" class="btn btn-secondary float-end">Retour à l'agenda</a>
+{% endblock %}
+
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
+<script>
+$(document).ready(function() {
+    $('.students-field').select2();
+    
+    var studentClassSelect = $('#event_form_studentClass');
+    var studentsSelect = $('#event_form_students');
+    var switchInput = $('#event_form_switch');
+
+    // Masquer les élèves au chargement de la page
+    studentsSelect.next('.select2-container').hide();
+    $('.label-students').hide();
+
+    // Afficher la classe par défaut
+    studentClassSelect.show();
+    $('.label-studentClass').show();
+
+    // Écouter les changements sur le champ switch
+    switchInput.on('change', function() {
+        if ($(this).is(':checked')) {
+            studentClassSelect.hide();
+            $('.label-studentClass').hide();
+
+            studentsSelect.next('.select2-container').show();
+            $('.label-students').show();
+
+            // Vider le champ de la classe et réinitialiser sa valeur
+            studentClassSelect.val('').trigger('change');
+
+        } else {
+            studentsSelect.next('.select2-container').hide();
+            $('.label-students').hide();
+
+            studentClassSelect.show();
+            $('.label-studentClass').show();
+
+            // Vider le champ des élèves et réinitialiser sa valeur
+            studentsSelect.val(null).trigger('change');
+        }
+    });
+
+    flatpickr('.datetimepickr', {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true,
+        minTime: "00:00",
+        maxTime: "23:59",
+        locale: "fr",
+    });
+
+    var materialsCheckboxes = document.querySelectorAll('.materials-checkboxes input[type="checkbox"]');
+    var roomSelect = document.querySelector('.room-select');
+
+    // Écouteur d'événement pour les cases à cocher des équipements
+    materialsCheckboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            var selectedMaterials = Array.from(materialsCheckboxes)
+                .filter(function(checkbox) {
+                    return checkbox.checked;
+                })
+                .map(function(checkbox) {
+                    return checkbox.value;
+                });
+            var startValue = $('#event_form_start').val();
+
+            // Fetch des salles en fonction des équipements sélectionnés et de l'horaire
+            fetch('/agenda/api/rooms?materials=' + selectedMaterials.join(',') + '&start=' + startValue)
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(rooms) {
+                    // Mise à jour des options de sélection de la salle
+                    while (roomSelect.firstChild) {
+                        roomSelect.removeChild(roomSelect.firstChild);
+                    }
+
+                    rooms.forEach(function(room) {
+                        var option = document.createElement('option');
+                        option.value = room.id;
+                        option.textContent = room.name;
+                        roomSelect.appendChild(option);
+                    });
+                })
+                .catch(function(error) {
+                    console.log(error);
+                });
+        });
+    });
+
+
+    // Récupérer le champ de l'heure de début et le champ des salles réservées
+    var startField = $('#event_form_start');
+    var reservedRoomsField = $('#event_form_reservedRooms');
+
+    // Fonction pour mettre à jour l'affichage des salles disponibles
+    function updateAvailableRooms() {
+        // Récupérer la liste des salles disponibles
+        var roomSelect = $('#event_form_room');
+
+        // Récupérer les salles réservées
+        var reservedRoomsValue = reservedRoomsField.val();
+
+        // Masquer les salles réservées dans la liste des salles disponibles
+        roomSelect.find('option').each(function() {
+            var option = $(this);
+            var roomId = option.val();
+
+            // Vérifier si la salle est réservée
+            if (reservedRoomsValue.includes(roomId)) {
+                option.hide();
+            } else {
+                option.show();
+            }
+        });
+    }
+
+    // Écouter l'événement 'change' sur le champ de l'heure de début
+    startField.change(function() {
+        var startValue = startField.val();
+        var reservedRoomsValue = reservedRoomsField.val();
+
+        // Effectuer une requête AJAX pour récupérer les salles réservées
+        $.ajax({
+            url: startField.data('route'), // Récupérer l'URL de la route depuis l'attribut 'data-route' du champ
+            type: 'GET',
+            data: {
+                start: startValue
+            },
+            success: function(response) {
+                // Mettre à jour la liste des salles réservées
+                reservedRoomsField.val(response.reservedRooms);
+
+                // Mettre à jour l'affichage des salles disponibles
+                updateAvailableRooms();
+            },
+            error: function() {
+                // Gérer les erreurs de la requête AJAX
+            }
+        });
+    });
+
+    // Appeler la fonction pour mettre à jour l'affichage initial des salles disponibles
+    updateAvailableRooms()
+
+});
+
+</script>
+{% endblock %}

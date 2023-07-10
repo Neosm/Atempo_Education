@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'évènement{% endblock %}
+
+{% block content %}
+    <h1>Modifier l'évènement {{ event.title }} - {{ event.start|format_datetime('full', 'short', locale='fr')}}</h1>
+    {{ include('agenda/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+
+    <a href="{{ path('agenda_home') }}" class="btn btn-secondary float-end ms-3">Retour à l'agenda</a>
+        <div class="float-end">
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                Supprimer
+            </button>
+        </div>
+        
+        <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmation de suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cet événement ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <a href="{{ path('agenda_delete_event', {'id': event.id}) }}" class="btn btn-danger">Supprimer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        {% endblock %}
+
+
+
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
+<script>
+    $(document).ready(function() {
+    $('.students-field').select2();
+    
+    var studentClassSelect = $('#event_form_studentClass');
+    var studentsSelect = $('#event_form_students');
+    var switchInput = $('#event_form_switch');
+
+    // Vérifier l'état initial des élèves et de la classe
+    var hasStudents = {{ event.students is not empty ? 'true' : 'false' }};
+    var hasStudentClass = {{ event.studentClass is not empty ? 'true' : 'false' }};
+
+    // Activer ou désactiver le switch en fonction des données de l'événement
+    if (hasStudents || !hasStudentClass) {
+        switchInput.prop('checked', true);
+        studentClassSelect.hide();
+        $('.label-studentClass').hide();
+        studentsSelect.next('.select2-container').show();
+        $('.label-students').show();
+        studentsSelect.prop('disabled', false);
+    } else {
+        switchInput.prop('checked', false);
+        studentClassSelect.show();
+        $('.label-studentClass').show();
+        studentsSelect.next('.select2-container').hide();
+        $('.label-students').hide();
+        studentsSelect.prop('disabled', true);
+    }
+    
+    // Écouter les changements sur le champ switch
+    switchInput.on('change', function() {
+        if ($(this).is(':checked')) {
+            studentClassSelect.hide();
+            $('.label-studentClass').hide();
+
+            studentsSelect.next('.select2-container').show();
+            $('.label-students').show();
+
+            // Vider le champ de la classe et réinitialiser sa valeur
+            studentClassSelect.val('').trigger('change');
+            
+            // Activer le champ de liste d'élèves
+            studentsSelect.prop('disabled', false);
+
+        } else {
+            studentsSelect.next('.select2-container').hide();
+            $('.label-students').hide();
+
+            studentClassSelect.show();
+            $('.label-studentClass').show();
+
+            // Vider le champ des élèves et réinitialiser sa valeur
+            studentsSelect.val(null).trigger('change');
+            
+            // Désactiver le champ de liste d'élèves
+            studentsSelect.prop('disabled', true);
+        }
+    });
+
+    flatpickr('.datetimepickr', {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true,
+        minTime: "00:00",
+        maxTime: "23:59",
+        locale: "fr",
+    });
+});
+
+</script>
+{% endblock %}

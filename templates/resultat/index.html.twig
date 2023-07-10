@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes résultats{% endblock %}
+
+{% block stylesheets %}
+
+<style>
+.date-contain {
+    border-radius: 0.7rem;
+    text-align: center;
+    line-height: 1;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+}
+.time-contain, .date-contain {
+    flex: none;
+    box-sizing: border-box;
+    width: 3.2rem;
+    height: 3.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e2e2e2;
+    color: #515459;
+    font-weight: 600;
+}
+
+.color-green {
+    font-size: 1.1rem!important;
+    font-weight: 650!important;
+    color: #004b7b!important;
+}
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+    <h1 class="h3 mb-3">Résultats</h1>
+        <div class="card mb-3 col-md-4">
+            {% for resultat in resultatsMatieres %}
+                    <div class="card-header">
+                        <h3 class="card-title h5 color-green">{{ resultat.matiere.name }} <span class="float-end">{{ resultat.moyenne }}</span></h3>
+                        <p class="card-text text-muted">Professeur: {{ resultat.professeur }}</p>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for note in resultat.matiere.notes %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="date-contain">{{ note.date|date("d M") }}</span>
+                                        <span>{{ note.note }}</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+            {% endfor %}
+    <h2>Moyenne générale: {{ moyenneGenerale|round('2') }}</h2>
+        </div>
+
+
+
+{% endblock %}

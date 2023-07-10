@@ -1,0 +1,94 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Tous les articles Atempo-Education{% endblock %}
+
+{% block content %}
+<h1 class="h2">Tous les articles</h1>
+    <br>
+    <a href="{{ path('admin_articles_ajout') }}" class="btn btn-info float-lg-right">Ajouter un article</a>
+    <br>
+    <br>
+        <table class="table table-striped table-light text-center">
+            <thead>
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Titre</th>
+                    <th scope="col">Catégorie</th>
+                    <th scope="col">Slug</th>
+                    <th scope="col">Créateur</th>
+                    <th scope="col">Créé le :</th>
+                    <th scope="col">Actif</th>
+                    <th scope="col" colspan="2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for article in articles %}
+                <tr>
+                    <th scope="row"> {{ article.id }} </th>
+                    <td>{{ article.title }}</td>
+                    <td>{{ article.categories }}</td>
+                    <td>{{ article.slug }}</td>
+                    <td>{{ article.users.firstname }} {{ article.users.lastname }}</td>
+                    <td>{{ article.createdAt|date }}</td>
+                    <td>
+                        <div class="form-check form-switch" style="">
+                            <input class="form-check-input" type="checkbox" {{ (article.active) ? 'checked' : ''}} data-id="{{article.id}}"  id="flexSwitchCheckDefault">
+                            <label class="form-check-label" for="flexSwitchCheckDefault"></label>
+                        </div>
+                    </td>
+                    <td><a href="{{ path('admin_articles_modifier', {id: article.id}) }}" class="btn btn-secondary">Modifier</a></td>
+                    <td>
+                        <a href="#" class="btn btn-danger modal-trigger" type="button" data-bs-toggle="modal"
+                           data-bs-target="#modal-delete" data-target="modal-delete" data-id="{{article.id}}" data-titre="{{article.title}}">Supprimer</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+
+    <div class="modal fade" id="modal-delete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="exampleModalLabel">Supprimer un article</h3>
+                    <br>
+                </div>
+                <div class="modal-body">
+                    <h4 class="h5"></h4><br>
+                    <p></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" data-bs-dismiss="modal">Annuler</button>
+                    <a href="" type="button" class="btn btn-danger">Supprimer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        window.onload = () => {
+            let activer = document.querySelectorAll("[type=checkbox]")
+            for (let bouton of activer) {
+                bouton.addEventListener("click", function () {
+                    let xmlhttp = new XMLHttpRequest;
+                    xmlhttp.open("get", `/admin/articles/activer/${this.dataset.id}`)
+                    xmlhttp.send()
+                })
+            }
+
+            let supprimer = document.querySelectorAll(".modal-trigger")
+            for(let bouton of supprimer) {
+                bouton.addEventListener("click", function () {
+                    document.querySelector(".modal-footer a").href = `/admin/articles/supprimer/${this.dataset.id}`
+                    document.querySelector(".modal-body h4").innerText = `Êtes vous sûr(e) de vouloir supprimer l'article "${this.dataset.titre}" ?`
+                    document.querySelector(".modal-body p").innerText = `Cette action ne sera pas réversible, et l'article sera totalement perdu. `
+                })
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+
+{% if app.request.attributes.get('_route') == 'lecons_modifier' %}
+Modifier la leçon : {{ lecon.nom }}
+{% else %}
+Ajouter Leçon
+{% endif %}
+
+{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.0.0/dist/css/tom-select.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+
+    {% if app.request.attributes.get('_route') == 'lecons_modifier' %}
+        <h1 class="h3 mb-3">Modifier la leçon : {{ lecon.nom }}</h1>
+    {% else %}
+        <h1 class="h3 mb-3">Ajouter une Leçon</h1>
+    {% endif %}
+
+    {{ form_start(form) }}
+    {{ form_row(form.nom) }}
+    {{ form_row(form.ProgrammesLecons) }}
+    {{ form_row(form.users) }}
+    {{ form_row(form.programmes) }}
+    {{ form_row(form.thumbnails) }}
+    
+    {% if app.request.attributes.get('_route') == 'lecons_modifier' %}
+        <div>
+            <img src="/uploads/lecons/images/{{lecon.thumbnails}}" alt="Atempo-Education | {{ lecon.thumbnails }}" height="150">
+        </div>
+    {% endif %}
+    <br>
+    {{ form_row(form.contenu) }}
+
+        {{ form_label(form.pdf) }} :
+    {% if app.request.attributes.get('_route') == 'lecons_modifier' %}
+        {{ lecon.pdf }}
+    {% endif %}
+    {{ form_widget(form.pdf) }}
+    <br>
+    {{ form_label(form.audio) }} :
+    {% if app.request.attributes.get('_route') == 'lecons_modifier' %}
+        <div>
+            {{ lecon.audio }}
+        </div>
+    {% endif %}
+    {{ form_widget(form.audio) }}
+    <br>
+        {{ form_label(form.video) }} :
+    {% if app.request.attributes.get('_route') == 'lecons_modifier' %}
+        {{lecon.video}}
+    {% endif %}
+    {{ form_widget(form.video) }}
+
+    <br>
+    {{ form_row(form.submit) }}
+    {{ form_end(form) }}
+
+{% endblock %}
+
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.0.0/dist/js/tom-select.complete.min.js"></script>
+<script src="{{ asset('assets/js/appApi.js')}}"></script>
+    <script>
+        let Camoufle = document.querySelector("#lecons_users");
+        let ParentCamoufle = Camoufle.parentElement;
+        ParentCamoufle.classList.add('d-none');
+
+        window.onload = () => {
+            // On va chercher le type de lecons
+            let TypesLecons = document.querySelector("#lecons_ProgrammesLecons");
+
+            TypesLecons.addEventListener("change", function () {
+                let form = this.closest("form");
+                let data = this.name + "=" + this.value;
+                if (data !== 'lecons[ProgrammesLecons]=2') {
+                    ParentCamoufle.classList.add('d-none');
+                } else {
+                    ParentCamoufle.classList.remove('d-none');
+                }
+            });
+        }
+    </script>
+
+{% endblock %}

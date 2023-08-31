@@ -4,6 +4,8 @@ namespace App\Controller\Admin;
 
 use App\Entity\Users;
 use App\Form\EditProfileType;
+use App\Repository\EventRepository;
+use App\Repository\NotesRepository;
 use App\Repository\UsersRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -35,7 +37,8 @@ class UsersController extends AbstractController
      */
     public function eleves(UsersRepository $usersRepository): Response
     {
-        $userData = $usersRepository->findByrolesStudent();
+        $userData = $usersRepository->findAllStudent();
+        dump($userData);
 
         return $this->render('admin/users/index.html.twig', [
             'users' => $userData,
@@ -47,31 +50,20 @@ class UsersController extends AbstractController
      */
     public function professeurs(UsersRepository $usersRepository): Response
     {
-        $userData = $usersRepository->findByrolesTeacher();
+        $userData = $usersRepository->findAllTeacher();
 
         return $this->render('admin/users/index.html.twig', [
             'users' => $userData,
         ]);
     }
 
-    /**
-     * @Route("/superprofesseurs", name="superteacher")
-     */
-    public function Superprofesseurs(UsersRepository $usersRepository): Response
-    {
-        $userData = $usersRepository->findByrolesSuperTeacher();
-
-        return $this->render('admin/users/index.html.twig', [
-            'users' => $userData,
-        ]);
-    }
 
     /**
      * @Route("/administrateurs", name="admin")
      */
     public function admin(UsersRepository $usersRepository): Response
     {
-        $userData = $usersRepository->findByrolesAdmin();
+        $userData = $usersRepository->findAllAdmin();
 
         return $this->render('admin/users/index.html.twig', [
             'users' => $userData,
@@ -93,13 +85,29 @@ class UsersController extends AbstractController
     /**
      * @Route("/supprimer/{id}", name="supprimer")
      */
-    public function supprimerUser(Request $request, Users $users): Response
+    public function supprimerUser(Request $request, Users $users, NotesRepository $notesRepository, EventRepository $eventRepository): Response
     {
         $em = $this->getDoctrine()->getManager();
+        
+        // Supprimer la note affiliée à l'utilisateur
+        $notes = $notesRepository->findBy(['user' => $users]);
+        $events = $eventRepository->findBy(['teacher' => $users ]);
+
+        
+        foreach ($events as $event) {
+            $event->setTeacher(null);
+            $em->persist($event);
+        }
+
+        foreach ($notes as $note) {
+            $em->remove($note);
+        }
+        
+        // Supprimer l'utilisateur
         $em->remove($users);
         $em->flush();
-
-        $this->addFlash('message', 'Utilisateur supprimé avec succès');
+    
+        $this->addFlash('message', 'Utilisateur et notes associées supprimés avec succès');
         return $this->redirectToRoute('admin_users_home');
     }
 

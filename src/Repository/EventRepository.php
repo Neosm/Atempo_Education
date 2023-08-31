@@ -55,14 +55,19 @@ class EventRepository extends ServiceEntityRepository
     }
 
 
-    public function findReservedRooms($start): array
+    public function findReservedRooms($start, $end): array
     {
         $qb = $this->createQueryBuilder('e')
             ->select('r')
             ->from('App\Entity\Room', 'r')
             ->leftJoin('e.room', 'room')
-            ->andWhere(':start BETWEEN e.start AND DATE_ADD(e.start, e.duration, \'MINUTE\')')
+            ->andWhere(
+                '(:start >= e.start AND :start < DATE_ADD(e.start, e.duration, \'MINUTE\')) OR ' .
+                '(:end > e.start AND :end <= DATE_ADD(e.start, e.duration, \'MINUTE\')) OR ' .
+                '(:start < e.start AND :end > DATE_ADD(e.start, e.duration, \'MINUTE\'))'
+            )
             ->setParameter('start', new \DateTime($start))
+            ->setParameter('end', new \DateTime($end))
             ->andWhere('room.id = r.id');
 
         $reservedRooms = $qb->getQuery()->getResult();

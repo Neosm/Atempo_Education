@@ -55,11 +55,30 @@ class Event
     #[ORM\ManyToOne(inversedBy: 'Event')]
     private ?Matieres $matieres;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $objectif = null;
+
+    #[ORM\ManyToMany(targetEntity: programmes::class, inversedBy: 'events')]
+    private Collection $programme;
+
+    #[ORM\ManyToMany(targetEntity: lecons::class, inversedBy: 'events')]
+    private Collection $Lecons;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $ZoomLink = null;
+
     public function __construct()
     {
         $this->students = new ArrayCollection();
         $this->delays = new ArrayCollection();
         $this->absences = new ArrayCollection();
+        $this->programme = new ArrayCollection();
+        $this->Lecons = new ArrayCollection();
+    }
+
+    public function getTitleAndStart(): string
+    {
+        return $this->getTitle() . ' - ' . $this->getStart()->format('d F Y à H:i');
     }
 
     public function getId(): ?int
@@ -267,6 +286,78 @@ class Event
     public function setMatieres(?Matieres $matieres): self
     {
         $this->matieres = $matieres;
+
+        return $this;
+    }
+
+    public function getObjectif(): ?string
+    {
+        return $this->objectif;
+    }
+
+    public function setObjectif(?string $objectif): self
+    {
+        $this->objectif = $objectif;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, programmes>
+     */
+    public function getProgramme(): Collection
+    {
+        return $this->programme;
+    }
+
+    public function addProgramme(programmes $programme): self
+    {
+        if (!$this->programme->contains($programme)) {
+            $this->programme->add($programme);
+        }
+
+        return $this;
+    }
+
+    public function removeProgramme(programmes $programme): self
+    {
+        $this->programme->removeElement($programme);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, lecons>
+     */
+    public function getLecons(): Collection
+    {
+        return $this->Lecons;
+    }
+
+    public function addLecon(lecons $lecon): self
+    {
+        if (!$this->Lecons->contains($lecon)) {
+            $this->Lecons->add($lecon);
+        }
+
+        return $this;
+    }
+
+    public function removeLecon(lecons $lecon): self
+    {
+        $this->Lecons->removeElement($lecon);
+
+        return $this;
+    }
+
+    public function getZoomLink(): ?string
+    {
+        return $this->ZoomLink;
+    }
+
+    public function setZoomLink(?string $ZoomLink): self
+    {
+        $this->ZoomLink = $ZoomLink;
 
         return $this;
     }

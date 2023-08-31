@@ -1,0 +1,25 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}{% if app.request.attributes.get('_route') == 'admin_matiere_create' %}Créer une Matière{% else %}Modifier la Matière{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{% if app.request.attributes.get('_route') == 'admin_matiere_create' %}Créer une Matière{% else %}Modifier la Matière{% endif %}</h1>
+    
+    {% if app.flashes('success') %}
+        <div class="alert alert-success mt-3">
+            {{ app.flashes('success')|first }}
+        </div>
+    {% endif %}
+    
+    <form method="post">
+        {{ form_start(form) }}
+        
+        {{ form_row(form.name, {'attr': {'class': 'form-control'}}) }}
+        
+        {{ form_end(form) }}
+    </form>
+    
+    <a href="{{ path('admin_matiere_liste') }}" class="btn btn-secondary mt-3 float-end">Retour à la liste des matières</a>
+</div>
+{% endblock %}

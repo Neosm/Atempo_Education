@@ -1,0 +1,66 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Liste des retards{% endblock %}
+
+{% block content %}
+    <a href="{{ path('admin_liste_delay_create') }}" class="btn btn-primary float-end">Ajouter un retard</a>
+
+    <h1 class="h3 mb-3">Liste des retards</h1>
+    <div class="container my-5">
+        <div class="card">
+            <div class="card-body">
+                {% if delay is not empty %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date du delay</th>
+                                <th>Élève</th>
+                                <th>Cours concerné</th>
+                                <th>Durée</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for delayItem in delay %}
+                                <tr>
+                                    <td>{{ delayItem.event.start|format_datetime('full', 'short', locale='fr') }}</td>
+                                    <td>{{ delayItem.student.UserIdentifier }}</td>
+                                    <td>{{ delayItem.event.getTitle() }}</td>
+                                    <td>{{ delayItem.delayMinutes() }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ delayItem.id }}">
+                                            <i class="bi bi-trash "></i> Supprimer
+                                        </a>
+                                        <a href="{{ path('admin_liste_delay_edit', {'delayId': delayItem.id}) }}" class="btn btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> Modifier
+                                        </a>
+                                    </td>
+                                </tr>
+                                <!-- Modal de confirmation de suppression pour chaque delay -->
+                                <div class="modal fade" id="deleteModal{{ delayItem.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel{{ delayItem.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalLabel{{ delayItem.id }}">Confirmation de suppression</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Êtes-vous sûr de vouloir supprimer ce retard ?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                <a href="{{ path('admin_liste_delay_delete', {'delayId': delayItem.id}) }}" class="btn btn-danger">Supprimer</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>Aucune delay trouvée.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

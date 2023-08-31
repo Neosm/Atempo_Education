@@ -7,9 +7,12 @@ use App\Form\LeconsType;
 use App\Repository\LeconsRepository;
 use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -88,7 +91,7 @@ class LeconsController extends AbstractController
     }
 
 
-     /**
+    /**
      * @Route("/modifier/{id}", name="modifier")
      */
     public function modifierLecon(Request $request, Lecons $lecons, SluggerInterface $slugger): Response
@@ -151,7 +154,7 @@ class LeconsController extends AbstractController
         ]);
     }
 
-     /**
+    /**
      * @Route("/supprimer/{id}", name="supprimer")
      */
     public function supprimerProgramme(Lecons $lecon): Response
@@ -163,5 +166,30 @@ class LeconsController extends AbstractController
 
         return $this->redirectToRoute('admin_lecons_home');
 
+    }
+
+    /**
+     * @Route("/{slug}", name="details")
+     */
+    public function details(LeconsRepository $leconsRepository, $slug): Response
+    {
+        $lecon = $leconsRepository->findOneBy(['slug' => $slug]);
+        if(!$lecon instanceof \App\Entity\Lecons){
+            throw new NotFoundHttpException('La leçon n\'a pas été trouvé');
+        }
+
+        return $this->render('admin/lecons/details.html.twig', ['lecon' => $lecon]);
+    }
+
+    /**
+     * @Route("/{slug}/pdf/download", name="pdf_download")
+     */
+    public function downloadPdf(LeconsRepository $leconsRepository, $slug): Response
+    {
+        $lecon = $leconsRepository->findOneBy(['slug' => $slug]);
+        $getPdf = $lecon->getPdf();
+        $response = new BinaryFileResponse('uploads/lecons/pdf/'.$getPdf);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT,$getPdf);
+        return $response;
     }
 }

@@ -1,0 +1,19 @@
+{% if material is defined %}
+    <h4>Équipement : "{{ material.name }}"</h4>
+
+        <ul>
+        {% if material.rooms is not empty %}
+            <h5> Salle :</h5>
+            {% for room in material.rooms %}
+                <li>{{ room.name }}
+                </li>
+            {% endfor %}
+        {% else %}
+            Pas de salle affiliée à l'équipement
+        {% endif %}
+        
+        
+        </ul>
+{% else %}
+    <p>Sélectionnez un équipement pour afficher ses détails.</p>
+{% endif %}

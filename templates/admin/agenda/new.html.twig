@@ -1,11 +1,186 @@
 {% extends 'admin.html.twig' %}
 
-{% block title %}Ajouter un nouvel évènement{% endblock %}
+{% block title %}Ajouter un nouvel évènement
+{% endblock %}
+
+
+{% block stylesheets %}{% endblock %}
+
 
 {% block content %}
-    <h1>Ajouter un évènement</h1>
+	<h1>Ajouter un évènement</h1>
 
-    {{ include('admin/agenda/_form.html.twig') }}
+	{{ include('admin/agenda/_form.html.twig') }}
 
-    <a href="{{ path('admin_agenda_home') }}" class="btn btn-secondary float-end">Retour à l'agenda</a>
+	<a href="{{ path('admin_agenda_home') }}" class="btn btn-secondary float-end">Retour à l'agenda</a>
+{% endblock %}
+
+
+{% block javascripts %}
+<script src = "https://cdn.jsdelivr.net/npm/flatpickr"> </script> 
+<script src = "https://npmcdn.com/flatpickr/dist/l10n/fr.js" > </script> 
+<script >
+	$(document).ready(function() {
+		$('.students-field').select2({
+			placeholder: "Choisissez l'élève ou les élèves à qui vous allez faire cours. (Désactivez le boutton si vous faites cours à une classe entière)",
+			closeOnSelect: false
+		});
+		$('.programmes-field').select2({
+			placeholder: "Souhaitez-vous ajouter un/des programme(s) ?",
+			closeOnSelect: false
+		});
+		$('.lecons-field').select2({
+			placeholder: "Souhaitez-vous ajouter une/des leçon(s) ?",
+			closeOnSelect: false
+		});
+
+		var studentClassSelect = $('#event_form_studentClass');
+		var studentsSelect = $('#event_form_students');
+		var studentSwitchInput = $('#event_form_studentswitch');
+		// Masquer les élèves au chargement de la page
+		studentsSelect.next('.select2-container').hide();
+		$('.label-students').hide();
+		// Afficher la classe par défaut
+		studentClassSelect.show();
+		$('.label-studentClass').show();
+		// Écouter les changements sur le champ switch student
+		studentSwitchInput.on('change', function() {
+			if ($(this).is(':checked')) {
+				studentClassSelect.hide();
+				$('.label-studentClass').hide();
+
+				studentsSelect.next('.select2-container').show();
+				$('.label-students').show();
+
+				// Vider le champ de la classe et réinitialiser sa valeur
+				studentClassSelect.val('').trigger('change');
+
+			} else {
+				studentsSelect.next('.select2-container').hide();
+				$('.label-students').hide();
+
+				studentClassSelect.show();
+				$('.label-studentClass').show();
+
+				// Vider le champ des élèves et réinitialiser sa valeur
+				studentsSelect.val(null).trigger('change');
+			}
+		});
+
+		var zoomLinkSelect = $('#event_form_zoomlink');
+		var roomSwitchselect = $('#event_form_room');
+		var roomSwitchInput = $('#event_form_zoomswitch');
+
+		// Masquer le zoom au chargement de la page
+		zoomLinkSelect.hide();
+		$('.label-zoom').hide();
+
+		// Afficher les salles par défaut
+		roomSwitchselect.show();
+		$('#row-materials').show();
+		$('.label-room').show();
+		$('.label-materials').show();
+		// Écouter les changements sur le champ switch room
+
+		roomSwitchInput.on('change', function() {
+			if ($(this).is(':checked')) {
+				$('.label-room').hide();
+				$('.label-materials').hide();
+				$('#row-materials').hide();
+				roomSwitchselect.hide();
+
+				zoomLinkSelect.show();
+				$('.label-zoom').show();
+
+				// Vider le champ de la classe et réinitialiser sa valeur
+				roomSwitchselect.val('').trigger('change');
+				$('#event_form_materials .form-check-input').prop('checked', false).trigger('change');
+
+			} else {
+				zoomLinkSelect.hide();
+				$('.label-zoom').hide();
+
+				$('.label-room').show();
+				roomSwitchselect.show();
+				$('#row-materials').show();
+				$('.label-materials').show();
+
+				// Vider le champ des élèves et réinitialiser sa valeur
+				zoomLinkSelect.val(null).trigger('change');
+			}
+		});
+
+		flatpickr('.datetimepickr', {
+			enableTime: true,
+			dateFormat: "Y-m-d H:i",
+			time_24hr: true,
+			minTime: "00:00",
+			maxTime: "23:59"
+		});
+
+		var materialsCheckboxes = document.querySelectorAll('.materials-checkboxes input[type="checkbox"]');
+		var roomSelect = document.querySelector('.room-select');
+		var startField = $('#event_form_start');
+		var durationField = $('#event_form_duration');
+		var zoomlinkField = $('#event_form_zoomlink');
+		// Champ zoomlink
+
+		// Écouter l'événement 'change' sur les champs de matériel et de durée
+		materialsCheckboxes.forEach(function(checkbox) {
+			checkbox.addEventListener('change', updateRooms);
+		});
+
+		durationField.on('input', updateRooms);
+
+		// Écouteur d'événement pour le champ zoomlink
+		zoomlinkField.on('input', updateRooms);
+
+		// Fonction pour mettre à jour les salles en fonction des matériaux sélectionnés, de l'heure et de la durée
+		function updateRooms() {
+			var selectedMaterials = Array.from(materialsCheckboxes).filter(function(checkbox) {
+				return checkbox.checked;
+			}).map(function(checkbox) {
+				return checkbox.value;
+			});
+
+			var startValue = startField.val();
+			var durationValue = durationField.val();
+			var zoomlinkValue = zoomlinkField.val();
+			// Récupérer la valeur du champ zoomlink
+
+			// Construire l'URL de l'API avec les paramètres appropriés
+			var apiUrl = '/admin/agenda/api/rooms';
+			apiUrl += '?materials=' + selectedMaterials.join(',');
+			apiUrl += '&start=' + startValue;
+			apiUrl += '&duration=' + durationValue;
+			apiUrl += '&zoomlink=' + zoomlinkValue;
+			// Ajouter la valeur du champ zoomlink
+
+			// Fetch des salles en fonction des équipements sélectionnés, de l'heure et de la durée
+			fetch(apiUrl).then(function(response) {
+				return response.json();
+			}).then(function(rooms) { // Mise à jour des options de sélection de la salle
+				while (roomSelect.firstChild) {
+					roomSelect.removeChild(roomSelect.firstChild);
+				}
+
+				rooms.forEach(function(room) {
+					var option = document.createElement('option');
+					option.value = room.id;
+					option.textContent = room.name;
+					roomSelect.appendChild(option);
+				});
+			}).catch(function(error) {
+			});
+		}
+
+		// Appeler la fonction pour mettre à jour les salles initialement
+		updateRooms();
+
+		// Écouteur d'événement pour le champ de l'heure de début
+		startField.change(updateRooms);
+		$('#event_form_zoomswitch').on('change', updateRooms); // Écouteur sur le champ zoomswitch
+
+	}); 
+    </script>
 {% endblock %}

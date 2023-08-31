@@ -3,42 +3,137 @@
 {% block title %}Emploi du temps{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullEvent@5.9.0/main.min.css" integrity="sha256-FjyLCG3re1j4KofUTQQXmaWJw13Jdb7LQvXlkFxTDJI=" crossorigin="anonymous">
+<style>
+        .event-icon-header {
+            font-size: 24px;
+        }
+        .event-start {
+            color: green;
+        }
+        .event-end {
+            color: red;
+        }
+        .event-icon{
+            font-size: 18px;
+        }
+        .modal-backdrop.first-modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+    </style>
 {% endblock %}
 
 
 {% block content %}
-    {% if is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('admin_agenda_new') }}" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> Ajouter un évènement</a>
-    {% endif %}
-        <h1 class="h3 mb-3">Agenda</h1>
-        <div class="card">
-            <div class="card-body">
-                <div id="calendrier"></div>
+        <a href="{{ path('admin_agenda_create_event') }}" class="btn btn-primary float-end ms-1 mt-n1"><i class="bi bi-plus"></i> Ajouter un évènement</a>
+
+    <h1 class="h3 mb-3">Agenda</h1>
+    <div class="card">
+        <div class="card-body">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <!-- Ajoutez l'élément HTML de la modal ici -->
+    <div>
+        <div class="modal fade first-modal" id="event-modal-details" tabindex="-1" role="dialog" aria-labelledby="event-modal-label" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="event-modal-label"></h5>
+                        {% if is_granted('ROLE_TEACHER') %}
+                            <div class="ms-auto">
+                                <a href="#" class="btn btn-link edit-event me-2" data-event-id=""><i class="bi bi-pencil event-icon-header"></i></a>
+                                <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="bi bi-trash event-icon-header"></i></button>
+                            </div>
+                        {% endif %}
+                        <button type="button" class="btn btn-link ms-2" data-bs-dismiss="modal" aria-label="Fermer"><i class="bi bi-x event-icon-header"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="card-text"><i class="bi bi-circle-fill event-icon event-start"></i> <strong>Date de début : </strong><span id="event-start"></span></p>
+                        <p class="card-text"><i class="bi bi-circle-fill event-icon event-end"></i> <strong>Date de fin : </strong><span id="event-end"></span></p>
+                        <p class="card-text" id="event-room"></p>
+                        <p class="card-text"><i class="bi bi-person event-icon"></i> <strong>Professeur : </strong><span id="event-teacher"></span></p>
+                        <ul id="event-students" class="list-unstyled"></ul>
+                        <p id="event-programmes" class="card-text"></p>
+                        <p id="event-lecons" class="card-text"></p>
+                        <hr>
+                        <p class="card-text" id="commentaireObjectif"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" class="btn btn-dark add-delay" data-event-id="">Ajouter un retard</a>
+                        <a href="#" class="btn btn-info add-absence" data-event-id="">Ajouter une absence</a>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteModal" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered w-75 h-75">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmation de suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cet événement ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <a href="#" class="btn btn-danger delete-event" data-event-id="">Supprimer</a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
-    <script src="https://cdn.jsdelivr.net/npm/fullEvent@5.9.0/main.min.js" integrity="sha256-8nl2O4lMNahIAmUnxZprMxJIBiPv+SzhMuYwEuinVM0=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/bootstrap5@6.1.8/index.global.min.js'></script>
     <script>
-        window.onload = () => {
-            let EventElement = document.querySelector('#calendrier');
-            let Event = new FullEvent.Event(EventElement, {
-                themeSystem: 'bootstrap',
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var pastDate = new Date();
+            pastDate.setMonth(pastDate.getMonth() - 3);
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                themeSystem: 'bootstrap5',
                 initialView: 'dayGridMonth',
-                locale: 'fr',
-                timeZone: 'Europe/Paris',
+                locale: 'Fr',
+                firstDay: 1,
+                allDaySlot: false,
+                editable:true,
+                navLinks: true,
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    end: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
                 },
-                eventClick: function(e) {
-                    window.open(`/admin/agenda/${e.event.id}`,"_self")
+                views: {
+                    dayGridMonth: {
+                        dayHeaderFormat: { weekday: 'short' },
+                        titleFormat: { year: 'numeric', month: 'long' },
+                        eventDisplay: 'block',
+                        eventContent: function(arg) {
+                            return {
+                                html: '<div class="fc-event-title">' + arg.event.title + '</div><div class="fc-event-time">' + formatTime(arg.event.start) + ' - ' + formatTime(arg.event.end) + '</div>'
+                            };
+                        }
+                    },
+                    timeGridWeek: {
+                        dayHeaderFormat: { weekday: 'short' }
+                    },
+                    timeGridDay: {
+                        dayHeaderFormat: { weekday: 'long' },
+                        eventContent: function(arg) {
+                            console.log(arg.event);
+                            return {
+                                html: '<div class="fc-event-title">' + arg.event.title + '</div><div class="fc-event-details">' + arg.event.extendedProps.teacher + '</div>'
+                            };
+                        }
+                    }
                 },
-                navLinks: true,
                 buttonText:{
                     today: 'Aujourd\'hui',
                     month: 'Mois',
@@ -46,31 +141,165 @@
                     day: 'Jour',
                     list: 'Liste'
                 },
-                events: {{ dataEvents|raw }},
+                extraParams: function() {
+                    return {
+                        start: pastDate.toISOString(), // Date de début pour les événements passés
+                    };
+                },
+                nowIndicator: true,
+                events: {{ jsonEvents|raw }},
+                eventClick: function(info) {
+                    var eventId = info.event.id;
+                    $.ajax({
+                        url: '{{ path('admin_agenda_get_event_details') }}',
+                        type: 'POST',
+                        data: { eventId: eventId },
+                        dataType: 'json',
+                        success: function(response) {
+                            var event = response.event;
+                            // Mettre à jour les informations de l'événement dans la modal
+                            $('#event-modal-label').text(event.title);
+                            $('#event-title').text(event.title);
+                            $('#event-start').text(event.start);
+                            $('#event-end').text(event.end);
+                            $('.edit-event').attr('data-event-id', event.id);
+                            $('.delete-event').attr('data-event-id', event.id);
+                            $('.add-delay').attr('data-event-id', event.id);
+                            $('.add-absence').attr('data-event-id', event.id);
+                            $('#event-teacher').text(event.teacher);
 
-            {% if is_granted('ROLE_ADMIN') %}
-                editable: true
-            {% endif %}
-            })
+                            // Ajouter la classe ou la liste d'élève
+                            $('#event-students').empty(); // Vide le contenu de #event-students
+                            if (event.studentClass) {
+                                addEventDetail('<i class="bi bi-card-list event-icon"></i> <strong>Classe : </strong>' + event.studentClass);
+                            } else if (event.students && event.students.length > 0) {
+                                addEventDetail('<i class="bi bi-people event-icon"></i> <strong>Élèves : </strong>');
+                                event.students.forEach(function(student) {
+                                    addEventDetail(student);
+                                });
+                            } else {
+                                addEventDetail('Aucun élève');
+                            }
+                            function addEventDetail(detail) {
+                                var eventStudents = $('#event-students');
+                                if (!eventStudents.find('.event-detail:contains("' + detail + '")').length) {
+                                    $('<li>').addClass('event-detail').html(detail).appendTo(eventStudents);
+                                }
+                            }
 
-            Event.on('eventChange', (e) => {
-                let url = `/admin/agenda/api/${e.event.id}/edit`
-                let donnees = {
-                    "title": e.event.title,
-                    "description": e.event.extendedProps.description,
-                    "start": e.event.start,
-                    "end": e.event.end,
-                    "backgroundColor": e.event.backgroundColor,
-                    "borderColor": e.event.borderColor,
-                    "textColor": e.event.textColor,
-                    "allDay": e.event.allDay
+                            // Afficher les informations de la salle de classe
+                            if (event.room) {
+                                $('#event-room').html('<i class="bi bi-geo-alt event-icon"></i> <strong>Salle de classe : </strong>' + event.room);
+                            }                            
+                            // Afficher le lien Zoom
+                            if (event.zoomlink) {
+                                $('#event-room').html('<i class="bi bi-link event-icon"></i> <strong> <a href="' + event.zoomlink +'" target="_blank">Lien Zoom </a> </strong>');
+                            }
+
+                            $('#event-programmes').empty();
+                            if (event.programmes  && event.programmes.length > 0) {
+                                addProgramme('<strong>Programmes : </strong>' + event.programmes.map(function(programme) {
+                                    return '<a href="/admin/programmes/' + programme.slug + '">' + programme.nom + '</a>';
+                                }).join(', '));
+                            } else {
+                                addProgramme('Aucun programme affilié au cours')
+                            }
+                            function addProgramme(detail) {
+                                var eventProgrammes = $('#event-programmes');
+                                eventProgrammes.html(detail);
+                            }
+
+                            $('#event-lecons').empty();
+                            if (event.lecons && event.lecons.length > 0) {
+                                addLecons('<strong>Leçons : </strong>' + event.lecons.map(function(lecon) {
+                                    return '<a href="/admin/lecons/' + lecon.slug + '">' + lecon.nom + '</a>';
+                                }).join(', '));
+                            } else {
+                                addLecons('Aucune leçon affilié au cours')
+                            }
+                            function addLecons(detail) {
+                                var eventLecons = $('#event-lecons');
+                                eventLecons.html(detail);
+                            }
+
+
+                            if (event.commentaire) {
+                                addCommentaire('<i class="bi bi-chat-dots"></i> <strong>Commentaire : </strong> ' + event.commentaire)
+                            } else if (event.objectif) {
+                                addCommentaire('<i class="bi bi-chat-dots"></i> <strong>Objectif : </strong> ' + event.objectif)
+                            } else {
+                                addCommentaire('<i class="bi bi-chat-dots"></i> <strong>Aucun objectif ou commentaire pour le prochain cours</strong> ')
+                            }
+                            function addCommentaire(detail) {
+                                var eventComObj = $('#commentaireObjectif');
+                                eventComObj.html(detail);
+                            }
+                            
+
+                            // Afficher la modal
+                            $('#event-modal-details').modal('show');
+                        },
+                    });
                 }
-                let xhr = new XMLHttpRequest
-                xhr.open("PUT", url)
-                xhr.send(JSON.stringify(donnees))
-            })
+            });
 
-            Event.render();
+            calendar.render();
+
+            var urlParams = new URLSearchParams(window.location.search);
+            var viewParam = urlParams.get('view');
+
+            // Changez la vue en ListView si le paramètre "view" est "list"
+            if (viewParam === 'list') {
+                calendar.changeView('listWeek');
+            }
+        });
+
+        function formatTime(time) {
+            return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
+
+        $(document).on('click', '.edit-event', function(e) {
+            e.preventDefault();
+            var eventId = $(this).attr('data-event-id');
+            var editUrl = '{{ path('admin_agenda_edit_event', {'id': 'eventId'}) }}';
+            editUrl = editUrl.replace('eventId', eventId);
+            window.location.assign(editUrl);
+        });
+
+        $(document).on('click', '.add-delay', function(e) {
+            e.preventDefault();
+            var idEvent = $(this).attr('data-event-id');
+            var delayURL = '{{ path('admin_delay_create', {'eventId': 'idEvent'}) }}';
+            delayURL = delayURL.replace('idEvent', idEvent);
+            window.location.assign(delayURL);
+        });
+
+        $(document).on('click', '.add-absence', function(e) {
+            e.preventDefault();
+            var idEvent = $(this).attr('data-event-id');
+            var absenceUrl = '{{ path('admin_absence_event_create', {'eventId': 'idEvent'}) }}';
+            absenceUrl = absenceUrl.replace('idEvent', idEvent);
+            window.location.assign(absenceUrl);
+        });
+        
+        $(document).on('click', '.delete-event', function(e) {
+            e.preventDefault();
+            var eventId = $(this).attr('data-event-id');
+            var deleteUrl = '{{ path('admin_agenda_delete_event', {'id': 'eventId'}) }}';
+            deleteUrl = deleteUrl.replace('eventId', eventId);
+            window.location.assign(deleteUrl);
+        });
+
+        $('#deleteModal').on('show.bs.modal', function () {
+            $('.first-modal').addClass('modal-backdrop');
+        });
+
+        $('#deleteModal').on('hidden.bs.modal', function () {
+            $('.first-modal').removeClass('modal-backdrop');
+        });
+
+
+
+
     </script>
 {% endblock %}

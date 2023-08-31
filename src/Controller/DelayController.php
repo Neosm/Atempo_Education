@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DelayController extends AbstractController
 {
-    #[Route('/agenda/event/{eventId}/delay/create', name: 'delay_create')]
+    #[Route('/agenda/event/{eventId}/retard/create', name: 'delay_create')]
     public function create(Request $request, $eventId): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
@@ -37,7 +37,7 @@ class DelayController extends AbstractController
         ]);
     }
 
-    #[Route('/agenda/event/{eventId}/delay/edit/{delayId}', name: 'delay_edit')]
+    #[Route('/agenda/event/{eventId}/retard/edit/{delayId}', name: 'delay_edit')]
     public function edit(Request $request, $eventId, $delayId): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
@@ -57,8 +57,8 @@ class DelayController extends AbstractController
         ]);
     }
 
-    #[Route('/agenda/event/{eventId}/delay/delete/{delayId}', name: 'delay_delete')]
-    public function delete($eventId, $delayId): Response
+    #[Route('/retard/delete/{delayId}', name: 'professeur_delay_delete')]
+    public function delete($delayId): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
         $delay = $entityManager->getRepository(Delay::class)->find($delayId);
@@ -66,6 +66,52 @@ class DelayController extends AbstractController
         $entityManager->remove($delay);
         $entityManager->flush();
 
-        return $this->redirectToRoute('agenda_event_details', ['id' => $eventId]);
+        return $this->redirectToRoute('professeur_delay_liste');
+    }
+
+    #[Route('/retard/creer', name: 'professeur_delay_create')]
+    public function professeur_delay_create(Request $request): Response
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $ajouterChampEvent = true;
+        $delay = new Delay();
+        $user = $this->getUser();
+
+        $form = $this->createForm(delayType::class, $delay, ['ajouter_creer_delay' => $ajouterChampEvent, 'userid' => $user->getId()]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+
+            $entityManager->persist($delay);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('home');
+        }
+
+        return $this->render('delay/create.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/retard/liste-retards', name: 'professeur_delay_liste')]
+    public function professeur_delay_liste(): Response
+    {
+        $user = $this->getUser();
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $delayRepository = $entityManager->getRepository(Delay::class);
+    
+        // Récupérer tous les retards avec un événement dont le teacher id correspond à l'ID de l'utilisateur
+        $delays = $delayRepository->createQueryBuilder('d')
+            ->leftJoin('d.event', 'e')
+            ->andWhere('e.teacher = :teacherId')
+            ->setParameter('teacherId', $user->getId())
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('delay/index.html.twig', [
+            "delay" => $delays
+        ]);
     }
 }

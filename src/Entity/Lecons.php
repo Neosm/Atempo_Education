@@ -49,10 +49,14 @@ class Lecons
     #[ORM\ManyToOne(inversedBy: 'lecons')]
     private ?ProgrammesLecons $type_lecons = null;
 
+    #[ORM\ManyToMany(targetEntity: Event::class, mappedBy: 'Lecons')]
+    private Collection $events;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable('now');
+        $this->events = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -200,6 +204,33 @@ class Lecons
     public function setProgrammesLecons(?ProgrammesLecons $type_lecons): self
     {
         $this->type_lecons = $type_lecons;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Event>
+     */
+    public function getEvents(): Collection
+    {
+        return $this->events;
+    }
+
+    public function addEvent(Event $event): self
+    {
+        if (!$this->events->contains($event)) {
+            $this->events->add($event);
+            $event->addLecon($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvent(Event $event): self
+    {
+        if ($this->events->removeElement($event)) {
+            $event->removeLecon($this);
+        }
 
         return $this;
     }

@@ -1,0 +1,24 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Ajouter un nouveau retard{% endblock %}
+
+
+{% block stylesheets %}
+{% endblock %}
+
+
+{% block content %}
+    <h1>Ajouter un retard</h1>
+    
+    {{ form_start(form) }}
+    {{ form_row(form.student) }}
+    {% if app.request.attributes.get('_route') starts with 'admin_liste_delay' %}
+    {{ form_row(form.event) }}
+    {% endif %}
+    {{ form_row(form.delayMinutes) }}
+
+    <button type="submit" class="btn btn-primary">Valider</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('admin_liste_delay_liste') }}" class="btn btn-secondary float-end">Retour à l'agenda</a>
+{% endblock %}

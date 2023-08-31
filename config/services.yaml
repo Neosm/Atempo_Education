@@ -9,12 +9,16 @@ parameters:
     lecons_pdfs_directory: '%kernel.project_dir%/public/uploads/lecons/pdf'
     thumbnails_directory: '%kernel.project_dir%/public/uploads/profile_pics'
     maintenanceFilePath: '%kernel.project_dir%/public/.maintenance'
+    timezone: '%env(APP_TIMEZONE)%'
 
 services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    App\EventSubscriber\AccessDeniedSubscriber:
+        tags:
+            - { name: kernel.event_subscriber }
 
 
     # makes classes in src/ available to be used as services

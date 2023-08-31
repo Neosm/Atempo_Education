@@ -14,23 +14,14 @@
         <div class="col">
             {{ form_row(form.duration) }}
         </div>
-    </div>
-
-    <div class="row mb-3">
         <div class="col">
             {{ form_row(form.teacher) }}
         </div>
-        <div class="col">
-            {{ form_row(form.materials) }}
-        </div>
-        <div class="col">
-            {{ form_row(form.room) }}
-        </div>
     </div>
 
     <div class="row mb-3">
         <div class="col">
-            <label for="{{ form.switch.vars.id }}">Activer pour choisir une liste d'élèves. Désactiver pour choisir une classe.</label>
+            <label for="{{ form.zoomswitch.vars.id }}">Cours en visio ou non</label>
         </div>
     </div>
     
@@ -38,11 +29,48 @@
         <div class="col">
             <div class="custom-switch">
             {% if app.request.attributes.get('_route') == 'agenda_edit_event' %}
-                {{ form_widget(form.switch, {'attr': {'class': 'form-check-input', 'checked': event.students is not empty}}) }}
+                {{ form_widget(form.zoomswitch, {'attr': {'checked': event.zoomlink is not null}}) }}
             {% else %}
-                {{ form_widget(form.switch) }}
+                {{ form_widget(form.zoomswitch) }}
             {% endif %}
-            {{ form_label(form.switch) }}
+            {{ form_label(form.zoomswitch) }}
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            {{ form_row(form.materials) }}
+        </div>
+        <div class="col">
+            {{ form_row(form.room) }}
+        </div>
+        {{ form_row(form.zoomlink) }}
+    </div>
+
+    <div class="row mb-3">
+        <div class="col">
+            {{ form_row(form.programme) }}
+        </div>
+        <div class="col">
+            {{ form_row(form.lecons) }}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col">
+            <label for="{{ form.studentswitch.vars.id }}">Activer le boutton si vous faites cours à un ou plusieurs élève(s)</label>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col">
+            <div class="custom-switch">
+            {% if app.request.attributes.get('_route') == 'agenda_edit_event' %}
+                {{ form_widget(form.studentswitch, {'attr': {'checked': event.students is not empty}}) }}
+            {% else %}
+                {{ form_widget(form.studentswitch) }}
+            {% endif %}
+            {{ form_label(form.studentswitch) }}
             </div>
         </div>
     </div>
@@ -50,11 +78,6 @@
     <div class="row mb-3">
         <div class="col">
             {{ form_row(form.studentClass) }}
-        </div>
-    </div>
-
-    <div class="row mb-3">
-        <div class="col">
             {{ form_row(form.students) }}
         </div>
     </div>
@@ -63,6 +86,14 @@
         <div class="row mb-3">
             <div class="col">
                 {{ form_row(form.comment) }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if form.objectif is defined %}
+        <div class="row mb-3">
+            <div class="col">
+                {{ form_row(form.objectif) }}
             </div>
         </div>
     {% endif %}

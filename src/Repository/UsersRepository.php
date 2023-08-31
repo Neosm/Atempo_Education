@@ -74,18 +74,8 @@ class UsersRepository extends ServiceEntityRepository implements PasswordUpgrade
             ->getResult();
     }
 
-    public function findByrolesSuperTeacher()
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.roles LIKE :val')
-            ->setParameter('val', '%["ROLE_SUPERTEACHER"]%')
-            ->orderBy('u.id', 'DESC')
-            ->getQuery()
-            ->getResult()
-            ;
-    }
 
-    public function findByrolesAdmin()
+    public function findAllAdmin()
     {
         return $this->createQueryBuilder('u')
             ->andWhere('u.roles LIKE :val')
@@ -101,6 +91,16 @@ class UsersRepository extends ServiceEntityRepository implements PasswordUpgrade
         return $this->createQueryBuilder('u')
             ->andWhere('u.roles LIKE :val')
             ->setParameter('val', '%["ROLE_STUDENT"]%')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
+    public function findAllTeacher()
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.roles LIKE :val')
+            ->setParameter('val', '%["ROLE_TEACHER"]%')
             ->getQuery()
             ->getResult()
             ;

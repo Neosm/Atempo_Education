@@ -40,15 +40,28 @@ class RoomRepository extends ServiceEntityRepository
     }
 
 
-    public function findRoomsByMaterials(array $materialIdsArray): array
+    public function createFilteredQuery(array $materialIdsArray)
     {
-        $queryBuilder = $this->createQueryBuilder('r')
-            ->leftJoin('r.materials', 'm')
-            ->andWhere('m.id IN (:materialIds)')
-            ->setParameter('materialIds', $materialIdsArray);
-    
-        return $queryBuilder->getQuery()->getResult();
+        $queryBuilder = $this->createQueryBuilder('r');
+
+        $conditions = [];
+        $parameters = [];
+
+        foreach ($materialIdsArray as $index => $materialId) {
+            $alias = 'm'.$index;
+            $conditions[] = $queryBuilder->expr()->eq($alias.'.id', ':materialId'.$index);
+            $parameters['materialId'.$index] = $materialId;
+
+            $queryBuilder->join('r.materials', $alias);
+        }
+
+        $queryBuilder
+            ->andWhere($queryBuilder->expr()->andX(...$conditions))
+            ->setParameters($parameters);
+
+        return $queryBuilder;
     }
+
     
 
 

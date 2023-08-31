@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -50,6 +51,9 @@ class RegistrationFormType extends AbstractType
                     'Placeholder'=>'0607080901'
                 ]
             ])
+            ->add('dateOfBirth', DateType::class, [
+                'label'=>"Date de naissance"
+            ])
             ->add('roles', ChoiceType::class, [
                 'label' => 'Role de l\'utilisateur',
                 'placeholder'=> 'Élève, Professeur, SuperProfesseur',
@@ -59,7 +63,6 @@ class RegistrationFormType extends AbstractType
                 'choices'=> [
                     'Élèves'=> "ROLE_STUDENT",
                     'Professeur'=> "ROLE_TEACHER",
-                    'SuperProfesseur'=> "ROLE_SUPERTEACHER",
                     'Administrateur'=> "ROLE_ADMIN",
                 ]
             ])

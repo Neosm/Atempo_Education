@@ -17,10 +17,13 @@ class Ecoles
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $siret = null;
+    private ?string $numero = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $siren = null;
+    private ?string $ville = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $campus = null;
 
     public function getId(): ?int
     {
@@ -39,26 +42,38 @@ class Ecoles
         return $this;
     }
 
-    public function getSiret(): ?string
+    public function getNumero(): ?string
     {
-        return $this->siret;
+        return $this->numero;
     }
 
-    public function setSiret(string $siret): self
+    public function setNumero(string $numero): self
     {
-        $this->siret = $siret;
+        $this->numero = $numero;
 
         return $this;
     }
 
-    public function getSiren(): ?string
+    public function getVille(): ?string
     {
-        return $this->siren;
+        return $this->ville;
     }
 
-    public function setSiren(string $siren): self
+    public function setVille(string $ville): self
     {
-        $this->siren = $siren;
+        $this->ville = $ville;
+
+        return $this;
+    }
+
+    public function getCampus(): ?string
+    {
+        return $this->campus;
+    }
+
+    public function setCampus(string $campus): self
+    {
+        $this->campus = $campus;
 
         return $this;
     }

@@ -24,7 +24,6 @@ class TeacherController extends AbstractController
         if ($studentClass) {
             $events = array_merge($events, $studentClass->getEvents()->toArray());
         }
-        dump($events);
         $userData = $usersRepository->findByrolesTeacher($events);
 
         return $this->render('teacher/index.html.twig', [

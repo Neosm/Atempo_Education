@@ -1,0 +1,120 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Liste des Salles{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Salles</h2>
+                </div>
+                <div class="card-body">
+                    {% for flash in app.flashes('success') %}
+                        <div class="alert alert-success" role="alert">{{ flash }}</div>
+                    {% endfor %}
+                    <ul class="list-group">
+                        {% for room in rooms %}
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3>{{ room.name }}</h3>
+                                    <div class="btn-group">
+                                        <a href="{{ path('admin_salle_liste_details', { 'id': room.id }) }}" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i> Voir
+                                        </a>
+                                        <a href="{{ path('admin_salle_edit', { 'id': room.id }) }}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-pencil"></i> Éditer
+                                        </a>
+                                        <button class="btn btn-outline-danger modal-trigger"
+                                                data-toggle="modal" data-target="#modal-delete"
+                                                data-id="{{ room.id }}" data-titre="{{ room.name }}">
+                                            <i class="bi bi-trash"></i> Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Détails de la salle</h2>
+                </div>
+                <div class="card-body" id="content">
+                    {{ include('admin/room/_content.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="modal fade" id="modal-delete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="exampleModalLabel">Supprimer la salle</h3>
+                    <br>
+                </div>
+                <div class="modal-body">
+                    <h4 class="h5"></h4>
+                    <br>
+                    <p></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" data-bs-dismiss="modal">Annuler</button>
+                    <a href="" type="button" class="btn btn-danger">Supprimer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    let supprimer = document.querySelectorAll(".modal-trigger")
+    for (let bouton of supprimer) {
+        bouton.addEventListener("click", function () {
+            var roomId = bouton.getAttribute('data-id');
+            var modal = $('#modal-delete');
+
+            // Chargez les informations spécifiques à la salle et les événements liés
+            // Remplissez les détails de la modal
+            $.ajax({
+                url: '{{ path("load_room_events") }}', // Remplacez cela par votre URL pour charger les informations spécifiques à la salle
+                data: { roomId: roomId },
+                dataType: 'json',
+                success: function (data) {
+                    var modalTitle = modal.find('.modal-title');
+                    var modalBody = modal.find('.modal-body h4');
+                    var modalInfo = modal.find('.modal-body p');
+                    var confirmDeleteLink = modal.find('.modal-footer a');
+
+                    // Mettez à jour les éléments de la modal avec les informations
+                    modalTitle.text('Supprimer la salle');
+                    modalBody.text('Êtes-vous sûr(e) de vouloir supprimer la salle ?');
+                    
+                    if (data.events.length === 0) {
+                        modalInfo.text('Aucun cours affilié à la salle.');
+                    } else {
+                        modalInfo.text('Cela entraînera des modifications dans l\'affichage des cours passés et futurs ayant cette salle de classe. Si vous souhaitez tout de même supprimer la salle, vous devrez modifier les cours :');
+                        var eventList = $('<ul></ul>');
+                        data.events.forEach(function (event) {
+                            var eventItem = $('<li>' + event.title + ' - ' + event.start + '</li>');
+                            eventList.append(eventItem);
+                        });
+                        modalInfo.append(eventList);
+                    }
+
+                    confirmDeleteLink.attr('href', '{{ path("admin_salle_delete", { "id": "ROOM_ID" }) }}'.replace('ROOM_ID', roomId));
+
+                    // Affichez la modal une fois que toutes les informations sont prêtes
+                    modal.modal('show');
+                }
+            });
+        });
+    }
+</script>
+
+{% endblock %}

@@ -7,6 +7,9 @@
 
     {{ form_start(form) }}
     {{ form_row(form.student) }}
+    {% if app.request.attributes.get('_route') == 'professeur_absence_create' %}
+    {{ form_row(form.event) }}
+    {% endif %}
 
     <button type="submit" class="btn btn-primary">Valider</button>
     {{ form_end(form) }}

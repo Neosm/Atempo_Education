@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -141,5 +142,18 @@ class ProgrammesController extends AbstractController
         );
         return $this->redirectToRoute('admin_programmes_home');
 
+    }
+
+    /**
+     * @Route("/{slug}", name="details")
+     */
+    public function details(ProgrammesRepository $programmesRepository, $slug): Response
+    {
+        $programme = $programmesRepository->findOneBy(['slug' => $slug]);
+        if(!$programme instanceof \App\Entity\Programmes){
+            throw new NotFoundHttpException('Le programme n\'a pas été trouvé');
+        }
+
+        return $this->render('admin/programmes/details.html.twig', ['programme' => $programme]);
     }
 }

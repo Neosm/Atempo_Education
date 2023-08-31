@@ -60,7 +60,8 @@ class RegistrationController extends AbstractController
                 $user->setPassword($password);
             } else {
                 $notification = "Email non valide ou déjà inscrite sur le site, essayez une nouvelle adresse mail ou connectez vous à votre compte";
-            }
+            }            
+            $user->setIdUnique(uniqid(mt_rand(), true));
             $user->setOnline(false);
             $user->setIsVerified(false);
             $entityManager->persist($user);

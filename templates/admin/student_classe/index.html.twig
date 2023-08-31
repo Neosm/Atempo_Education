@@ -1,0 +1,53 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Liste des Classes{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Classes</h2>
+                </div>
+                <div class="card-body">
+                {% for flash in app.flashes('success') %}
+                    <div class="alert alert-success" role="alert">{{ flash }}</div>
+                {% endfor %}
+                    <ul class="list-group">
+                        {% for studentClass in studentClasses %}
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3>{{ studentClass.name }}</h3>
+                                    <div class="btn-group">
+                                        <a href="{{ path('admin_studentclasse_liste_details', { 'id': studentClass.id }) }}" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i> Voir
+                                        </a>
+                                        <a href="{{ path('admin_studentclasse_edit', { 'id': studentClass.id }) }}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-pencil"></i> Éditer
+                                        </a>
+                                        <a href="{{ path('admin_studentclasse_delete', { 'id': studentClass.id }) }}" class="btn btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Supprimer
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Élèves de la Classe</h2>
+                </div>
+                <div class="card-body" id="content">
+                        {{ include('admin/student_classe/_content.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+{% endblock %}

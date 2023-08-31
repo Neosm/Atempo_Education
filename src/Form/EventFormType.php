@@ -3,8 +3,10 @@
 namespace App\Form;
 
 use App\Entity\Event;
+use App\Entity\Lecons;
 use App\Entity\Materials;
 use App\Entity\Matieres;
+use App\Entity\Programmes;
 use App\Entity\Room;
 use App\Entity\StudentClass;
 use App\Entity\Users;
@@ -21,6 +23,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
@@ -64,10 +67,10 @@ class EventFormType extends AbstractType
                     ->andWhere('u.roles LIKE :val')
                     ->setParameter('val', '%["ROLE_TEACHER"]%');
                 },
-                'choice_label' => 'username',
+                'choice_label' => 'UserIdentifier',
             ])
             ->add('materials', EntityType::class, [
-                'label' => 'Équipement de la salle (non obligatoire)',
+                'label' => 'Trier les salles par équipement',
                 'class' => Materials::class,
                 'choice_label' => 'name',
                 'mapped' => false,
@@ -75,22 +78,48 @@ class EventFormType extends AbstractType
                 'expanded' => true,
                 'required' => false,
                 'attr' => [
-                    'class' => 'materials-field select2 materials-checkboxes'
+                    'class' => 'materials-field materials-checkboxes'
+                ],
+                'row_attr' =>[
+                    "id" => "row-materials"
                 ],
                 'label_attr' => [
                     'class' => 'label-materials',
+                ],
+            ])
+            ->add('zoomswitch', CheckboxType::class, [
+                'label' => false,
+                'required' => false,
+                'mapped' => false,
+                'attr' => [
+                    'class' => 'custom-switch-input',
+                    'role' => 'switch',
+                ],
+                'label_attr' => [
+                    'class' => 'custom-switch-label',
+                ],
+            ])
+            ->add('zoomlink', UrlType::class, [
+                'label' => "Lien pour la visio",
+                'required' => false,
+                'label_attr' => [
+                    'class' => 'label-zoom',
                 ],
             ])
             ->add('room', EntityType::class, [
                 'class' => Room::class,
                 'placeholder' => 'Choisir une salle pour le cours',
                 'choice_label' => 'name',
+                'required' => false,
                 'label' => 'Salle',
                 'attr' => [
                     'class' => 'room-select',
                 ],
+                'label_attr' => [
+                    'class' => 'label-room',
+                ],
             ])
-            ->add('switch', CheckboxType::class, [
+            ->add('studentswitch', CheckboxType::class, [
                 'label' => false,
                 'required' => false,
                 'mapped' => false,
@@ -107,6 +136,7 @@ class EventFormType extends AbstractType
                 'class' => StudentClass::class,
                 'choice_label' => 'name',
                 'required' => false,
+                'placeholder' => "Choisissez la classe à laquelle vous faites cours",
                 'attr' => [
                     'class' => 'student-class-field'
                 ],
@@ -122,41 +152,43 @@ class EventFormType extends AbstractType
                     ->andWhere('u.roles LIKE :val')
                     ->setParameter('val', '%["ROLE_STUDENT"]%');
                 },
-                'choice_label' => 'username',
+                'choice_label' => 'UserIdentifier',
                 'multiple' => true,
                 'required' => false,
                 'attr' => [
-                    'class' => 'students-field select2'
+                    'class' => 'students-field'
                 ],
                 'label_attr' => [
                     'class' => 'label-students',
                 ],
+            ])
+            ->add('programme', EntityType::class, [
+                'label' => 'Programmes',
+                'class' => Programmes::class,
+                'choice_label' => 'nom',
+                'attr' => [
+                    'class' => 'programmes-field'
+                ],
+                'multiple' => true,
+                'required' => false,
+            ])
+            ->add('lecons', EntityType::class, [
+                'label' => 'Leçons',
+                'placeholder' => "Souhaitez-vous ajouter une/des leçon(s) ?",
+                'class' => Lecons::class,
+                'choice_label' => 'nom',
+                'attr' => [
+                    'class' => 'lecons-field'
+                ],
+                'multiple' => true,
+                'required' => false,
             ])
             ->add('reservedRooms', HiddenType::class, [
                 'mapped' => false,
             ]);
 
 
-
-        // Ajouter l'écouteur d'événement pour le champ de commentaire
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
-            $form = $event->getForm();
-            $data = $event->getData();
-
-            // Récupérer la date de fin de l'événement
-            $startDate = $data->getStart();
-            // Vérifier si la date de fin est passée
-            if ($startDate !== null && $startDate < new \DateTime()) {
-                // Activer le champ de commentaire
-                $form->add('comment', TextareaType::class, [
-                    'label' => 'Commentaire',
-                    'required' => false,
-                ]);
-            }
-            
-        });
-
-        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
             $form = $event->getForm();
             $data = $event->getData();
 
@@ -166,6 +198,23 @@ class EventFormType extends AbstractType
                 if ($reservedRooms !== null) {
                     $form->get('reservedRooms')->setData($reservedRooms->getId());
                 }
+            }
+
+            // Récupérer la date de début de l'événement
+            $startDate = $data->getStart();
+            $currentDateTime = new \DateTime();
+
+            if ($startDate !== null && $startDate < $currentDateTime) {
+                    $form->add('comment', TextareaType::class, [
+                        'label' => 'Commentaire',
+                        'required' => false,
+                    ]);
+            } else {
+                // Si la date de début est future, ajoutez le champ "Objectif"
+                $form->add('objectif', TextareaType::class, [
+                    'label' => 'Objectif de la Séance et Travail à Faire',
+                    'required' => false,
+                ]);
             }
         });
 

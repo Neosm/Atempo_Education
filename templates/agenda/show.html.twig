@@ -30,6 +30,9 @@
 {% block content %}
     <h1><i class="bi bi-calendar3 event-icon"></i> Détails de l'évènement </h1>
 
+                {% if is_granted ('ROLE_TEACHER') %}
+                    <a href="{{ path('agenda_export_event', {'id': event.id}) }}" class="btn btn-primary float-end me-1 mt-n1">Exporter pour un Calendrier</a>
+                {% endif %}
     <div class="container mt-5">
         <div class="row">
             <div class="col-lg-8 offset-lg-2">
@@ -42,9 +45,14 @@
                                 <p class="card-text"><i class="bi bi-circle-fill event-icon event-start"></i> Date de début : {{ event.start|date('d/m/Y H:i') }}</p>
                                 <p class="card-text"><i class="bi bi-clock event-icon"></i> Durée : {{ event.duration }} minutes</p>
                                 <p class="card-text"><i class="bi bi-circle-fill event-icon event-end"></i> Date de fin : {{ event.end|date('d/m/Y H:i') }}</p>
+                                {% if event.room %}
                                 <p class="card-text"><i class="bi bi-geo-alt event-icon"></i> Salle de classe : {{ event.room.name }}</p>
+                                {% elseif event.zoomlink %}
+                                <p class="card-text"><i class="bi bi-link event-icon"></i> <a href="{{event.zoomlink}}" target="_blank">Lien Zoom  </a> </p>
+                                {% endif %}
+                                
                                 {% if event.teacher is defined %}
-                                    <p class="card-text"><i class="bi bi-person event-icon"></i> Professeur : {{ event.teacher.username }}</p>
+                                    <p class="card-text"><i class="bi bi-person event-icon"></i> Professeur : {{ event.teacher.UserIdentifier }}</p>
                                 {% endif %}
                             </div>
                             <div class="col-md-6">
@@ -55,25 +63,50 @@
                                     <p class="card-text"><i class="bi bi-person-check event-icon"></i> Élèves :</p>
                                     <ul class="list-unstyled">
                                         {% for student in event.students %}
-                                            <li>{{ student.username }}</li>
+                                            <li>{{ student.UserIdentifier }}</li>
                                         {% endfor %}
                                     </ul>
                                 {% endif %}
+                                {% if event.programme is not empty %}
+                                <p class="card-text"><i class="bi bi-journal-bookmark event-icon"></i> Programme : </p>
+                                <ul class="list-unstyled">
+                                    {% for programme in event.programme %}
+                                        <li> <a href="{{ path('programmes_details', {slug: programme.slug}) }}">{{ programme.nom }}</a></li>
+                                    {% endfor %}
+                                </ul>  
+                                {% else %}
+                                    <p class="card-text"><i class="bi bi-journal-bookmark event-icon"></i> Aucun programme </p>
+                                {% endif %}
+                                {% if event.lecons is not empty %}
+                                <p class="card-text"><i class="bi bi-book event-icon"></i> Leçons : </p>
+                                <ul class="list-unstyled">
+                                    {% for lecon in event.lecons %}
+                                        <li> <a href="{{ path('lecons_details', {slug: lecon.slug}) }}">{{ lecon.nom }} </a></li>
+                                    {% endfor %}
+                                </ul>  
+                                {% else %}
+                                    <p class="card-text"><i class="bi bi-book event-icon"></i> Aucune leçon </p>
+                                {% endif %}
+                                
                             </div>
                         </div>
                         <hr>
-                        {% if event.end < date() %}
+                        {% if event.objectif is defined and event.objectif is not null and event.start > date() %}
+                            <p class="card-text"><i class="bi bi-chat-dots"></i> Travail à faire et objectif de la séance : {{ event.objectif }}</p>
+                        {% endif %}
+
+                        {% if event.comment is defined and event.comment is not null and event.start < date() %}
                             <p class="card-text"><i class="bi bi-chat-dots"></i> Commentaire : {{ event.comment }}</p>
                         {% endif %}
                     </div>
                 </div>
                 <div class="text-center">
                     <a href="{{ path('agenda_home') }}" class="btn btn-primary">Retour à l'agenda</a>
-                    {% if is_granted ('ROLE_ADMIN') %}
-                    <a href="{{ path('agenda_edit_event', {'id': event.id}) }}" class="btn btn-secondary">Modifier</a>
+                    {% if is_granted ('ROLE_TEACHER') %}
                     <a href="{{ path('delay_create', {'eventId': event.id}) }}" class="btn btn-dark">Ajouter un retard</a>
-                    <a href="{{ path('absence_create', {'eventId': event.id}) }}" class="btn btn-info">Ajouter une absence</a>
+                    <a href="{{ path('absence_event_create', {'eventId': event.id}) }}" class="btn btn-info">Ajouter une absence</a>
                     <div class="float-end">
+                    <a href="{{ path('agenda_edit_event', {'id': event.id}) }}" class="btn btn-secondary ">Modifier</a>
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                             Supprimer
                         </button>

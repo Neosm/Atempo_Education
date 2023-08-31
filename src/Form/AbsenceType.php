@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Absence;
+use App\Entity\Event;
 use App\Entity\Users;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -23,20 +24,47 @@ class AbsenceType extends AbstractType
                     ->andWhere('u.roles LIKE :val')
                     ->setParameter('val', '%["ROLE_STUDENT"]%');
                 },
-                'choice_label' => 'username',
+                'choice_label' => 'UserIdentifier',
                 'attr' => [
                     'class' => 'students-field select2'
                 ],
                 'label_attr' => [
                     'class' => 'label-students',
                 ],
+                
             ]);
+
+            if ($options['creer_absence_professeur']) {
+                $userid = $options['userid'];
+    
+                $builder
+                    ->add('event', EntityType::class,[
+                        'label' => 'Cours conserné',
+                        'class' => Event::class,
+                        'choice_label' => 'getTitleAndStart',
+                        'query_builder' => function (EntityRepository $er) use ($userid) {
+                            return $er->createQueryBuilder('e')
+                                ->andWhere('e.teacher = :userid')
+                                ->setParameter('userid', $userid);
+                        },
+                    ]);
+            } elseif ($options['creer_absence_admin']) {
+                $builder
+                    ->add('event', EntityType::class,[
+                        'label' => 'Cours conserné',
+                        'class' => Event::class,
+                        'choice_label' => 'getTitleAndStart',
+                    ]);
+            }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Absence::class,
+            'data_class' => Absence::class,            
+            'creer_absence_professeur' => false,        
+            'creer_absence_admin' => false, // Valeur par défaut pour l'option personnalisée
+            'userid' => null,
         ]);
     }
 }

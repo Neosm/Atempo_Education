@@ -27,10 +27,10 @@ class ArticlesRepository extends ServiceEntityRepository
         if($filters != null){
             $query->leftJoin('a.categories', 'c');
             $query->andWhere('c.id IN(:cats)')
-                ->setParameter(':cats', array_values($filters));
+                ->setParameter(':cats', $filters);
             if($catParent = $filters){
                 $query->orWhere('c.parent IN(:cats)')
-                    ->setParameter(':cats', array_values($filters));
+                    ->setParameter(':cats', $filters);
             }
         }
 
@@ -50,10 +50,10 @@ class ArticlesRepository extends ServiceEntityRepository
         if($filters != null){
             $query->leftJoin('a.categories', 'c');
             $query->andWhere('c.id IN(:cats)')
-                ->setParameter(':cats', array_values($filters));
+                ->setParameter(':cats', $filters);
             if($catParent = $filters){
                 $query->orWhere('c.parent IN(:cats)')
-                    ->setParameter(':cats', array_values($filters));
+                    ->setParameter(':cats', $filters);
             }
         }
 

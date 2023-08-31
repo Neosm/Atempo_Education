@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Form\DefinedNewPasswordType;
 use App\Form\EditProfileType;
+use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -17,6 +19,14 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 class UsersController extends AbstractController
 {
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
+
     /**
      * @Route("/utilisateur", name="users")
      */
@@ -153,4 +163,6 @@ class UsersController extends AbstractController
 
         return new Response();
     }
+
+
 }

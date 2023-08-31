@@ -1,0 +1,38 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}
+    {% if app.request.attributes.get('_route') == 'admin_salle_create' %}
+        Créer une Salle
+    {% else %}
+        Éditer la Salle
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>
+        {% if app.request.attributes.get('_route') == 'admin_salle_create' %}
+            Créer une Salle
+        {% else %}
+            Éditer la Salle
+        {% endif %}
+    </h1>
+    {{ form_start(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.materials) }}
+    {{ form_end(form) }}
+</div>
+{% endblock %}
+
+
+{% block javascripts %}
+<script>
+$(document).ready(function() {
+		$('.equipement-field').select2({
+			placeholder: "Choisissez l'équipement / les équipements de la salle (non obligatoire)",
+			closeOnSelect: false
+		});
+})
+</script>
+
+{% endblock %}

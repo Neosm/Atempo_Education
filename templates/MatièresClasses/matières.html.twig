@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des matières{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mb-4">Liste des matières</h1>
+
+        {% if matieres is not empty %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for matiere in matieres %}
+                    {% set totalMinutes = 0 %}
+                    {% set passedMinutes = 0 %}
+                    {% set teachers = [] %}
+                    {% for event in matiere.event %}
+                        {% set totalMinutes = totalMinutes + event.duration %}
+                        {% if event.end < date() %}
+                            {% set passedMinutes = passedMinutes + event.duration %}
+                        {% endif %}
+                        {% if event.teacher not in teachers %}
+                            {% set teachers = teachers|merge([event.teacher]) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% set totalHours = totalMinutes // 60 %}
+                    {% set totalMinutes = totalMinutes % 60 %}
+                    {% set passedHours = passedMinutes // 60 %}
+                    {% set passedMinutes = passedMinutes % 60 %}
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header"> <h2 class="h3">{{ matiere.name }}</h2></div>
+                            <div class="card-body">
+                                <p><strong>Total des heures :</strong> {{ totalHours }}h {{ totalMinutes }}min</p>
+                                <p><strong>Heures passées :</strong> {{ passedHours }}h {{ passedMinutes }}min</p>
+                                <p><strong>Notes :</strong> 
+                                    {% set userNotes = [] %}
+                                    {% for note in matiere.notes %}
+                                        {% if note.user == app.user %}
+                                            {% set userNotes = userNotes|merge([note.note]) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {{ userNotes|join(', ') }}
+                                </p>
+                                <p><strong>Professeurs :</strong>
+                                    {% for teacher in teachers %}
+                                        {{ teacher }}
+                                        {% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mt-4"><strong>Aucune matière trouvée.</strong></p>
+        {% endif %}
+    </div>
+{% endblock %}

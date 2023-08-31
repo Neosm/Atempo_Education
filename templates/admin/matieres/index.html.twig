@@ -1,0 +1,40 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Liste des Matières{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Liste des Matières</h1>
+    <a href="{{ path('admin_matiere_create') }}" class="btn btn-info float-lg-right">Ajouter une matière</a>
+    
+    <br>
+    <br>
+    {% for flash in app.flashes('success') %}
+        <div class="alert alert-success mt-3">
+            {{ flash }}
+        </div>
+    {% endfor %}
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nom de la Matière</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for matiere in matieres %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ matiere.name }}</td>
+                    <td>
+                        <a href="{{ path('admin_matiere_edit', {'id': matiere.id}) }}" class="btn btn-primary">Modifier</a>
+                        <a href="{{ path('admin_matiere_delete', {'id': matiere.id}) }}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette matière ? Si des cours ou des notes sont affiliés à cette matière, ils deviendront orphelins')">Supprimer</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

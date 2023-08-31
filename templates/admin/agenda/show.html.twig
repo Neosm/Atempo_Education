@@ -1,40 +1,136 @@
 {% extends 'admin.html.twig' %}
 
-{% block title %}{{ Event.title }}{% endblock %}
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .card-title {
+            font-size: 24px!important;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            font-size: 20px;
+        }
+        .card-text {
+            font-size: 16px!important;
+        }
+        .event-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        .event-start {
+            color: green;
+        }
+        .event-end {
+            color: red;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
-    <h1>{{ Event.title }} {{ Event.start|date('d M y - H:i')}}</h1>
+    <h1><i class="bi bi-calendar3 event-icon"></i> Détails de l'évènement </h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Nom de l'évènement</th>
-                <td>{{ Event.title }}</td>
-            </tr>
-            {% if Event.allDay %}
-            <tr>
-                <th>Début</th>
-                <td>{{ Event.start ? Event.start|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Fin</th>
-                <td>{{ Event.end ? Event.end|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            {% endif %}
-            <tr>
-                <th>Description</th>
-                <td>{{ Event.description }}</td>
-            </tr>
-            <tr>
-                <th>Toute la journée ?</th>
-                <td>{{ Event.allDay ? 'Oui' : 'Non' }}</td>
-            </tr>
-        </tbody>
-    </table>
+                {% if is_granted ('ROLE_TEACHER') %}
+                    <a href="{{ path('agenda_export_event', {'id': event.id}) }}" class="btn btn-primary float-end me-1 mt-n1">Exporter pour un Calendrier</a>
+                {% endif %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ event.title }}</h3>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="card-text"><i class="bi bi-circle-fill event-icon event-start"></i> Date de début : {{ event.start|date('d/m/Y H:i') }}</p>
+                                <p class="card-text"><i class="bi bi-clock event-icon"></i> Durée : {{ event.duration }} minutes</p>
+                                <p class="card-text"><i class="bi bi-circle-fill event-icon event-end"></i> Date de fin : {{ event.end|date('d/m/Y H:i') }}</p>
+                                {% if event.room %}
+                                <p class="card-text"><i class="bi bi-geo-alt event-icon"></i> Salle de classe : {{ event.room.name }}</p>
+                                {% elseif event.zoomlink %}
+                                <p class="card-text"><i class="bi bi-link event-icon"></i> <a href="{{event.zoomlink}}" target="_blank">Lien Zoom  </a> </p>
+                                {% endif %}
+                                
+                                {% if event.teacher is defined %}
+                                    <p class="card-text"><i class="bi bi-person event-icon"></i> Professeur : {{ event.teacher.UserIdentifier }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {% if event.studentClass is not null %}
+                                    <p class="card-text"><i class="bi bi-people event-icon"></i> Classe : {{ event.studentClass.name }}</p>
+                                {% endif %}
+                                {% if event.students is not empty %}
+                                    <p class="card-text"><i class="bi bi-person-check event-icon"></i> Élèves :</p>
+                                    <ul class="list-unstyled">
+                                        {% for student in event.students %}
+                                            <li>{{ student.UserIdentifier }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                                {% if event.programme is not empty %}
+                                <p class="card-text"><i class="bi bi-journal-bookmark event-icon"></i> Programme : </p>
+                                <ul class="list-unstyled">
+                                    {% for programme in event.programme %}
+                                        <li> <a href="{{ path('admin_programmes_details', {slug: programme.slug}) }}">{{ programme.nom }}</a></li>
+                                    {% endfor %}
+                                </ul>  
+                                {% else %}
+                                    <p class="card-text"><i class="bi bi-journal-bookmark event-icon"></i> Aucun programme </p>
+                                {% endif %}
+                                {% if event.lecons is not empty %}
+                                <p class="card-text"><i class="bi bi-book event-icon"></i> Leçons : </p>
+                                <ul class="list-unstyled">
+                                    {% for lecon in event.lecons %}
+                                        <li> <a href="{{ path('admin_lecons_details', {slug: lecon.slug}) }}">{{ lecon.nom }} </a></li>
+                                    {% endfor %}
+                                </ul>  
+                                {% else %}
+                                    <p class="card-text"><i class="bi bi-book event-icon"></i> Aucune leçon </p>
+                                {% endif %}
+                                
+                            </div>
+                        </div>
+                        <hr>
+                        {% if event.objectif is defined and event.objectif is not null and event.start > date() %}
+                            <p class="card-text"><i class="bi bi-chat-dots"></i> Travail à faire et objectif de la séance : {{ event.objectif }}</p>
+                        {% endif %}
 
-    <a href="{{ path('admin_agenda_home') }}" class="btn btn-primary float-start">Retour à l'agenda</a>
+                        {% if event.comment is defined and event.comment is not null and event.start < date() %}
+                            <p class="card-text"><i class="bi bi-chat-dots"></i> Commentaire : {{ event.comment }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-center">
+                    <a href="{{ path('admin_agenda_home') }}" class="btn btn-primary">Retour à l'agenda</a>
+                    <a href="{{ path('admin_delay_create', {'eventId': event.id}) }}" class="btn btn-dark">Ajouter un retard</a>
+                    <a href="{{ path('admin_absence_event_create', {'eventId': event.id}) }}" class="btn btn-info">Ajouter une absence</a>
+                    <div class="float-end">
+                    <a href="{{ path('admin_agenda_edit_event', {'id': event.id}) }}" class="btn btn-secondary ">Modifier</a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            Supprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <a href="{{ path('admin_agenda_edit', {'id': Event.id}) }}" class="btn btn-secondary float-end ms-3">Modifier</a>
-
-    <div class="float-end">{{ include('admin/agenda/_delete_form.html.twig') }}</div>
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmation de suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cet événement ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <a href="{{ path('admin_agenda_delete_event', {'id': event.id}) }}" class="btn btn-danger">Supprimer</a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

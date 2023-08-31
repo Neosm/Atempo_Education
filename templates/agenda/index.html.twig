@@ -24,10 +24,10 @@
 
 
 {% block content %}
-    {% if is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('agenda_create_event') }}" class="btn btn-primary float-end ms-1 mt-n1"><i class="fas fa-plus"></i> Ajouter un évènement</a>
+    {% if is_granted('ROLE_TEACHER') %}
+        <a href="{{ path('agenda_create_event') }}" class="btn btn-primary float-end ms-1 mt-n1"><i class="bi bi-plus"></i> Ajouter un évènement</a>
     {% endif %}
-    <a href="{{ path('agenda_export_calendar_download') }}" class="btn btn-success float-end me-1 mt-n1"><i class="fas fa-download"></i> Télécharger le calendrier</a>
+    <a href="{{ path('agenda_export_calendar_download') }}" class="btn btn-success float-end me-1 mt-n1"><i class="bi bi-download"></i> Télécharger le calendrier</a>
 
     <h1 class="h3 mb-3">Agenda</h1>
     <div class="card">
@@ -43,7 +43,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="event-modal-label"></h5>
-                        {% if is_granted('ROLE_ADMIN') %}
+                        {% if is_granted('ROLE_TEACHER') %}
                             <div class="ms-auto">
                                 <a href="#" class="btn btn-link edit-event me-2" data-event-id=""><i class="bi bi-pencil event-icon-header"></i></a>
                                 <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="bi bi-trash event-icon-header"></i></button>
@@ -54,13 +54,18 @@
                     <div class="modal-body">
                         <p class="card-text"><i class="bi bi-circle-fill event-icon event-start"></i> <strong>Date de début : </strong><span id="event-start"></span></p>
                         <p class="card-text"><i class="bi bi-circle-fill event-icon event-end"></i> <strong>Date de fin : </strong><span id="event-end"></span></p>
-                        <p class="card-text"><i class="bi bi-geo-alt event-icon"></i> <strong>Salle de classe : </strong><span id="event-room"></span></p>
+                        <p class="card-text" id="event-room"></p>
                         <p class="card-text"><i class="bi bi-person event-icon"></i> <strong>Professeur : </strong><span id="event-teacher"></span></p>
                         <ul id="event-students" class="list-unstyled"></ul>
+                        <p id="event-programmes" class="card-text"></p>
+                        <p id="event-lecons" class="card-text"></p>
+                        <hr>
+                        <p class="card-text" id="commentaireObjectif"></p>
                     </div>
                     <div class="modal-footer">
                         <a href="#" class="btn btn-primary export-event" data-event-id="">Exporter pour un Calendrier</a>
-
+                        <a href="#" class="btn btn-dark add-delay" data-event-id="">Ajouter un retard</a>
+                        <a href="#" class="btn btn-info add-absence" data-event-id="">Ajouter une absence</a>
                     </div>
                 </div>
             </div>
@@ -99,7 +104,7 @@
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 themeSystem: 'bootstrap5',
                 initialView: 'dayGridMonth',
-                locale: 'fr',
+                locale: 'Fr',
                 firstDay: 1,
                 allDaySlot: false,
                 navLinks: true,
@@ -160,15 +165,15 @@
                             $('#event-title').text(event.title);
                             $('#event-start').text(event.start);
                             $('#event-end').text(event.end);
-                            $('#event-room').text(event.room);
                             $('.edit-event').attr('data-event-id', event.id);
                             $('.delete-event').attr('data-event-id', event.id);
                             $('.export-event').attr('data-event-id', event.id);
+                            $('.add-delay').attr('data-event-id', event.id);
+                            $('.add-absence').attr('data-event-id', event.id);
                             $('#event-teacher').text(event.teacher);
 
                             // Ajouter la classe ou la liste d'élève
                             $('#event-students').empty(); // Vide le contenu de #event-students
-
                             if (event.studentClass) {
                                 addEventDetail('<i class="bi bi-card-list event-icon"></i> <strong>Classe : </strong>' + event.studentClass);
                             } else if (event.students && event.students.length > 0) {
@@ -179,7 +184,6 @@
                             } else {
                                 addEventDetail('Aucun élève');
                             }
-
                             function addEventDetail(detail) {
                                 var eventStudents = $('#event-students');
                                 if (!eventStudents.find('.event-detail:contains("' + detail + '")').length) {
@@ -187,6 +191,54 @@
                                 }
                             }
 
+                            // Afficher les informations de la salle de classe
+                            if (event.room) {
+                                $('#event-room').html('<i class="bi bi-geo-alt event-icon"></i> <strong>Salle de classe : </strong>' + event.room);
+                            }                            
+                            // Afficher le lien Zoom
+                            if (event.zoomlink) {
+                                $('#event-room').html('<i class="bi bi-link event-icon"></i> <strong> <a href="' + event.zoomlink +'" target="_blank">Lien Zoom </a> </strong>');
+                            }
+
+                            $('#event-programmes').empty();
+                            if (event.programmes  && event.programmes.length > 0) {
+                                addProgramme('<strong>Programmes : </strong>' + event.programmes.map(function(programme) {
+                                    return '<a href="/programmes/' + programme.slug + '">' + programme.nom + '</a>';
+                                }).join(', '));
+                            } else {
+                                addProgramme('Aucun programme affilié au cours')
+                            }
+                            function addProgramme(detail) {
+                                var eventProgrammes = $('#event-programmes');
+                                eventProgrammes.html(detail);
+                            }
+
+                            $('#event-lecons').empty();
+                            if (event.lecons && event.lecons.length > 0) {
+                                addLecons('<strong>Leçons : </strong>' + event.lecons.map(function(lecon) {
+                                    return '<a href="/lecons/' + lecon.slug + '">' + lecon.nom + '</a>';
+                                }).join(', '));
+                            } else {
+                                addLecons('Aucune leçon affilié au cours')
+                            }
+                            function addLecons(detail) {
+                                var eventLecons = $('#event-lecons');
+                                eventLecons.html(detail);
+                            }
+
+
+                            if (event.commentaire) {
+                                addCommentaire('<i class="bi bi-chat-dots"></i> <strong>Commentaire : </strong> ' + event.commentaire)
+                            } else if (event.objectif) {
+                                addCommentaire('<i class="bi bi-chat-dots"></i> <strong>Objectif : </strong> ' + event.objectif)
+                            } else {
+                                addCommentaire('<i class="bi bi-chat-dots"></i> <strong>Aucun objectif ou commentaire pour le prochain cours</strong> ')
+                            }
+                            function addCommentaire(detail) {
+                                var eventComObj = $('#commentaireObjectif');
+                                eventComObj.html(detail);
+                            }
+                            
 
                             // Afficher la modal
                             $('#event-modal-details').modal('show');
@@ -226,6 +278,22 @@
             window.location.assign(exportUrl);
         });
 
+        $(document).on('click', '.add-delay', function(e) {
+            e.preventDefault();
+            var idEvent = $(this).attr('data-event-id');
+            var delayURL = '{{ path('delay_create', {'eventId': 'idEvent'}) }}';
+            delayURL = delayURL.replace('idEvent', idEvent);
+            window.location.assign(delayURL);
+        });
+
+        $(document).on('click', '.add-absence', function(e) {
+            e.preventDefault();
+            var idEvent = $(this).attr('data-event-id');
+            var absenceUrl = '{{ path('absence_event_create', {'eventId': 'idEvent'}) }}';
+            absenceUrl = absenceUrl.replace('idEvent', idEvent);
+            window.location.assign(absenceUrl);
+        });
+        
         $(document).on('click', '.delete-event', function(e) {
             e.preventDefault();
             var eventId = $(this).attr('data-event-id');

@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Event;
-use App\Entity\Room;
 use App\Form\EventFormType;
 use App\Repository\RoomRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,12 +11,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
-    /**
-     * @Route("/agenda", name="agenda_")
-    * @package App\Controller
-    */
+/**
+ * @Route("/agenda", name="agenda_")
+ * @package App\Controller
+ */
 
 class EventController extends AbstractController
 {
@@ -32,7 +30,8 @@ class EventController extends AbstractController
     }
 
 
-    function getDescription($event) {
+    function getDescription($event)
+    {
         $students = $event->getStudents();
         $description = '';
 
@@ -45,7 +44,7 @@ class EventController extends AbstractController
             $description = rtrim($description, ', '); // Supprimer la virgule finale
         }
 
-        $description .= ' - Professeur: ' . $event->getTeacher()->getUsername();
+        $description .= ' - Professeur: ' . $event->getTeacher()->getUserIdentifier();
 
         return $description;
     }
@@ -66,13 +65,12 @@ class EventController extends AbstractController
         // Convertir les événements en un format compatible avec FullCalendar (par exemple, JSON)
         $formattedEvents = [];
         foreach ($events as $event) {
-            $formattedEvents[] = [ 
+            $formattedEvents[] = [
                 'title' => $event->getTitle(),
                 'id' => $event->getId(),
                 'start' => $event->getStart()->format('Y-m-d H:i:s'),
                 'end' => $event->getEnd()->format('Y-m-d H:i:s'),
-                'room' => $event->getRoom()->getName(),
-                'teacher' => $event->getTeacher()->getUsername(),
+                'teacher' => $event->getTeacher()->getUserIdentifier(),
                 'description' => $this->getDescription($event),
                 // Ajoutez ici d'autres champs que vous souhaitez afficher dans le calendrier
             ];
@@ -95,17 +93,35 @@ class EventController extends AbstractController
 
         // Récupérer les informations de l'événement en fonction de son ID
         $event = $this->getDoctrine()->getRepository(Event::class)->find($eventId);
-    
+
         // Vérifier si l'événement existe
         if (!$event) {
             return new JsonResponse(['error' => 'L\'événement n\'a pas été trouvé.'], 404);
         }
-    
+
         $studentClass = $event->getStudentClass();
-        $studentClassData = $studentClass ? $studentClass->getName() : '';     
+        $studentClassData = $studentClass ? $studentClass->getName() : '';
 
         $studentClass = $event->getStudentClass();
         $students = $event->getStudents();
+        $lecons = $event->getLecons();
+        $programmes = $event->getProgramme();
+
+        if ($event->getStart() > new \DateTime & $event->getObjectif() == null) {
+            $objectif = "Aucun objectif défini pour le prochain cours";
+            $commentaire = null;
+        } elseif ($event->getStart() > new \DateTime) {
+            $objectif = $event->getObjectif();
+            $commentaire = null;
+        } elseif ($event->getStart() < new \DateTime &  $event->getComment() == null) {
+            $commentaire = "Aucun commentaire défini pour le prochain cours";
+            $objectif = null;
+        } elseif ($event->getStart() < new \DateTime) {
+            $commentaire = $event->getComment();
+            $objectif = null;
+        }
+
+
 
         // Convertir l'objet Event en tableau associatif
         $eventData = [
@@ -113,10 +129,21 @@ class EventController extends AbstractController
             'id' => $event->getId(),
             'start' => $event->getStart()->format('Y-m-d H:i:s'),
             'end' => $event->getEnd()->format('Y-m-d H:i:s'),
-            'room' => $event->getRoom()->getName(),
-            'teacher' => $event->getTeacher()->getUsername(),
+            'room' => $event->getRoom() ? $event->getRoom()->getName() : null,
+            'teacher' => $event->getTeacher()->getUserIdentifier(),
             'studentClass' => $studentClass ? $studentClass->getName() : null,
-            'students' => $students->isEmpty() ? [] : $students->map(fn($student) => $student->getUsername())->toArray(),
+            'students' => $students->isEmpty() ? [] : $students->map(fn ($student) => $student->getUserIdentifier())->toArray(),
+            'zoomlink' => $event->getZoomLink() ?? '',
+            'lecons' => $lecons->isEmpty() ? [] : $lecons->map(fn ($lecons) => [
+                'nom' => $lecons->getNom(),
+                'slug' => $lecons->getSlug()
+            ])->toArray(),
+            'programmes' => $programmes->isEmpty() ? [] : $programmes->map(fn ($programme) => [
+                'nom' => $programme->getNom(),
+                'slug' => $programme->getSlug()
+            ])->toArray(),
+            'objectif' => $objectif,
+            'commentaire' => $commentaire,
             // Ajoutez ici d'autres propriétés de l'événement que vous souhaitez inclure dans la réponse JSON
         ];
 
@@ -140,21 +167,31 @@ class EventController extends AbstractController
             $event->setStart($start);
 
             $title = $form->get('matieres')->getData() . ' - ';
-            if ($form->get('studentClass')->getData()) {
-                $title .= $form->get('studentClass')->getData();
-            } else {
-                foreach ($form->get('students')->getData() as $student) {
-                    $title .= $student . ', ';
+            $studentClass = $form->get('studentClass')->getData();
+            $studentsData = $form->get('students')->getData();
+            $numberOfStudents = count($studentsData);
+
+            if ($studentClass) {
+                $title .= $studentClass;
+            } elseif ($numberOfStudents > 0) {
+                $title .= $studentsData[0];
+
+                if ($numberOfStudents > 1) {
+                    $title .= ', ';
+
+                    if ($numberOfStudents > 2) {
+                        $title .= $studentsData[1] . ', ...';
+                    } else {
+                        $title .= $studentsData[1];
+                    }
                 }
-                // On retire la virgule supplémentaire
-                $title = rtrim($title, ", ");
             }
 
             $event->setTitle($title);
 
             $duration = $event->getDuration();
             $event->setIdUnique(uniqid(mt_rand(), true));
-        
+
             $end = clone $start;
             $end->modify("+$duration minutes");
             $event->setEnd($end);
@@ -198,19 +235,29 @@ class EventController extends AbstractController
             $duration = $event->getDuration();
 
             $title = $form->get('matieres')->getData() . ' - ';
-            if ($form->get('studentClass')->getData()) {
-                $title .= $form->get('studentClass')->getData();
-            } else {
-                foreach ($form->get('students')->getData() as $student) {
-                    $title .= $student . ', ';
+            $studentClass = $form->get('studentClass')->getData();
+            $studentsData = $form->get('students')->getData();
+            $numberOfStudents = count($studentsData);
+
+            if ($studentClass) {
+                $title .= $studentClass;
+            } elseif ($numberOfStudents > 0) {
+                $title .= $studentsData[0];
+
+                if ($numberOfStudents > 1) {
+                    $title .= ', ';
+
+                    if ($numberOfStudents > 2) {
+                        $title .= $studentsData[1] . ', ...';
+                    } else {
+                        $title .= $studentsData[1];
+                    }
                 }
-                // On retire la virgule supplémentaire
-                $title = rtrim($title, ", ");
             }
 
             $event->setTitle($title);
 
-        
+
             $end = clone $start;
             $end->modify("+$duration minutes");
             $event->setEnd($end);
@@ -260,7 +307,12 @@ class EventController extends AbstractController
         $content .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n";
         $content .= "DTSTART:" . $event->getStart()->format('Ymd\THis\Z') . "\r\n";
         $content .= "DTEND:" . $event->getEnd()->format('Ymd\THis\Z') . "\r\n";
-        $content .= "LOCATION:" . $event->getRoom()->getName() . "\r\n";
+        if ($event->getRoom() != null) {
+            $content .= "LOCATION:" . $event->getRoom()->getName() . "\r\n";
+        } elseif ($event->getZoomLink() != null) {
+            $content .= "LOCATION: Lien Zoom : " . $event->getZoomLink() . "\r\n";
+        }
+
 
         $description = "";
 
@@ -277,8 +329,14 @@ class EventController extends AbstractController
             $description = rtrim($description, ", ") . "\\n";
         }
 
-        $description .= "Professeur: " . $event->getTeacher()->getUsername() . "\\n";
-        $description .= "Salle: " . $event->getRoom()->getName();
+        $description .= "Professeur: " . $event->getTeacher()->getUserIdentifier() . "\\n";
+
+        if ($event->getRoom() != null) {
+            $description .= "Salle: " . $event->getRoom()->getName();
+        } elseif ($event->getZoomLink() != null) {
+            $description .= "Lien Zoom: " . $event->getZoomLink();
+        }
+
 
         $content .= "SUMMARY:" . $event->getTitle() . "\r\n";
         $content .= "DESCRIPTION:" . $description . "\r\n";
@@ -317,8 +375,8 @@ class EventController extends AbstractController
         $content .= "PRODID;LANGUAGE=fr:Copyright ATempo-Education @" . date('Y') . "\r\n";
         $content .= "X-CALSTART:" . $startDate . "\r\n";
         $content .= "X-CALEND:" . $endDate . "\r\n";
-        $content .= "X-WR-CALNAME;LANGUAGE=fr:ATempo - " . $user->getLastName() . " " . $user->getFirstName() . " - " . $userDateOfBirth . " - " . $user->getStudentClass()->getName() . "\r\n";
-        $content .= "X-WR-CALDESC;LANGUAGE=fr:Emploi du temps " . $user->getLastName() . " " . $user->getFirstName() . " - " . $userDateOfBirth . " - " . $user->getStudentClass()->getName() . " | Généré par ATempo.Education - Semaines :"  . date('W') . " - " . $lastEvent->getEnd()->format('W') . "\r\n";
+        $content .= "X-WR-CALNAME;LANGUAGE=fr:ATempo - " . $user->getLastname() . " " . $user->getFirstname() . " - " . $userDateOfBirth . " - " . $user->getStudentClass()->getName() . "\r\n";
+        $content .= "X-WR-CALDESC;LANGUAGE=fr:Emploi du temps " . $user->getLastname() . " " . $user->getFirstname() . " - " . $userDateOfBirth . " - " . $user->getStudentClass()->getName() . " | Généré par ATempo.Education - Semaines :"  . date('W') . " - " . $lastEvent->getEnd()->format('W') . "\r\n";
 
         foreach ($events as $event) {
             $content .= "BEGIN:VEVENT\r\n";
@@ -327,8 +385,11 @@ class EventController extends AbstractController
             $content .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n";
             $content .= "DTSTART:" . $event->getStart()->format('Ymd\THis\Z') . "\r\n";
             $content .= "DTEND:" . $event->getEnd()->format('Ymd\THis\Z') . "\r\n";
-            $content .= "LOCATION:" . $event->getRoom()->getName() . "\r\n";
-
+            if ($event->getRoom() != null) {
+                $content .= "LOCATION:" . $event->getRoom()->getName() . "\r\n";
+            } elseif ($event->getZoomLink() != null) {
+                $content .= "LOCATION: Lien Zoom : " . $event->getZoomLink() . "\r\n";
+            }
             $description = "";
 
             if ($event->getStudentClass()) {
@@ -344,10 +405,15 @@ class EventController extends AbstractController
                 $description = rtrim($description, ", ") . "\\n";
             }
 
-            $description .= "Professeur: " .$event->getTeacher() . "\\n";
-            $description .= "Salle: " . $event->getRoom()->getName();
+            $description .= "Professeur: " . $event->getTeacher() . "\\n";
+            
+            if ($event->getRoom() != null) {
+                $description .= "Salle: " . $event->getRoom()->getName();
+            } elseif ($event->getZoomLink() != null) {
+                $description .= "Lien Zoom: " . $event->getZoomLink();
+            }
 
-            $content .= "SUMMARY:" .  $event->getTitle() . " - " .$event->getTeacher() . "\r\n";
+            $content .= "SUMMARY:" .  $event->getTitle() . " - " . $event->getTeacher() . "\r\n";
             $content .= "DESCRIPTION:" . $description . "\r\n";
             $content .= "END:VEVENT\r\n";
         }
@@ -368,84 +434,88 @@ class EventController extends AbstractController
     /**
      * @Route("/api/rooms", name="api_rooms", methods={"GET"})
      */
-    public function apiRoomChange(Request $request): JsonResponse
+    public function apiRoomChange(Request $request, SerializerInterface $serializer)
     {
+
         $materialIds = $request->query->get('materials');
         $materialIdsArray = explode(',', $materialIds);
         $start = $request->query->get('start');
+        // Récupérer les données envoyées via AJAX
+        $zoomlink = $request->query->get('zoomlink');
 
-        // Vérifier si aucune option n'est sélectionnée
-        if (empty(array_filter($materialIdsArray))) {
-            // Récupérer toutes les salles à partir du repository
-            $rooms = $this->roomRepository->findAll();
-        } else {
-            // Votre logique pour récupérer les salles en fonction des matériaux sélectionnés
-            $rooms = $this->roomRepository->findRoomsByMaterials($materialIdsArray);
-        }
+        $duration = $request->query->get('duration'); // Récupérer la durée depuis la requête
+        $startTime = new \DateTime($start);
+        $end = clone $startTime;
+        $end->add(new \DateInterval('PT' . intval($duration) . 'M')); // Ajouter la durée en minutes
 
-        // Filtrer les salles disponibles en fonction de l'horaire
-        if (!empty($start)) {
-            // Effectuez ici la logique pour récupérer les salles réservées
-            // en fonction de l'heure de début
+        // Formatter endTime en tant que chaîne de caractères au format souhaité
+        $endAsString = $end->format('Y-m-d H:i');
 
-            // Exemple de code pour récupérer les salles réservées
-            $reservedRooms = $this->getDoctrine()
+        // Récupérer les salles réservées en fonction de l'heure de début et de fin
+        $reservedRooms = $this->getDoctrine()
+            ->getRepository(Event::class)
+            ->findReservedRooms($start, $endAsString);
+
+
+        // Récupérer l'ID de l'événement que vous modifiez (si applicable)
+        $eventId = $request->query->get('eventId'); // Remplacez 'eventId' par la clé réelle
+
+        if ($eventId) {
+            // Récupérer l'événement en fonction de son ID
+            $event = $this->getDoctrine()
                 ->getRepository(Event::class)
-                ->findReservedRooms($start);
+                ->find($eventId);
 
-            // Filtrer les salles disponibles en excluant les salles réservées
-            $availableRooms = [];
-            foreach ($rooms as $room) {
-                if (!in_array($room, $reservedRooms)) {
-                    $availableRooms[] = $room;
-                }
+            // Si l'événement existe et a une salle réservée, retirer cette salle des salles réservées
+            if ($event && $event->getRoom()) {
+                $eventRoomId = $event->getRoom()->getId();
+                $reservedRooms = array_filter($reservedRooms, function ($reservedRoom) use ($eventRoomId) {
+                    return $reservedRoom->getId() !== $eventRoomId;
+                });
             }
-
-            $rooms = $availableRooms;
+        }
+        dump($zoomlink);
+        if (!empty($zoomlink)) {
+            // Si le champ "zoomlink" est rempli, aucune salle ne sera affichée
+            $availableRooms = [];
+        } else {
+            if (empty(array_filter($materialIdsArray))) {
+                // Si aucun équipement n'est sélectionné, renvoyer toutes les salles
+                $filteredRooms = $this->roomRepository->findAll();
+            } else {
+                // Créer le QueryBuilder filtré pour les matériaux sélectionnés
+                $queryBuilder = $this->roomRepository->createFilteredQuery($materialIdsArray);
+                // Exécuter la requête et récupérer les salles en fonction des équipements sélectionnés
+                $filteredRooms = $queryBuilder->getQuery()->getResult();
+            }
+        
+            // Filtrer les salles disponibles en excluant les salles réservées
+            $availableRooms = array_filter($filteredRooms, function ($room) use ($reservedRooms) {
+                return !in_array($room, $reservedRooms);
+            });
+        
+            $availableRooms = array_values($availableRooms); // Réindexer le tableau
         }
 
-        // Convertir les salles en tableau JSON et renvoyer la réponse
-        $response = new JsonResponse(
-            $this->serializer->normalize($rooms, null, [AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                return $object->getId();
-            }])
-        );
-        // Supprimer les informations supplémentaires de la réponse
+        dump($availableRooms);
+        $roomData = [];
+        foreach ($availableRooms as $room) {
+            $roomData[] = [
+                'id' => $room->getId(),
+                'name' => $room->getName(),
+            ];
+        }
+
+        $normalizedRooms = $serializer->normalize($roomData, null, [
+            'circular_reference_handler' => function ($object) {
+                return $object['id'];
+            }
+        ]);
+
+        $response = new JsonResponse($normalizedRooms);
         $response->setEncodingOptions(JSON_UNESCAPED_UNICODE);
 
         // Renvoyer la réponse
         return $response;
     }
-
-
-    /**
-     * @Route("/api/reserved_rooms", name="api_reserved_rooms", methods={"GET"})
-     */
-    public function getReservedRooms(Request $request): JsonResponse
-    {
-        $start = $request->query->get('start');
-
-        // Effectuez ici la logique pour récupérer les salles réservées
-        // en fonction de l'heure de début
-
-        // Exemple de code pour récupérer les salles réservées
-        $reservedRooms = $this->getDoctrine()
-            ->getRepository(Event::class)
-            ->findReservedRooms($start);
-
-        // Convertir les salles réservées en tableau d'identifiants
-        $reservedRoomIds = [];
-        foreach ($reservedRooms as $room) {
-            $reservedRoomIds[] = $room->getId();
-        }
-
-        // Renvoyer les salles réservées en tant que réponse JSON
-        return new JsonResponse([
-            'reservedRooms' => $reservedRoomIds,
-        ]);
-    }
-
-
-
-
 }

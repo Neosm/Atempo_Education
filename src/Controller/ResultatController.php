@@ -2,13 +2,16 @@
 
 namespace App\Controller;
 
+use App\Entity\Notes;
+use App\Form\NoteType;
 use App\Repository\NotesRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ResultatController extends AbstractController
-{   
+{
     private function calculateMatiereAverage(array $matiereNotes)
     {
         if (empty($matiereNotes)) {
@@ -27,19 +30,6 @@ class ResultatController extends AbstractController
         return $totalNotes !== 0 ? $totalWeightedSum / $totalNotes : null;
     }
 
-        
-    private function calculateGeneralAverage(array $monthlyAverages)
-    {
-        if (empty($monthlyAverages)) {
-            return null;
-        }
-
-        $totalAverage = array_sum($monthlyAverages);
-        $count = count($monthlyAverages);
-
-        return $totalAverage / $count;
-    }
-
     #[Route('/resultat', name: 'app_resultat')]
     public function index(NotesRepository $notesRepository): Response
     {
@@ -55,7 +45,6 @@ class ResultatController extends AbstractController
 
         // Récupérer toutes les matières liées aux événements
         $matieres = [];
-        $prof = [];
         foreach ($events as $event) {
             $matiere = $event->getMatieres();
             $prof = $event->getTeacher();
@@ -63,9 +52,6 @@ class ResultatController extends AbstractController
                 $matieres[] = $matiere;
             }
         }
-
-    // Récupérer toutes les notes de l'utilisateur
-    $notes = $notesRepository->findByUser($user);
 
         // Calculer la moyenne générale de toutes les matières
         $totalMoyenne = 0;
@@ -92,14 +78,48 @@ class ResultatController extends AbstractController
             ];
         }
 
+        if ($nombreMatieres > 0 ) {
+            // Calculer la moyenne générale de toutes les matières
+            $moyenneGenerale = $totalMoyenne / $nombreMatieres;
+        } else {
+            $moyenneGenerale = -1;
+        }
 
-        // Calculer la moyenne générale de toutes les matières
-        $moyenneGenerale = $totalMoyenne / $nombreMatieres;
 
         // Rendu de la vue Twig avec les résultats
-        return $this->render('resultat/index.html.twig', [
-            'resultatsMatieres' => $resultatsMatieres,
-            'moyenneGenerale' => $moyenneGenerale
+        if ($moyenneGenerale >= 0 && $resultatsMatieres) {
+            return $this->render('resultat/index.html.twig', [
+                'resultatsMatieres' => $resultatsMatieres,
+                'moyenneGenerale' => $moyenneGenerale
+            ]);
+        } else {
+            return $this->render('resultat/index.html.twig', [
+                'resultatsMatieres' => $resultatsMatieres,
+            ]);
+        }
+
+    }
+
+    #[Route('/resultat/ajouter', name: 'app_resultat_add')]
+    public function add(Request $request): Response
+    {
+        $note = new Notes();
+
+        $form = $this->createForm(NoteType::class, $note);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($note);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La note a été ajoutée avec succès.');
+            return $this->redirectToRoute('app_resultat');
+        }
+
+
+        return $this->render('resultat/new.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 }

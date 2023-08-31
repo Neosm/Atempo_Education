@@ -1,168 +1,187 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ajouter un nouvel évènement{% endblock %}
-
-
-{% block stylesheets %}
+{% block title %}Ajouter un nouvel évènement
 {% endblock %}
 
 
-{% block content %}
-    <h1>Ajouter un évènement</h1>
-    
-    {{ include('agenda/_form.html.twig') }}
+{% block stylesheets %}{% endblock %}
 
-    <a href="{{ path('agenda_home') }}" class="btn btn-secondary float-end">Retour à l'agenda</a>
+
+{% block content %}
+	<h1>Ajouter un évènement</h1>
+
+	{{ include('agenda/_form.html.twig') }}
+
+	<a href="{{ path('agenda_home') }}" class="btn btn-secondary float-end">Retour à l'agenda</a>
 {% endblock %}
 
 
 {% block javascripts %}
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
-<script>
-$(document).ready(function() {
-    $('.students-field').select2();
-    
-    var studentClassSelect = $('#event_form_studentClass');
-    var studentsSelect = $('#event_form_students');
-    var switchInput = $('#event_form_switch');
+<script src = "https://cdn.jsdelivr.net/npm/flatpickr"> </script> 
+<script src = "https://npmcdn.com/flatpickr/dist/l10n/fr.js" > </script> 
+<script >
+	$(document).ready(function() {
+		$('.students-field').select2({
+			placeholder: "Choisissez l'élève ou les élèves à qui vous allez faire cours. (Désactivez le boutton si vous faites cours à une classe entière)",
+			closeOnSelect: false
+		});
+		$('.programmes-field').select2({
+			placeholder: "Souhaitez-vous ajouter un/des programme(s) ?",
+			closeOnSelect: false
+		});
+		$('.lecons-field').select2({
+			placeholder: "Souhaitez-vous ajouter une/des leçon(s) ?",
+			closeOnSelect: false
+		});
 
-    // Masquer les élèves au chargement de la page
-    studentsSelect.next('.select2-container').hide();
-    $('.label-students').hide();
+		var studentClassSelect = $('#event_form_studentClass');
+		var studentsSelect = $('#event_form_students');
+		var studentSwitchInput = $('#event_form_studentswitch');
+		// Masquer les élèves au chargement de la page
+		studentsSelect.next('.select2-container').hide();
+		$('.label-students').hide();
+		// Afficher la classe par défaut
+		studentClassSelect.show();
+		$('.label-studentClass').show();
+		// Écouter les changements sur le champ switch student
+		studentSwitchInput.on('change', function() {
+			if ($(this).is(':checked')) {
+				studentClassSelect.hide();
+				$('.label-studentClass').hide();
 
-    // Afficher la classe par défaut
-    studentClassSelect.show();
-    $('.label-studentClass').show();
+				studentsSelect.next('.select2-container').show();
+				$('.label-students').show();
 
-    // Écouter les changements sur le champ switch
-    switchInput.on('change', function() {
-        if ($(this).is(':checked')) {
-            studentClassSelect.hide();
-            $('.label-studentClass').hide();
+				// Vider le champ de la classe et réinitialiser sa valeur
+				studentClassSelect.val('').trigger('change');
 
-            studentsSelect.next('.select2-container').show();
-            $('.label-students').show();
+			} else {
+				studentsSelect.next('.select2-container').hide();
+				$('.label-students').hide();
 
-            // Vider le champ de la classe et réinitialiser sa valeur
-            studentClassSelect.val('').trigger('change');
+				studentClassSelect.show();
+				$('.label-studentClass').show();
 
-        } else {
-            studentsSelect.next('.select2-container').hide();
-            $('.label-students').hide();
+				// Vider le champ des élèves et réinitialiser sa valeur
+				studentsSelect.val(null).trigger('change');
+			}
+		});
 
-            studentClassSelect.show();
-            $('.label-studentClass').show();
+		var zoomLinkSelect = $('#event_form_zoomlink');
+		var roomSwitchselect = $('#event_form_room');
+		var roomSwitchInput = $('#event_form_zoomswitch');
 
-            // Vider le champ des élèves et réinitialiser sa valeur
-            studentsSelect.val(null).trigger('change');
-        }
-    });
+		// Masquer le zoom au chargement de la page
+		zoomLinkSelect.hide();
+		$('.label-zoom').hide();
 
-    flatpickr('.datetimepickr', {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        time_24hr: true,
-        minTime: "00:00",
-        maxTime: "23:59",
-        locale: "fr",
-    });
+		// Afficher les salles par défaut
+		roomSwitchselect.show();
+		$('#row-materials').show();
+		$('.label-room').show();
+		$('.label-materials').show();
+		// Écouter les changements sur le champ switch room
 
-    var materialsCheckboxes = document.querySelectorAll('.materials-checkboxes input[type="checkbox"]');
-    var roomSelect = document.querySelector('.room-select');
+		roomSwitchInput.on('change', function() {
+			if ($(this).is(':checked')) {
+				$('.label-room').hide();
+				$('.label-materials').hide();
+				$('#row-materials').hide();
+				roomSwitchselect.hide();
 
-    // Écouteur d'événement pour les cases à cocher des équipements
-    materialsCheckboxes.forEach(function(checkbox) {
-        checkbox.addEventListener('change', function() {
-            var selectedMaterials = Array.from(materialsCheckboxes)
-                .filter(function(checkbox) {
-                    return checkbox.checked;
-                })
-                .map(function(checkbox) {
-                    return checkbox.value;
-                });
-            var startValue = $('#event_form_start').val();
+				zoomLinkSelect.show();
+				$('.label-zoom').show();
 
-            // Fetch des salles en fonction des équipements sélectionnés et de l'horaire
-            fetch('/agenda/api/rooms?materials=' + selectedMaterials.join(',') + '&start=' + startValue)
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(rooms) {
-                    // Mise à jour des options de sélection de la salle
-                    while (roomSelect.firstChild) {
-                        roomSelect.removeChild(roomSelect.firstChild);
-                    }
+				// Vider le champ de la classe et réinitialiser sa valeur
+				roomSwitchselect.val('').trigger('change');
+				$('#event_form_materials .form-check-input').prop('checked', false).trigger('change');
 
-                    rooms.forEach(function(room) {
-                        var option = document.createElement('option');
-                        option.value = room.id;
-                        option.textContent = room.name;
-                        roomSelect.appendChild(option);
-                    });
-                })
-                .catch(function(error) {
-                    console.log(error);
-                });
-        });
-    });
+			} else {
+				zoomLinkSelect.hide();
+				$('.label-zoom').hide();
 
+				$('.label-room').show();
+				roomSwitchselect.show();
+				$('#row-materials').show();
+				$('.label-materials').show();
 
-    // Récupérer le champ de l'heure de début et le champ des salles réservées
-    var startField = $('#event_form_start');
-    var reservedRoomsField = $('#event_form_reservedRooms');
+				// Vider le champ des élèves et réinitialiser sa valeur
+				zoomLinkSelect.val(null).trigger('change');
+			}
+		});
 
-    // Fonction pour mettre à jour l'affichage des salles disponibles
-    function updateAvailableRooms() {
-        // Récupérer la liste des salles disponibles
-        var roomSelect = $('#event_form_room');
+		flatpickr('.datetimepickr', {
+			enableTime: true,
+			dateFormat: "Y-m-d H:i",
+			time_24hr: true,
+			minTime: "00:00",
+			maxTime: "23:59"
+		});
 
-        // Récupérer les salles réservées
-        var reservedRoomsValue = reservedRoomsField.val();
+		var materialsCheckboxes = document.querySelectorAll('.materials-checkboxes input[type="checkbox"]');
+		var roomSelect = document.querySelector('.room-select');
+		var startField = $('#event_form_start');
+		var durationField = $('#event_form_duration');
+		var zoomlinkField = $('#event_form_zoomlink');
+		// Champ zoomlink
 
-        // Masquer les salles réservées dans la liste des salles disponibles
-        roomSelect.find('option').each(function() {
-            var option = $(this);
-            var roomId = option.val();
+		// Écouter l'événement 'change' sur les champs de matériel et de durée
+		materialsCheckboxes.forEach(function(checkbox) {
+			checkbox.addEventListener('change', updateRooms);
+		});
 
-            // Vérifier si la salle est réservée
-            if (reservedRoomsValue.includes(roomId)) {
-                option.hide();
-            } else {
-                option.show();
-            }
-        });
-    }
+		durationField.on('input', updateRooms);
 
-    // Écouter l'événement 'change' sur le champ de l'heure de début
-    startField.change(function() {
-        var startValue = startField.val();
-        var reservedRoomsValue = reservedRoomsField.val();
+		// Écouteur d'événement pour le champ zoomlink
+		zoomlinkField.on('input', updateRooms);
 
-        // Effectuer une requête AJAX pour récupérer les salles réservées
-        $.ajax({
-            url: startField.data('route'), // Récupérer l'URL de la route depuis l'attribut 'data-route' du champ
-            type: 'GET',
-            data: {
-                start: startValue
-            },
-            success: function(response) {
-                // Mettre à jour la liste des salles réservées
-                reservedRoomsField.val(response.reservedRooms);
+		// Fonction pour mettre à jour les salles en fonction des matériaux sélectionnés, de l'heure et de la durée
+		function updateRooms() {
+			var selectedMaterials = Array.from(materialsCheckboxes).filter(function(checkbox) {
+				return checkbox.checked;
+			}).map(function(checkbox) {
+				return checkbox.value;
+			});
 
-                // Mettre à jour l'affichage des salles disponibles
-                updateAvailableRooms();
-            },
-            error: function() {
-                // Gérer les erreurs de la requête AJAX
-            }
-        });
-    });
+			var startValue = startField.val();
+			var durationValue = durationField.val();
+			var zoomlinkValue = zoomlinkField.val();
+			// Récupérer la valeur du champ zoomlink
 
-    // Appeler la fonction pour mettre à jour l'affichage initial des salles disponibles
-    updateAvailableRooms()
+			// Construire l'URL de l'API avec les paramètres appropriés
+			var apiUrl = '/agenda/api/rooms';
+			apiUrl += '?materials=' + selectedMaterials.join(',');
+			apiUrl += '&start=' + startValue;
+			apiUrl += '&duration=' + durationValue;
+			apiUrl += '&zoomlink=' + zoomlinkValue;
+			// Ajouter la valeur du champ zoomlink
 
-});
+			// Fetch des salles en fonction des équipements sélectionnés, de l'heure et de la durée
+			fetch(apiUrl).then(function(response) {
+				return response.json();
+			}).then(function(rooms) { // Mise à jour des options de sélection de la salle
+				while (roomSelect.firstChild) {
+					roomSelect.removeChild(roomSelect.firstChild);
+				}
 
-</script>
+				rooms.forEach(function(room) {
+					var option = document.createElement('option');
+					option.value = room.id;
+					option.textContent = room.name;
+					roomSelect.appendChild(option);
+				});
+			}).catch(function(error) {
+				console.log(error);
+			});
+		}
+
+		// Appeler la fonction pour mettre à jour les salles initialement
+		updateRooms();
+
+		// Écouteur d'événement pour le champ de l'heure de début
+		startField.change(updateRooms);
+		$('#event_form_zoomswitch').on('change', updateRooms); // Écouteur sur le champ zoomswitch
+
+	}); 
+    </script>
 {% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des classes{% endblock %}
+
+{% block content %}
+	<div class="container my-5">
+		<h1 class="mb-4">Liste de mes classes</h1>
+		<div class="card">
+			{% if studentClassesByMatiere is not empty %}
+				{% set matieres = studentClassesByMatiere|keys|sort %}
+
+				{% for matiereName in matieres %}
+					<div class="card-body">
+						<h2>{{ matiereName|upper }}</h2>
+						{% set studentClasses = studentClassesByMatiere[matiereName] %}
+
+						<div class="accordion" id="accordion{{ loop.index }}">
+							{% for studentClassName, classInfo in studentClasses %}
+								<div class="accordion-item">
+									<h2 class="accordion-header" id="heading{{ loop.parent.loop.index }}-{{ loop.index }}">
+										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.parent.loop.index }}-{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.parent.loop.index }}-{{ loop.index }}">
+											{{ studentClassName }}
+										</button>
+									</h2>
+									<div id="collapse{{ loop.parent.loop.index }}-{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.parent.loop.index }}-{{ loop.index }}" data-bs-parent="#accordion{{ loop.parent.loop.index }}">
+										<div class="accordion-body">
+											<p>
+												<strong>Total des heures:</strong>
+												{{ classInfo.totalMinutes // 60 }}h
+												{{ classInfo.totalMinutes % 60 }}min<br>
+												<strong>Heures passées:</strong>
+												{{ classInfo.passedMinutes // 60 }}h
+												{{ classInfo.passedMinutes % 60 }}min<br>
+												<strong>Élèves:</strong>
+												<ul>
+													{% for student in classInfo.students %}
+														<li>{{ student }}</li>
+													{% endfor %}
+												</ul>
+											</p>
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+						</div>
+					</div>
+				{% endfor %}
+			{% else %}
+				<div class="col">
+					<p>Aucune classe trouvée.</p>
+				</div>
+			{% endif %}
+
+		</div>
+	</div>
+{% endblock %}

@@ -81,7 +81,7 @@ class LeconsType extends AbstractType
                 'label' => 'Contenu de la leçon'
             ])
             ->add('pdf', FileType::class, [
-                'label' => 'Cours (PDF file)',
+                'label' => 'Cours | Fichier PDF',
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [
@@ -101,9 +101,11 @@ class LeconsType extends AbstractType
             ])
             ->add('audio', UrlType::class, [
                 'required'=>false,
+                'label' => "Audio | Lien URL du son"
             ])
             ->add('video', UrlType::class, [
                 'required'=>false,
+                'label' => "Vidéo | Lien URL de la vidéo"
             ])
             ->add('submit',SubmitType::class, [
                 'label' => 'Valider',

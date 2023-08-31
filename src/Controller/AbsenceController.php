@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AbsenceController extends AbstractController
 {
-    #[Route('/agenda/event/{eventId}/absence/create', name: 'absence_create')]
+    #[Route('/agenda/event/{eventId}/absence/create', name: 'absence_event_create')]
     public function create(Request $request, $eventId): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
@@ -37,7 +37,7 @@ class AbsenceController extends AbstractController
         ]);
     }
 
-    #[Route('/agenda/event/{eventId}/absence/edit/{absenceId}', name: 'absence_edit')]
+    #[Route('/agenda/event/{eventId}/absence/edit/{absenceId}', name: 'absence_event_edit')]
     public function edit(Request $request, $eventId, $absenceId): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
@@ -57,8 +57,8 @@ class AbsenceController extends AbstractController
         ]);
     }
 
-    #[Route('/agenda/event/{eventId}/absence/delete/{absenceId}', name: 'absence_delete')]
-    public function delete($eventId, $absenceId): Response
+    #[Route('/absences/supprimer/{absenceId}', name: 'professeur_absence_delete')]
+    public function delete($absenceId): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
         $absence = $entityManager->getRepository(absence::class)->find($absenceId);
@@ -66,6 +66,55 @@ class AbsenceController extends AbstractController
         $entityManager->remove($absence);
         $entityManager->flush();
 
-        return $this->redirectToRoute('agenda_event_details', ['id' => $eventId]);
+        return $this->redirectToRoute('professeur_absence_liste');
     }
+
+    #[Route('/absences/creer', name: 'professeur_absence_create')]
+    public function professeur_absence_create(Request $request): Response
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $ajouterChampEvent = true;
+        $absence = new absence();
+        $user = $this->getUser();
+
+        $form = $this->createForm(absenceType::class, $absence, ['creer_absence_professeur' => $ajouterChampEvent, 'userid' => $user->getId()]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $event = $form->get('event')->getData();
+            $absence->setAbsenceDate($event->getStart());
+
+            $entityManager->persist($absence);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('home');
+        }
+
+        return $this->render('absence/create.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/absences/liste-absences', name: 'professeur_absence_liste')]
+    public function professeur_absence_liste(Request $request): Response
+    {
+        $user = $this->getUser();
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $absenceRepository = $entityManager->getRepository(Absence::class);
+    
+        // Récupérer toutes les absences avec un événement dont le teacher id correspond à l'ID de l'utilisateur
+        $absences = $absenceRepository->createQueryBuilder('a')
+            ->leftJoin('a.event', 'e')
+            ->andWhere('e.teacher = :teacherId')
+            ->setParameter('teacherId', $user->getId())
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('absence/index.html.twig', [
+            "absence" => $absences
+        ]);
+    }
+    
 }

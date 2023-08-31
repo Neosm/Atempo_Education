@@ -1,0 +1,26 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}{% if app.request.attributes.get('_route') == 'admin_studentclasse_create' %}Créer une classe {% else %}
+	Modifier la classe {% endif %}{% endblock %}
+
+{% block content %}
+
+{{ form_start(form) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.students) }}
+
+{{ form_end(form) }}
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+$(document).ready(function() {
+		$('.students-field').select2({
+			placeholder: "Choisissez l'élève ou les élèves qui seront dans la classe (non obligatoire)",
+			closeOnSelect: false
+		});
+})
+</script>
+
+{% endblock %}

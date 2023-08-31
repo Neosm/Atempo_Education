@@ -1,0 +1,46 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}
+    {% if app.request.attributes.get('_route') == 'admin_resultats_ajouter' %}
+        Ajouter une Note
+    {% else %}
+        Modifier une Note
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block content %}
+    <h1 class="h3 mb-3">
+        {% if app.request.attributes.get('_route') == 'admin_resultats_ajouter' %}
+            Ajouter une note
+        {% else %}
+            Modifier une note
+        {% endif %}
+    </h1>
+
+    {{ form_start(form) }}
+
+    {{ form_row(form.note) }}
+
+    {{ form_row(form.date) }}
+
+    {{ form_row(form.coefficient) }}
+    {{ form_row(form.user) }}
+    {{ form_row(form.matiere) }}
+
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
+<script>
+    $(document).ready(function() {
+        flatpickr('.datetimepickr', {
+            dateFormat: "Y-m-d H:i",
+        });
+    });
+</script>
+{% endblock %}

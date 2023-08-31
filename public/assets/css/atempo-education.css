@@ -129,3 +129,10 @@
 .custom-switch-input:checked + .custom-switch-label:before {
     transform: translateX(26px);
 }
+
+label.required:after {
+    content: " *";
+    color: red;
+    font-weight: 600
+    ;
+}

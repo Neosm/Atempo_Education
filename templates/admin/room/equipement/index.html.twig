@@ -1,0 +1,50 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}Liste des Équipements{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Équipements</h2>
+                </div>
+                <div class="card-body">
+                    {% for flash in app.flashes('success') %}
+                        <div class="alert alert-success" role="alert">{{ flash }}</div>
+                    {% endfor %}
+                    <ul class="list-group">
+                        {% for material in materials %}
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h3>{{ material.name }}</h3>
+                                    <div class="btn-group">
+                                        <a href="{{ path('admin_salle_equipement_liste_details', { 'id': material.id }) }}" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i> Voir
+                                        </a>
+                                        <a href="{{ path('admin_salle_equipement_edit', { 'id': material.id }) }}" class="btn btn-outline-secondary">
+                                            <i class="bi bi-pencil"></i> Éditer
+                                        </a>
+                                        <a href="{{ path('admin_salle_equipement_delete', { 'id': material.id }) }}" class="btn btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet équipement ?')">
+                                            <i class="bi bi-trash"></i> Supprimer
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Détails de l'Équipement</h2>
+                </div>
+                <div class="card-body" id="content">
+                    {{ include('admin/room/equipement/_content.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

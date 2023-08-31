@@ -1,0 +1,12 @@
+
+    {% if studentClass is defined %}
+        <h6>Élèves de la classe "{{ studentClass.name }}"</h6>
+        <ul>
+            {% for student in studentClass.students %}
+                {% set age = date().diff(date(student.dateofbirth)).y %}
+                <li>{{ student.userIdentifier }} | {{ age }} ans | {{ student.dateofbirth|date() }} | {{ student.telephone }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Sélectionnez une classe pour afficher les élèves.</p>
+    {% endif %}

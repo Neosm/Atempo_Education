@@ -63,19 +63,28 @@ class HomeController extends AbstractController
         $events = $this->getDoctrine()->getRepository(Event::class)->findEventsByUser($user);
         // Convertir les événements en un format compatible avec FullCalendar (par exemple, JSON)
         $formattedEvents = [];
+        $objectifs = [];
         foreach ($events as $event) {
             $formattedEvents[] = [
                 'id' => $event->getId(),
                 'title' => $event->getTitle(),
                 'start' => $event->getStart()->format('Y-m-d H:i:s'),
                 'end' => $event->getEnd()->format('Y-m-d H:i:s'),
-                'room' => $event->getRoom()->getName(),
-                'teacher' => $event->getTeacher()->getUsername(),
+                'teacher' => $event->getTeacher()->getUserIdentifier(),
                 // Ajoutez ici d'autres champs que vous souhaitez afficher dans le calendrier
             ];
+            if ($event->getObjectif() !== null ){
+                $objectifs[] = [
+                    'title' => $event->getTitle(),
+                    'start' => $event->getStart()->format('Y-m-d H:i:s'),
+                    'objectif' => $event->getObjectif(),
+                    'matière' => $event->getMatieres(),
+                ];
+            }
         }
         // Retourner les événements au format JSON
         $jsonEvents = json_encode($formattedEvents);
+
 
         //ELEVES / TEACHER LIST
         if ($user->getRoles() == ["ROLE_STUDENT"]){
@@ -160,6 +169,7 @@ class HomeController extends AbstractController
 
         return $this->render('home/index.html.twig', [
             'userStudent' => $userList,
+            'objectifs' => $objectifs,
             'userTeacher' => $userList,
             'absences' => $absences,
             'delays' => $delays,
@@ -170,6 +180,45 @@ class HomeController extends AbstractController
             'articles' => $articles,
         ]);
 
+    }
+
+    #[Route('/objectifs-de-cours', name: 'user_objectifs')]
+    public function objectifs()
+    {
+        $user = $this->getUser();
+
+        $events = $this->getDoctrine()->getRepository(Event::class)->findEventsByUser($user);
+        
+        $objectifs = [];
+        $now = new \DateTime(); // Date et heure actuelles
+        
+        // Filtrer les événements futurs et les trier par matière
+        $filteredEvents = [];
+        foreach ($events as $event) {
+            if ($event->getStart() > $now && $event->getObjectif() !== null) {
+                $matiere = $event->getMatieres()->getName(); // Vous pouvez utiliser l'ID de la matière comme clé
+                $filteredEvents[$matiere][] = [
+                    'title' => $event->getTitle(),
+                    'start' => $event->getStart()->format('Y-m-d H:i:s'),
+                    'objectif' => $event->getObjectif(),
+                ];
+            }
+        }
+        
+        // Tri des événements par matière
+        ksort($filteredEvents);
+        
+        // Formatage des objectifs
+        foreach ($filteredEvents as $matiereId => $eventsForMatiere) {
+            $objectifs[] = [
+                'matiere' => $matiereId,
+                'objectifs' => $eventsForMatiere,
+            ];
+        }
+        
+        return $this->render('home/objectifs.html.twig', [
+            'objectifs' => $objectifs,
+        ]);
     }
 
     #[Route('/mentions-legales', name: 'mentions')]

@@ -30,7 +30,13 @@
                 <th scope="row"> {{ lecon.id }} </th>
                 <td>{{ lecon.slug }}</td>
                 <td>{{ lecon.nom }}</td>
-                <td>{{ lecon.programmes.nom }}</td>
+                {% if lecon.programmes is not null %}
+                    <td>{{ lecon.programmes.nom }}</td>
+                
+                {% else %}
+                    <td>Programme inexistant</td>
+                {% endif %}
+                
                 <td>
                 {% if lecon.users|length == 0 %}
                     Publique
@@ -66,7 +72,7 @@
                             </svg>
                         </a>
                         <a href="#" class="modal-trigger" type="button" data-bs-toggle="modal"
-                                           data-bs-target="#modal-delete" data-target="modal-delete" data-id="{{lecon.id}}" data-titre="{{lecon.nom}}">
+                            data-bs-target="#modal-delete" data-target="modal-delete" data-id="{{lecon.id}}" data-titre="{{lecon.nom}}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash align-middle">
                                 <polyline points="3 6 5 6 21 6"></polyline>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -108,7 +114,7 @@
 	let supprimer = document.querySelectorAll(".modal-trigger")
     for(let bouton of supprimer) {
         bouton.addEventListener("click", function () {
-            document.querySelector(".modal-footer a").href = `/lecons/supprimer/${this.dataset.id}`
+            document.querySelector(".modal-footer a").href = `/admin/lecons/supprimer/${this.dataset.id}`
             document.querySelector(".modal-body h4").innerText = `Êtes vous sûr(e) de vouloir supprimer la leçon "${this.dataset.titre}" ?`
             document.querySelector(".modal-body p").innerText = `Cette action ne sera pas réversible, et la leçon sera totalement perdue. `
         })

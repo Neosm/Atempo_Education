@@ -1,0 +1,87 @@
+{% extends 'admin.html.twig' %}
+
+{% block title %}{{ lecon.nom }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <h1 class="h3 mb-3">{{ lecon.nom }}</h1>
+            <div class="badge bg-info mb-3"><a href="{{ path('admin_programmes_details', {slug: lecon.programmes.slug} )}}" class="text-white">{{ lecon.programmes.nom }}</a></div>
+            
+            <!-- Contenu de la leçon -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">Contenu de la leçon</h2>
+                </div>
+                <div class="card-body">
+                    {{ lecon.contenu|raw }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!-- Thumbnails -->
+            <div class="card mb-4">
+                <img src="{{ asset('/uploads/lecons/images/' ~ lecon.thumbnails)|imagine_filter('illustration') }}" alt="Atempo-Education | {{ lecon.thumbnails }}" class="card-img-top">
+            </div>
+            
+            <!-- Documents liés -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">Documents liés</h2>
+                </div>
+                <div class="card-body">
+                    {% if lecon.pdf %}
+                        <a href="{{ path('admin_lecons_pdf_download', {slug: lecon.slug} ) }}"><i class="bi bi-file-earmark-pdf text-primary"></i> Télécharger le PDF</a><br>
+                    {% endif %}
+                    {% if lecon.video %}
+                        <a href="{{ lecon.video }}"><i class="bi bi-camera-video-fill text-primary"></i> Voir la vidéo</a><br>
+                    {% endif %}
+                    {% if lecon.audio %}
+                        <a href="{{ lecon.audio }}"><i class="bi bi-volume-up-fill text-primary"></i> Écouter l'audio</a>
+                    {% endif %}
+                    {% if not (lecon.pdf or lecon.video or lecon.audio) %}
+                        Aucun document relié à cette leçon. Pour tout problème, veuillez contacter votre professeur ou l'administration.
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Informations -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">Informations</h2>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-md-4">Documents joints</dt>
+                        <dd class="col-md-8">
+                            {% if lecon.pdf %}
+                                <a href="{{ path('admin_lecons_pdf_download', {slug: lecon.slug} ) }}">PDF</a>
+                            {% endif %}
+                            {% if lecon.video %}
+                                <a href="{{ lecon.video }}">Vidéo</a>
+                            {% endif %}
+                            {% if lecon.audio %}
+                                <a href="{{ lecon.audio }}">Audio</a>
+                            {% endif %}
+                            {% if not (lecon.pdf or lecon.video or lecon.audio) %}
+                                Aucun document relié à cette leçon. Pour tout problème, veuillez contacter votre professeur ou l'administration.
+                            {% endif %}
+                        </dd>
+                        <dt class="col-md-4">Type de leçon</dt>
+                        <dd class="col-md-8">
+                            {% if lecon.ProgrammesLecons.id == 2 %}
+                                Privée
+                            {% else %}
+                                Publique
+                            {% endif %}
+                        </dd>
+                        <dt class="col-md-4">Créer le :</dt>
+                        <dd class="col-md-8">{{ lecon.createdAt|date }}</dd>
+                        <dt class="col-md-4">Programme</dt>
+                        <dd class="col-md-8">{{ lecon.programmes.nom }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

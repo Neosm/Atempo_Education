@@ -27,21 +27,20 @@
 							{% endfor %}
 						{% endif %}
 
-						<div class="card-footer bg-transparent d-flex justify-content-between">
-
+						<div class="card-footer bg-transparent d-flex float-end" >
 							{% if is_granted("IS_AUTHENTICATED_FULLY") %}
 								{% if isFavorite %}
 									<a href="{{ path('actualites_retrait_favoris', {id: article.id}) }}">
-										<i class="fas fa-heart fa-2x" style="color: #ff6b6b;"></i>
+										<i class="bi bi-heart-fill fa-2x" style="color: #ff6b6b;"></i>
 									</a>
 								{% else %}
 									<a href="{{ path('actualites_ajout_favoris', {id: article.id}) }}">
-										<i class="far fa-heart fa-2x" style="color: #ff6b6b;"></i>
+										<i class="bi bi-heart fa-2x" style="color: #ff6b6b;"></i>
 									</a>
 								{% endif %}
 
 							{% endif %}
-							<a href="{{ path('actualites_details', {slug: article.slug}) }}" class="text-decoration-none btn btn-outline-primary">
+							<a href="{{ path('actualites_details', {slug: article.slug}) }}" class="text-decoration-none btn btn-outline-primary ms-2 align-self-center">
 								Lire l'actu
 							</a>
 						</div>
@@ -66,11 +65,13 @@
 		<li class="{{ (page == 1) ? 'disabled' : ''}} page-item">
 			<a class="page-link" href="{{ (page>1) ? '?page=' ~ (page - 1) : '' }}&{{ querystring }}" tabindex="-1" aria-disabled="true">Précedente</a>
 		</li>
-		{% for item in 1..(pages) %}
-			<li class="{{ (page == item) ? 'active' : ''}} page-item" aria-current="page">
-				<a class="page-link" href="?page={{ item }}&{{ querystring }}">{{ item }}</a>
-			</li>
-		{% endfor %}
+		{% if pages > 0 %}
+			{% for item in 1..(pages) %}
+					<li class="{{ (page == item) ? 'active' : ''}} page-item" aria-current="page">
+						<a class="page-link" href="?page={{ item }}&{{ querystring }}">{{ item }}</a>
+					</li>
+				{% endfor %}
+			{% endif %}
 		<li class="{{ (page == pages) ? 'disabled' : ''}} page-item">
 			<a class="page-link" href="{{ (page != pages) ? '?page=' ~ (page + 1) : '' }}&{{ querystring }}">Suivante</a>
 		</li>

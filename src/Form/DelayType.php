@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Delay;
+use App\Entity\Event;
 use App\Entity\Users;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -23,7 +24,12 @@ class DelayType extends AbstractType
         ->add('student', EntityType::class, [
             'label' => 'Élèves',
             'class' => Users::class,
-            'choice_label' => 'username',
+            'query_builder' => function (EntityRepository $er) {
+                return $er->createQueryBuilder('u')
+                ->andWhere('u.roles LIKE :val')
+                ->setParameter('val', '%["ROLE_STUDENT"]%');
+            },
+            'choice_label' => 'UserIdentifier',
             'attr' => [
                 'class' => 'students-field select2'
             ],
@@ -31,12 +37,39 @@ class DelayType extends AbstractType
                 'class' => 'label-students',
             ],
         ]);
+
+        if ($options['ajouter_creer_delay']) {
+            $userid = $options['userid'];
+
+            $builder
+                ->add('event', EntityType::class,[
+                    'label' => 'Cours conserné',
+                    'class' => Event::class,
+                    'choice_label' => 'getTitleAndStart',
+                    'query_builder' => function (EntityRepository $er) use ($userid) {
+                        return $er->createQueryBuilder('e')
+                            ->andWhere('e.teacher = :userid')
+                            ->setParameter('userid', $userid);
+                    },
+                ]);
+        }elseif ($options['admin_creer_delay']) {
+
+            $builder
+                ->add('event', EntityType::class,[
+                    'label' => 'Cours conserné',
+                    'class' => Event::class,
+                    'choice_label' => 'getTitleAndStart',
+                ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Delay::class,
+            'ajouter_creer_delay' => false,
+            'admin_creer_delay' => false, // Valeur par défaut pour l'option personnalisée
+            'userid' => null,
         ]);
     }
 }

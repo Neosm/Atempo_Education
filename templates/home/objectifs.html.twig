@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Objectifs des cours{% endblock %}
+
+{% block content %}
+    <h1>Travail {% if "ROLE_TEACHER" in app.user.roles %}
+                                donné
+                            {% elseif "ROLE_STUDENT" in app.user.roles %}
+                                à faire
+                            {% endif %}</h1>
+
+    <div class="row">
+        <div class="col">
+            <div class="card mb-4">
+                <div class="card-body">
+                    {% for matiereObjectifs in objectifs %}
+                        <h2>{{ matiereObjectifs.matiere }}</h2>
+                        {% for objectif in matiereObjectifs.objectifs %}
+                            <p class="mb-2">
+                                <strong>Cours :</strong>
+                                {{ objectif.title }}
+                            </p>
+                            <div class="mb-0">
+                                <span class="badge badge-soft-danger me-2">
+                                    {{ objectif.start|format_datetime(pattern='eeee d MMM à HH:mm', locale='fr') }}
+                                </span>
+                                <span class="text-muted">Objectifs : {{ objectif.objectif }}</span>
+                            </div>
+                            <hr>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

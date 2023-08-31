@@ -60,41 +60,5 @@
                 {% endfor %}
             </div>
         {% endif %}
-        <br>
-        <hr>
-        <br>
-        <h2 class="h3">Messages reçus</h2>
-        {% if app.user.received %}
-            <div class="row">
-                {% for messages in app.user.received|reverse %}
-                    <div class="col-sm-4 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <p class="card-title">{{ messages.sender }}</p>
-                                <p class="card-text">{{ messages.message }}</p>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        <br>
-        <hr>
-        <br>
-        <h2 class="h3">Messages envoyés</h2>
-        {% if app.user.sent %}
-            <div class="row">
-                {% for messages in app.user.sent|reverse %}
-                    <div class="col-sm-4 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <p class="card-title">{{ messages.recipient }}</p>
-                                <p class="card-text">{{ messages.message }}</p>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
     </div>
 {% endblock %}

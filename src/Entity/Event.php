@@ -67,6 +67,21 @@ class Event
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $ZoomLink = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $recurrence = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $recurrenceEnd = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $recurrenceFrequency = null;
+
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'events')]
+    private ?self $parentEvent = null;
+
+    #[ORM\OneToMany(mappedBy: 'parentEvent', targetEntity: self::class)]
+    private Collection $events;
+
     public function __construct()
     {
         $this->students = new ArrayCollection();
@@ -74,6 +89,7 @@ class Event
         $this->absences = new ArrayCollection();
         $this->programme = new ArrayCollection();
         $this->Lecons = new ArrayCollection();
+        $this->events = new ArrayCollection();
     }
 
     public function getTitleAndStart(): string
@@ -361,6 +377,85 @@ class Event
 
         return $this;
     }
+
+    public function getRecurrence(): ?bool
+    {
+        return $this->recurrence;
+    }
+
+    public function setRecurrence(?bool $recurrence): static
+    {
+        $this->recurrence = $recurrence;
+
+        return $this;
+    }
+
+    public function getRecurrenceEnd(): ?\DateTimeInterface
+    {
+        return $this->recurrenceEnd;
+    }
+
+    public function setRecurrenceEnd(?\DateTimeInterface $recurrenceEnd): static
+    {
+        $this->recurrenceEnd = $recurrenceEnd;
+
+        return $this;
+    }
+
+    public function getRecurrenceFrequency(): ?string
+    {
+        return $this->recurrenceFrequency;
+    }
+
+    public function setRecurrenceFrequency(?string $recurrenceFrequency): static
+    {
+        $this->recurrenceFrequency = $recurrenceFrequency;
+
+        return $this;
+    }
+
+    public function getParentEvent(): ?self
+    {
+        return $this->parentEvent;
+    }
+
+    public function setParentEvent(?self $parentEvent): static
+    {
+        $this->parentEvent = $parentEvent;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getEvents(): Collection
+    {
+        return $this->events;
+    }
+
+    public function addEvent(self $event): static
+    {
+        if (!$this->events->contains($event)) {
+            $this->events->add($event);
+            $event->setParentEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvent(self $event): static
+    {
+        if ($this->events->removeElement($event)) {
+            // set the owning side to null (unless already changed)
+            if ($event->getParentEvent() === $this) {
+                $event->setParentEvent(null);
+            }
+        }
+
+        return $this;
+    }
+
 
 
 }

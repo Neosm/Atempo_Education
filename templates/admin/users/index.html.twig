@@ -1,10 +1,31 @@
 {% extends 'admin.html.twig' %}
 
-{% block title %}Tous les utilisateurs Atempo-Education
+{% block title %}
+{% if app.request.attributes.get('_route') == 'admin_users_teacher' %}
+Tous les professeurs Atempo-Education
+{% elseif app.request.attributes.get('_route') == 'admin_users_student' %}
+Tous les élèves Atempo-Education
+{% elseif app.request.attributes.get('_route') == 'admin_users_admin' %}
+Tous le secrétariat Atempo-Education
+{% elseif app.request.attributes.get('_route') == 'admin_users_home' %}
+Tous les utilisateurs Atempo-Education
+{% endif %}
+
+
 {% endblock %}
 
 {% block content %}
-	<h1 class="h3 mb-3">Tous les utilisateurs</h1>
+	<h1 class="h3 mb-3">
+{% if app.request.attributes.get('_route') == 'admin_users_teacher' %}
+Tous les professeurs
+{% elseif app.request.attributes.get('_route') == 'admin_users_student' %}
+Tous les élèves
+{% elseif app.request.attributes.get('_route') == 'admin_users_admin' %}
+Tout le secrétariat
+{% elseif app.request.attributes.get('_route') == 'admin_users_home' %}
+Tous les utilisateurs
+{% endif %}
+	</h1>
 
 	<div class="row">
 		<div class="col-12">

@@ -59,6 +59,37 @@ class EventFormType extends AbstractType
             ->add('duration', IntegerType::class, [
                 'label' => 'Durée (en minutes)',
             ])
+            ->add('recurrence', ChoiceType::class, [
+                'label' => 'Événement récurrent',
+                'choices' => [
+                    'Non' => false,
+                    'Oui' => true,
+                ],
+                'multiple' => false,
+            ])
+            ->add('recurrenceFrequency', ChoiceType::class, [
+                'label' => 'Fréquence de récurrence',
+                'choices' => [
+                    'Tous les jours' => 'daily',
+                    'Toutes les semaines' => 'weekly',
+                    'Tous les mois' => 'monthly',
+                ],
+                'expanded' => true, // Pour afficher en tant que radios
+                'multiple' => false,
+                'required' => false, // Rendre ce champ facultatif
+                'attr' => [
+                    'class' => 'form-control', // Ajoutez des classes CSS si nécessaire
+                ],
+            ])
+            ->add('recurrenceEnd', DateTimeType::class, [
+                'label' => 'Date de fin de récurrence',
+                'widget' => 'single_text',
+                'html5' => false,
+                'required' => false, // Rendre ce champ facultatif
+                'attr' => [
+                    'class' => 'form-control datetimepickr', // Ajoutez des classes CSS si nécessaire
+                ],
+            ])
             ->add('teacher', EntityType::class, [
                 'label' => 'Professeur',
                 'class' => Users::class,
@@ -216,7 +247,25 @@ class EventFormType extends AbstractType
                     'required' => false,
                 ]);
             }
-        });
+
+            // Vérifiez si l'événement est une récurrence ou a un parentEventId
+            $isRecurrence = $data->getRecurrence() == 1 || $data->getParentEvent() !== null;
+
+            // Ajoutez le champ modificationScope uniquement si c'est une récurrence
+            if ($isRecurrence) {
+                $form->add('modificationScope', ChoiceType::class, [
+                    'label' => 'Portée de la modification',
+                    'choices' => [
+                        'Cet événement' => 'this_event',
+                        'Tous les événements de la récurrence' => 'all_events',
+                        'Tous les événements futurs de la récurrence' => 'future_events',
+                    ],
+                    'expanded' => true,
+                    'required' => true,
+                    'mapped' => false,
+                ]);
+            }
+        });      
 
     }
 

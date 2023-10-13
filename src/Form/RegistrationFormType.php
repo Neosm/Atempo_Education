@@ -50,20 +50,20 @@ class RegistrationFormType extends AbstractType
                 'attr'=>[
                     'Placeholder'=>'0607080901'
                 ]
-            ])
-            ->add('dateOfBirth', DateType::class, [
-                'label'=>"Date de naissance"
+            ])->add('dateOfBirth', DateType::class, [
+                'label' => "Date de naissance",
+                'years' => range(date('Y') - 100, date('Y')),
             ])
             ->add('roles', ChoiceType::class, [
                 'label' => 'Role de l\'utilisateur',
-                'placeholder'=> 'Élève, Professeur, SuperProfesseur',
+                'placeholder'=> 'Élève, Professeur, Secrétariat',
                 'required' => true,
                 'multiple' => false,
                 'expanded' => false,
                 'choices'=> [
                     'Élèves'=> "ROLE_STUDENT",
                     'Professeur'=> "ROLE_TEACHER",
-                    'Administrateur'=> "ROLE_ADMIN",
+                    'Secrétariat'=> "ROLE_ADMIN",
                 ]
             ])
             ->add('thumbnail', FileType::class, [

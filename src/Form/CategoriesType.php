@@ -19,7 +19,9 @@ class CategoriesType extends AbstractType
                 'label' => 'Titre de la catégorie'
             ])
             ->add('parent', EntityType::class, [
+                'label' => 'Catégorie rattachée',
                 'class'=>Categories::class,
+                'required' => false,
                 'attr'=>[
                     'class'=>'select-users-search'
                 ]

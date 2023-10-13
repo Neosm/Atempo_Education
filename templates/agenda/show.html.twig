@@ -116,10 +116,10 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal de confirmation de suppression -->
-    <div class="modal fade" id="deleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    
+<!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteModal" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered w-75 h-75">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteModalLabel">Confirmation de suppression</h5>
@@ -127,12 +127,65 @@
                 </div>
                 <div class="modal-body">
                     <p>Êtes-vous sûr de vouloir supprimer cet événement ?</p>
+                    {% if recurrence is not same as null %}
+                    <form id="deleteScopeForm">
+                        <div class="mb-3">
+                            <label for="deleteScope" class="form-label">Sélectionnez le scope :</label>
+                            <select class="form-select" id="deleteScope" name="deleteScope">
+                                <option value="this_event">Cet évènement</option>
+                                <option value="all_events">Tous les événements</option>
+                                <option value="future_events">Événements futurs uniquement</option>
+                            </select>
+                        </div>
+                    </form>
+                    {% endif %}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <a href="{{ path('agenda_delete_event', {'id': event.id}) }}" class="btn btn-danger">Supprimer</a>
+                    <a href="#" class="btn btn-danger delete-event" data-event-id="{{event.id}}">Supprimer</a>
                 </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+
+
+{% block javascripts %}
+<script>
+$(document).on('click', '.delete-event', function(e) {
+            e.preventDefault();
+            var eventId = $(this).attr('data-event-id');
+            var isScopeVisible = $('#deleteScopeForm').is(':visible'); // Vérifier si le formulaire de scope est affiché
+
+            if (isScopeVisible) {
+                // Le formulaire de scope est visible, nous traitons en fonction du scope sélectionné
+                var selectedScope = $('#deleteScope').val(); // Récupérer la valeur du scope sélectionné dans le formulaire
+
+                if (selectedScope === 'this_event') {
+                    // Suppression de l'événement actuel
+                    var deleteUrl = '{{ path('agenda_delete_event', {'id': 'eventId'}) }}';
+                } else if (selectedScope === 'all_events') {
+                    // Suppression de tous les événements
+                    var deleteUrl = '{{ path('agenda_delete_all_events', {'id': 'eventId'}) }}';
+                } else if (selectedScope === 'future_events') {
+                    // Suppression des événements futurs uniquement
+                    var deleteUrl = '{{ path('agenda_delete_future_events', {'id': 'eventId'}) }}';
+                } else {
+                    // Valeur de scope non reconnue
+                    console.error('Valeur de scope non reconnue : ' + selectedScope);
+                    return;
+                }
+            } else {
+                // Le formulaire de scope n'est pas visible, nous utilisons le chemin de suppression classique
+                var deleteUrl = '{{ path('agenda_delete_event', {'id': 'eventId'}) }}';
+            }
+
+            // Remplacer 'eventId' dans l'URL de suppression par l'ID de l'événement
+            deleteUrl = deleteUrl.replace('eventId', eventId);
+
+            // Rediriger vers l'URL appropriée pour effectuer la suppression
+            window.location.assign(deleteUrl);
+        });
+</script>
 {% endblock %}

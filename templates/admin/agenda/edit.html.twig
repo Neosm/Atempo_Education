@@ -31,6 +31,9 @@
             </div>
         </div>
     </div>
+
+
+
         
 {% endblock %}
 
@@ -153,70 +156,92 @@ $(document).ready(function() {
         maxTime: "23:59",
     });
 
-        var materialsCheckboxes = document.querySelectorAll('.materials-checkboxes input[type="checkbox"]');
-		var roomSelect = document.querySelector('.room-select');
-		var startField = $('#event_form_start');
-		var durationField = $('#event_form_duration');
-		var zoomlinkField = $('#event_form_zoomlink');
-		// Champ zoomlink
+    var materialsCheckboxes = document.querySelectorAll('.materials-checkboxes input[type="checkbox"]');
+    var roomSelect = document.querySelector('.room-select');
+    var startField = $('#event_form_start');
+    var durationField = $('#event_form_duration');
+    var zoomlinkField = $('#event_form_zoomlink');
+    // Champ zoomlink
 
-		// Écouter l'événement 'change' sur les champs de matériel et de durée
-		materialsCheckboxes.forEach(function(checkbox) {
-			checkbox.addEventListener('change', updateRooms);
-		});
+    // Écouter l'événement 'change' sur les champs de matériel et de durée
+    materialsCheckboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', updateRooms);
+    });
 
-		durationField.on('input', updateRooms);
+    durationField.on('input', updateRooms);
 
-		// Écouteur d'événement pour le champ zoomlink
-		zoomlinkField.on('input', updateRooms);
+    // Écouteur d'événement pour le champ zoomlink
+    zoomlinkField.on('input', updateRooms);
 
-		// Fonction pour mettre à jour les salles en fonction des matériaux sélectionnés, de l'heure et de la durée
-		function updateRooms() {
-			var selectedMaterials = Array.from(materialsCheckboxes).filter(function(checkbox) {
-				return checkbox.checked;
-			}).map(function(checkbox) {
-				return checkbox.value;
-			});
+    // Fonction pour mettre à jour les salles en fonction des matériaux sélectionnés, de l'heure et de la durée
+    function updateRooms() {
+        var selectedMaterials = Array.from(materialsCheckboxes).filter(function(checkbox) {
+            return checkbox.checked;
+        }).map(function(checkbox) {
+            return checkbox.value;
+        });
 
-			var startValue = startField.val();
-			var durationValue = durationField.val();
-			var zoomlinkValue = zoomlinkField.val();
-			// Récupérer la valeur du champ zoomlink
+        var startValue = startField.val();
+        var durationValue = durationField.val();
+        var zoomlinkValue = zoomlinkField.val();
+        // Récupérer la valeur du champ zoomlink
 
-			// Construire l'URL de l'API avec les paramètres appropriés
-			var apiUrl = '/admin/agenda/api/rooms';
-			apiUrl += '?materials=' + selectedMaterials.join(',');
-			apiUrl += '&start=' + startValue;
-			apiUrl += '&duration=' + durationValue;
-			apiUrl += '&zoomlink=' + zoomlinkValue;
-			// Ajouter la valeur du champ zoomlink
+        // Construire l'URL de l'API avec les paramètres appropriés
+        var apiUrl = '/admin/agenda/api/rooms';
+        apiUrl += '?materials=' + selectedMaterials.join(',');
+        apiUrl += '&start=' + startValue;
+        apiUrl += '&duration=' + durationValue;
+        apiUrl += '&zoomlink=' + zoomlinkValue;
+        // Ajouter la valeur du champ zoomlink
 
-			// Fetch des salles en fonction des équipements sélectionnés, de l'heure et de la durée
-			fetch(apiUrl).then(function(response) {
-				return response.json();
-			}).then(function(rooms) { // Mise à jour des options de sélection de la salle
-				while (roomSelect.firstChild) {
-					roomSelect.removeChild(roomSelect.firstChild);
-				}
+        // Fetch des salles en fonction des équipements sélectionnés, de l'heure et de la durée
+        fetch(apiUrl).then(function(response) {
+            return response.json();
+        }).then(function(rooms) { // Mise à jour des options de sélection de la salle
+            while (roomSelect.firstChild) {
+                roomSelect.removeChild(roomSelect.firstChild);
+            }
 
-				rooms.forEach(function(room) {
-					var option = document.createElement('option');
-					option.value = room.id;
-					option.textContent = room.name;
-					roomSelect.appendChild(option);
-				});
-			}).catch(function(error) {
-				console.log(error);
-			});
-		}
+            rooms.forEach(function(room) {
+                var option = document.createElement('option');
+                option.value = room.id;
+                option.textContent = room.name;
+                roomSelect.appendChild(option);
+            });
+        }).catch(function(error) {
+            console.log(error);
+        });
+    }
 
-		// Appeler la fonction pour mettre à jour les salles initialement
-		updateRooms();
+    // Appeler la fonction pour mettre à jour les salles initialement
+    updateRooms();
 
-		// Écouteur d'événement pour le champ de l'heure de début
-		startField.change(updateRooms);
-		$('#event_form_zoomswitch').on('change', updateRooms); // Écouteur sur le champ zoomswitch
+    // Écouteur d'événement pour le champ de l'heure de début
+    startField.change(updateRooms);
+    $('#event_form_zoomswitch').on('change', updateRooms); // Écouteur sur le champ zoomswitch
 
-	}); 
-    </script>
+    var recurrenceFields = $('#recurrence-fields');
+    var isRecurringSelect = $('#event_form_recurrence');
+
+    // Masquer les champs de récurrence au chargement de la page
+    recurrenceFields.hide();
+
+    // Écouter les changements sur le champ isRecurring (liste déroulante)
+    isRecurringSelect.on('change', function() {
+        var selectedValue = $(this).val();
+
+        if (selectedValue === '1') {
+            recurrenceFields.show();
+        } else {
+            recurrenceFields.hide();
+        }
+    });
+
+    // Appeler la fonction initiale pour vérifier l'état initial de la liste déroulante
+    isRecurringSelect.trigger('change');
+
+
+
+});
+</script>
 {% endblock %}

@@ -340,7 +340,7 @@
 									</a>
 
 									<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
-										<img src="{{ asset('/uploads/profile_pics/' ~ app.user.thumbnail)|imagine_filter('thumbnail') }}" class="avatar img-fluid rounded-circle me-1" alt="Photo de profile de {{ app.user.firstname }}">
+										<img src="{{ asset('/uploads/Profil_pics/' ~ app.user.thumbnail)|imagine_filter('thumbnail') }}" class="avatar img-fluid rounded-circle me-1" alt="Photo de Profil de {{ app.user.firstname }}">
 										<span class="text-dark">{{ app.user.firstname }}</span>
 									</a>
 									<div class="dropdown-menu dropdown-menu-end">
@@ -349,7 +349,7 @@
 												<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
 												<circle cx="12" cy="7" r="4"></circle>
 											</svg>
-											Profile
+											Profil
 										</a>
 										{% if is_granted('ROLE_ADMIN') %}
 										<a class="dropdown-item" href="{{ path('admin_home') }}">

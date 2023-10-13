@@ -21,6 +21,26 @@
 
     <div class="row mb-3">
         <div class="col">
+            {{ form_row(form.recurrence, {'attr': {'class': 'custom-select'}}) }}
+        </div>
+    </div>
+
+    <div id="recurrence-fields">
+        <div class="row mb-3">
+            <div class="col">
+                {{ form_row(form.recurrenceFrequency) }}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                {{ form_row(form.recurrenceEnd) }}
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row mb-3">
+        <div class="col">
             <label for="{{ form.zoomswitch.vars.id }}">Cours en visio ou non</label>
         </div>
     </div>
@@ -94,6 +114,14 @@
         <div class="row mb-3">
             <div class="col">
                 {{ form_row(form.objectif) }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if form.modificationScope is defined %}
+        <div class="row mb-3">
+            <div class="col">
+                {{ form_row(form.modificationScope) }}
             </div>
         </div>
     {% endif %}

@@ -38,7 +38,6 @@ class UsersController extends AbstractController
     public function eleves(UsersRepository $usersRepository): Response
     {
         $userData = $usersRepository->findAllStudent();
-        dump($userData);
 
         return $this->render('admin/users/index.html.twig', [
             'users' => $userData,

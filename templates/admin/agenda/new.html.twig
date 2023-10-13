@@ -19,7 +19,7 @@
 {% block javascripts %}
 <script src = "https://cdn.jsdelivr.net/npm/flatpickr"> </script> 
 <script src = "https://npmcdn.com/flatpickr/dist/l10n/fr.js" > </script> 
-<script >
+<script>
 	$(document).ready(function() {
 		$('.students-field').select2({
 			placeholder: "Choisissez l'élève ou les élèves à qui vous allez faire cours. (Désactivez le boutton si vous faites cours à une classe entière)",
@@ -181,6 +181,31 @@
 		startField.change(updateRooms);
 		$('#event_form_zoomswitch').on('change', updateRooms); // Écouteur sur le champ zoomswitch
 
+    var recurrenceFields = $('#recurrence-fields');
+    var isRecurringSelect = $('#event_form_recurrence');
+
+    // Masquer les champs de récurrence au chargement de la page
+    recurrenceFields.hide();
+
+    // Écouter les changements sur le champ isRecurring (liste déroulante)
+    isRecurringSelect.on('change', function() {
+    console.log('La sélection de la liste déroulante a changé.');
+    var selectedValue = $(this).val();
+    console.log('Valeur sélectionnée : ' + selectedValue);
+
+    if (selectedValue === '1') {
+        recurrenceFields.show();
+        console.log('Affichage des champs de récurrence.');
+    } else {
+        recurrenceFields.hide();
+        console.log('Masquage des champs de récurrence.');
+    }
+});
+
+    // Appeler la fonction initiale pour vérifier l'état initial de la liste déroulante
+    isRecurringSelect.trigger('change');
+
 	}); 
-    </script>
+</script>
+
 {% endblock %}

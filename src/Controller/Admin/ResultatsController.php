@@ -17,7 +17,9 @@ class ResultatsController extends AbstractController
     #[Route('/admin/resultat', name: 'admin_resultats_liste')]
     public function index(NotesRepository $notesRepository): Response
     {
-        $notes = $notesRepository->findAll();
+        
+        $ecole = $this->getUser()->getEcoles();
+        $notes = $notesRepository->findBy(["ecoles" => $ecole]);
 
         // Rendu de la vue Twig avec les résultats
         return $this->render('admin/resultat/index.html.twig', [
@@ -29,11 +31,13 @@ class ResultatsController extends AbstractController
     public function add(Request $request): Response
     {
         $note = new Notes();
+        $ecole = $this->getUser()->getEcoles();
 
-        $form = $this->createForm(NoteType::class, $note);
+        $form = $this->createForm(NoteType::class, $note, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $note->setEcoles($ecole);
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($note);
             $entityManager->flush();
@@ -51,8 +55,9 @@ class ResultatsController extends AbstractController
     #[Route('/admin/resultat/modifier/{id}', name: 'admin_resultats_edit')]
     public function modifier(Request $request, Notes $note): Response
     {
+        $ecole = $this->getUser()->getEcoles();
 
-        $form = $this->createForm(NoteType::class, $note);
+        $form = $this->createForm(NoteType::class, $note, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

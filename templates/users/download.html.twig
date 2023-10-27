@@ -1,4 +1,5 @@
-{% extends "base-pdf.html.twig" %}
+{% extends is_granted('ROLE_ADMIN') ? 'admin.html.twig' : 'base.html.twig' %}
+
 
 {% block title %}Mes données - Atempo Education{% endblock %}
 

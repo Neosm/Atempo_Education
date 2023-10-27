@@ -138,10 +138,10 @@
 					<!-- Affichage du dernier article -->
 					{% if latestArticle is not empty %}
 						{% for article in latestArticle|slice(-1) %}
-							<div class="overflow-hidden position-relative border-radius-lg bg-cover h-100" style="background-image: url('{{ asset('/uploads/articles/' ~ article.illustrations) }}'); background-color: rgba(0, 0, 0, 0.8);">
+							<div class="overflow-hidden position-relative border-radius-lg bg-cover h-100" >
 								<div class="card-body position-relative z-index-1 h-100 p-3">
-									<h6 class="text-white font-weight-bolder mb-3">{{ article.title }}</h6>
-									<p class="text-white mb-3">{{ article.content|striptags|u.truncate(147, '...')|raw }}</p>
+									<h6 class="font-weight-bolder mb-3">{{ article.title }}</h6>
+									<p class="mb-3">{{ article.content|striptags|u.truncate(147, '...')|raw }}</p>
 									<a class="btn link link-info mb-0" href="{{ path('actualites_details', {slug: article.slug}) }}">
 										Lire Plus
 										<i class="bi bi-arrow-right text-sm ms-1" aria-hidden="true"></i>
@@ -242,17 +242,17 @@
 <div class="row mt-4">
     <div class="col-sm-6">
         <div class="card h-100">
-            <!-- Contenu pour les Matières -->
+            <!-- Contenu pour les Disciplines -->
             <div class="card-body">
-                <h6 class="mb-3">Matières</h6>
-                <p>Nombre total de matières : {{ matieres | length }}</p>
-                <p>Les 4 dernières matières :</p>
+                <h6 class="mb-3">Disciplines</h6>
+                <p>Nombre total de Disciplines : {{ matieres | length }}</p>
+                <p>Les 4 dernières Disciplines :</p>
                 <ul>
                     {% for matiere in matieres | slice(-4) %}
                         <li>{{ matiere.name }}</li>
                     {% endfor %}
                 </ul>
-                <a href="{{ path('admin_matiere_liste') }}" class="btn btn-primary">Aller aux matières</a>
+                <a href="{{ path('admin_matiere_liste') }}" class="btn btn-primary">Aller aux Disciplines</a>
             </div>
         </div>
     </div>

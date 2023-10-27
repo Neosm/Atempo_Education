@@ -25,7 +25,9 @@ class UsersController extends AbstractController
      */
     public function index(UsersRepository $usersRepository): Response
     {
-        $getAll = $usersRepository->findAll();
+        
+        $ecole = $this->getUser()->getEcoles();
+        $getAll = $usersRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('/admin/users/index.html.twig', [
             'users'=>$getAll,
@@ -37,7 +39,8 @@ class UsersController extends AbstractController
      */
     public function eleves(UsersRepository $usersRepository): Response
     {
-        $userData = $usersRepository->findAllStudent();
+        $ecole = $this->getUser()->getEcoles();
+        $userData = $usersRepository->findAllStudentByEcole($ecole);
 
         return $this->render('admin/users/index.html.twig', [
             'users' => $userData,
@@ -49,7 +52,8 @@ class UsersController extends AbstractController
      */
     public function professeurs(UsersRepository $usersRepository): Response
     {
-        $userData = $usersRepository->findAllTeacher();
+        $ecole = $this->getUser()->getEcoles();
+        $userData = $usersRepository->findAllTeacherByEcole($ecole);
 
         return $this->render('admin/users/index.html.twig', [
             'users' => $userData,
@@ -62,7 +66,8 @@ class UsersController extends AbstractController
      */
     public function admin(UsersRepository $usersRepository): Response
     {
-        $userData = $usersRepository->findAllAdmin();
+        $ecole = $this->getUser()->getEcoles();
+        $userData = $usersRepository->findAllAdminByEcole($ecole);
 
         return $this->render('admin/users/index.html.twig', [
             'users' => $userData,

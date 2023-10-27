@@ -20,11 +20,16 @@ class AbsenceController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $event = $entityManager->getRepository(Event::class)->find($eventId);
 
+        $ecole = $this->getUser()->getEcoles();
+
         $absence = new absence();
         $absence->setEvent($event);
         $absence->setAbsenceDate($event->getStart());
+        $absence->setEcoles($ecole);
 
-        $form = $this->createForm(absenceType::class, $absence);
+        $ecole = $this->getUser()->getEcoles();
+
+        $form = $this->createForm(absenceType::class, $absence, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -45,7 +50,9 @@ class AbsenceController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $absence = $entityManager->getRepository(absence::class)->find($absenceId);
 
-        $form = $this->createForm(absenceType::class, $absence);
+        $ecole = $this->getUser()->getEcoles();
+
+        $form = $this->createForm(absenceType::class, $absence, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -77,14 +84,16 @@ class AbsenceController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $ajouterChampEvent = true;
         $absence = new absence();
+        $ecole = $this->getUser()->getEcoles();
 
-        $form = $this->createForm(absenceType::class, $absence, ['creer_absence_admin' => $ajouterChampEvent]);
+        $form = $this->createForm(absenceType::class, $absence, ['creer_absence_admin' => $ajouterChampEvent, 'ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
             $event = $form->get('event')->getData();
             $absence->setAbsenceDate($event->getStart());
+            $absence->setEcoles($ecole);
 
             $entityManager->persist($absence);
             $entityManager->flush();
@@ -100,7 +109,8 @@ class AbsenceController extends AbstractController
     #[Route('/admin/absences/liste-absences', name: 'admin_liste_absence_liste')]
     public function admin_professeur_absence_liste(AbsenceRepository $absenceRepository): Response
     {
-        $absences = $absenceRepository->findAll();
+        $ecole = $this->getUser()->getEcoles();
+        $absences = $absenceRepository->findBy(['ecoles' => $ecole]);
 
         return $this->render('admin/absence/index.html.twig', [
             "absence" => $absences
@@ -112,10 +122,12 @@ class AbsenceController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $absence = $absenceRepository->find($absenceId);
-        $user = $usersRepository->findAllStudent();
+        $ecole = $this->getUser()->getEcoles();
+        $user = $usersRepository->findAllStudentByEcole($ecole);
         $ajouterChampEvent = true;
 
-        $form = $this->createForm(absenceType::class, $absence, ['creer_absence_admin' => $ajouterChampEvent, 'userid' => $user]);
+
+        $form = $this->createForm(absenceType::class, $absence, ['creer_absence_admin' => $ajouterChampEvent, 'userid' => $user->getId(), 'ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

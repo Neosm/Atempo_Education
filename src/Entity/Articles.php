@@ -35,7 +35,7 @@ class Articles
     #[ORM\JoinColumn(nullable: false)]
     private ?Users $users = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $Illustrations = null;
 
     #[ORM\ManyToOne(inversedBy: 'articles')]
@@ -46,6 +46,9 @@ class Articles
 
     #[ORM\OneToMany(mappedBy: 'articles', targetEntity: Images::class)]
     private Collection $images;
+
+    #[ORM\ManyToOne(inversedBy: 'articles')]
+    private ?Ecoles $ecoles = null;
 
     public function __construct()
     {
@@ -205,6 +208,18 @@ class Articles
                 $image->setArticles(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
 
         return $this;
     }

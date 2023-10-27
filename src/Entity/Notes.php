@@ -26,8 +26,11 @@ class Notes
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable:true)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable:true)]
     private ?int $coefficient = null;
+
+    #[ORM\ManyToOne(inversedBy: 'notes')]
+    private ?Ecoles $ecoles = null;
 
     public function getId(): ?int
     {
@@ -90,6 +93,18 @@ class Notes
     public function setCoefficient(int $coefficient): self
     {
         $this->coefficient = $coefficient;
+
+        return $this;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
 
         return $this;
     }

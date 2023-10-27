@@ -24,6 +24,9 @@ class Room
     #[ORM\ManyToMany(targetEntity: Materials::class, inversedBy: 'rooms')]
     private Collection $materials;
 
+    #[ORM\ManyToOne(inversedBy: 'room')]
+    private ?Ecoles $ecoles = null;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
@@ -97,6 +100,18 @@ class Room
     public function removeMaterial(Materials $material): self
     {
         $this->materials->removeElement($material);
+
+        return $this;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
 
         return $this;
     }

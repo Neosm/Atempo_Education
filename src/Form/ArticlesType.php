@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Articles;
 use App\Entity\Categories;
+use Doctrine\ORM\EntityRepository;
 use FOS\CKEditorBundle\Form\Type\CKEditorType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -18,6 +19,7 @@ class ArticlesType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $ecole = $options["ecole"];
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Titre de l\'article'
@@ -32,7 +34,7 @@ class ArticlesType extends AbstractType
                 ],
                 'constraints' => [
                     new File([
-                        'maxSize' => '600k',
+                        'maxSize' => '1500k',
                         'mimeTypes' => [
                             'image/png',
                             'image/jpg',
@@ -51,7 +53,14 @@ class ArticlesType extends AbstractType
             ->add('categories', EntityType::class, [
                 'class' => Categories::class,
                 'label' => 'Catégories',
+                'required' => false,
                 'multiple'=>false,
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
+                    return $er->createQueryBuilder('c')
+                        ->join('c.ecoles', 'ec')
+                        ->andWhere('ec.id = :ecole')
+                        ->setParameter('ecole', $ecole);
+                },
                 'attr' => [
                     'placeholder' => 'Catégories',
                     'class'=>'select-users-search'
@@ -70,6 +79,7 @@ class ArticlesType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Articles::class,
+            'ecole' => null,
         ]);
     }
 }

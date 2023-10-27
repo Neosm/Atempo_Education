@@ -2,6 +2,10 @@
 
 {% block title %}Ajouter un Article{% endblock %}
 
+
+{% block stylesheets %}
+
+{% endblock %}
 {% block content %}
 
     {% if app.request.attributes.get('_route') == 'admin_articles_modifier' %}
@@ -22,4 +26,8 @@
     <br>
     {{ form_row(ArticleForm.submit) }}
     {{ form_end(ArticleForm) }}
+{% endblock %}
+
+{% block javascripts %}
+
 {% endblock %}

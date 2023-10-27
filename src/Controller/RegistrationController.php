@@ -32,11 +32,14 @@ class RegistrationController extends AbstractController
         $user = new Users();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
+        
+        $ecole =  $this->getUser()->getEcoles();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
             $search_email = $entityManager->getRepository(Users::class)->findOneByEmail($user->getEmail());
             $user = $form->getData();
+            $user->setEcoles($ecole);
             $thumbnail = $form->get('thumbnail')->getData();
             if ($thumbnail) {
                 $originalFilename = pathinfo($thumbnail->getClientOriginalName(), PATHINFO_FILENAME);
@@ -53,7 +56,7 @@ class RegistrationController extends AbstractController
                 }
                 $user->setThumbnail($newFilename);
             }else{
-                $user->setThumbnail('default-profile-pic.jpg');
+                $user->setThumbnail('default-profil-pic.jpg');
             }
             if (!$search_email) {
                 $password = $passwordHasher->hashPassword($user, $user->getPassword());

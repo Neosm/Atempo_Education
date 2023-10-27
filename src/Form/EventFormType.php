@@ -41,10 +41,17 @@ class EventFormType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $ecole = $options['ecole'];
         $builder
             ->add('matieres', EntityType::class, [
-                'label' => 'Matière',
+                'label' => 'Discipline',
                 'class' => Matieres::class,
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
+                    return $er->createQueryBuilder('m')
+                        ->join('m.ecoles', 'ec')
+                        ->andWhere('ec.id = :ecole')
+                        ->setParameter('ecole', $ecole);
+                },
                 'choice_label' => 'name',
             ])
             ->add('start', DateTimeType::class, [
@@ -93,11 +100,14 @@ class EventFormType extends AbstractType
             ->add('teacher', EntityType::class, [
                 'label' => 'Professeur',
                 'class' => Users::class,
-                'query_builder' => function (EntityRepository $er) {
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
                     return $er->createQueryBuilder('u')
+                    ->join('u.ecoles', 'e')
                     ->andWhere('u.roles LIKE :val')
-                    ->setParameter('val', '%["ROLE_TEACHER"]%');
-                },
+                    ->andWhere('e.id = :ecoleId')
+                    ->setParameter('val', '%["ROLE_TEACHER"]%')
+                    ->setParameter('ecoleId', $ecole->getId());
+            },
                 'choice_label' => 'UserIdentifier',
             ])
             ->add('materials', EntityType::class, [
@@ -108,6 +118,12 @@ class EventFormType extends AbstractType
                 'multiple' => true,
                 'expanded' => true,
                 'required' => false,
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
+                    return $er->createQueryBuilder('m')
+                        ->join('m.ecoles', 'ec')
+                        ->andWhere('ec.id = :ecole')
+                        ->setParameter('ecole', $ecole);
+                },
                 'attr' => [
                     'class' => 'materials-field materials-checkboxes'
                 ],
@@ -143,6 +159,12 @@ class EventFormType extends AbstractType
                 'choice_label' => 'name',
                 'required' => false,
                 'label' => 'Salle',
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
+                    return $er->createQueryBuilder('r')
+                        ->join('r.ecoles', 'ec')
+                        ->andWhere('ec.id = :ecole')
+                        ->setParameter('ecole', $ecole);
+                },
                 'attr' => [
                     'class' => 'room-select',
                 ],
@@ -167,6 +189,12 @@ class EventFormType extends AbstractType
                 'class' => StudentClass::class,
                 'choice_label' => 'name',
                 'required' => false,
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
+                    return $er->createQueryBuilder('sc')
+                        ->join('sc.ecoles', 'ec')
+                        ->andWhere('ec.id = :ecole')
+                        ->setParameter('ecole', $ecole);
+                },
                 'placeholder' => "Choisissez la classe à laquelle vous faites cours",
                 'attr' => [
                     'class' => 'student-class-field'
@@ -178,11 +206,14 @@ class EventFormType extends AbstractType
             ->add('students', EntityType::class, [
                 'label' => 'Élèves',
                 'class' => Users::class,
-                'query_builder' => function (EntityRepository $er) {
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
                     return $er->createQueryBuilder('u')
+                    ->join('u.ecoles', 'e')
                     ->andWhere('u.roles LIKE :val')
-                    ->setParameter('val', '%["ROLE_STUDENT"]%');
-                },
+                    ->andWhere('e.id = :ecoleId')
+                    ->setParameter('val', '%["ROLE_STUDENT"]%')
+                    ->setParameter('ecoleId', $ecole->getId());
+            },
                 'choice_label' => 'UserIdentifier',
                 'multiple' => true,
                 'required' => false,
@@ -196,6 +227,12 @@ class EventFormType extends AbstractType
             ->add('programme', EntityType::class, [
                 'label' => 'Programmes',
                 'class' => Programmes::class,
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
+                    return $er->createQueryBuilder('p')
+                        ->join('p.ecoles', 'ec')
+                        ->andWhere('ec.id = :ecole')
+                        ->setParameter('ecole', $ecole);
+                },
                 'choice_label' => 'nom',
                 'attr' => [
                     'class' => 'programmes-field'
@@ -207,6 +244,12 @@ class EventFormType extends AbstractType
                 'label' => 'Leçons',
                 'placeholder' => "Souhaitez-vous ajouter une/des leçon(s) ?",
                 'class' => Lecons::class,
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
+                    return $er->createQueryBuilder('l')
+                        ->join('l.ecoles', 'ec')
+                        ->andWhere('ec.id = :ecole')
+                        ->setParameter('ecole', $ecole);
+                },
                 'choice_label' => 'nom',
                 'attr' => [
                     'class' => 'lecons-field'
@@ -273,6 +316,7 @@ class EventFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Event::class,
+            'ecole' => null,
         ]);
     }
 }

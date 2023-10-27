@@ -16,16 +16,18 @@ class DelayController extends AbstractController
     #[Route('/agenda/event/{eventId}/retard/create', name: 'delay_create')]
     public function create(Request $request, $eventId): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         $entityManager = $this->getDoctrine()->getManager();
         $event = $entityManager->getRepository(Event::class)->find($eventId);
 
         $delay = new Delay();
         $delay->setEvent($event);
 
-        $form = $this->createForm(DelayType::class, $delay);
+        $form = $this->createForm(DelayType::class, $delay, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $delay->setEcoles($ecole);
             $entityManager->persist($delay);
             $entityManager->flush();
 
@@ -40,10 +42,11 @@ class DelayController extends AbstractController
     #[Route('/agenda/event/{eventId}/retard/edit/{delayId}', name: 'delay_edit')]
     public function edit(Request $request, $eventId, $delayId): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         $entityManager = $this->getDoctrine()->getManager();
         $delay = $entityManager->getRepository(Delay::class)->find($delayId);
 
-        $form = $this->createForm(DelayType::class, $delay);
+        $form = $this->createForm(DelayType::class, $delay, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -77,11 +80,12 @@ class DelayController extends AbstractController
         $delay = new Delay();
         $user = $this->getUser();
 
-        $form = $this->createForm(delayType::class, $delay, ['ajouter_creer_delay' => $ajouterChampEvent, 'userid' => $user->getId()]);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(delayType::class, $delay, ['ajouter_creer_delay' => $ajouterChampEvent, 'userid' => $user->getId(), 'ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
+            $delay->setEcoles($ecole);
 
             $entityManager->persist($delay);
             $entityManager->flush();
@@ -97,18 +101,21 @@ class DelayController extends AbstractController
     #[Route('/retard/liste-retards', name: 'professeur_delay_liste')]
     public function professeur_delay_liste(): Response
     {
-        $user = $this->getUser();
-
         $entityManager = $this->getDoctrine()->getManager();
         $delayRepository = $entityManager->getRepository(Delay::class);
     
-        // Récupérer tous les retards avec un événement dont le teacher id correspond à l'ID de l'utilisateur
-        $delays = $delayRepository->createQueryBuilder('d')
-            ->leftJoin('d.event', 'e')
-            ->andWhere('e.teacher = :teacherId')
-            ->setParameter('teacherId', $user->getId())
+        $user = $this->getUser();
+        $ecoleId = $user->getEcoles()->getId();
+    
+        $delays = $delayRepository->createQueryBuilder('delay')
+            ->join('delay.event', 'event') // Joindre la relation event
+            ->join('event.ecoles', 'ecoles') // Joindre la relation ecoles
+            ->where('ecoles.id = :ecoleId') // Filtrer les retards par l'ID de l'école
+            ->setParameter('ecoleId', $ecoleId)
+            ->orderBy('event.start', 'DESC') // Trier par la date de début de l'événement
             ->getQuery()
             ->getResult();
+    
 
         return $this->render('delay/index.html.twig', [
             "delay" => $delays

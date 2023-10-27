@@ -17,7 +17,8 @@ class StudentClasseController extends AbstractController
     #[Route('/admin/classe', name: 'admin_studentclasse_liste')]
     public function index(StudentClassRepository $studentClassRepository): Response
     {
-        $studentClasses = $studentClassRepository->findAll();
+        $ecole = $this->getUser()->getEcoles();
+        $studentClasses = $studentClassRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('admin/student_classe/index.html.twig', [
             'studentClasses' => $studentClasses,
@@ -27,7 +28,8 @@ class StudentClasseController extends AbstractController
     #[Route('/admin/classe/{id}', name: 'admin_studentclasse_liste_details')]
     public function details(StudentClass $studentClass,StudentClassRepository $studentClassRepository): Response
     {
-        $studentClasses = $studentClassRepository->findAll();
+        $ecole = $this->getUser()->getEcoles();
+        $studentClasses = $studentClassRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('admin/student_classe/index.html.twig', [
             'studentClass' => $studentClass,
@@ -39,12 +41,13 @@ class StudentClasseController extends AbstractController
     public function create(Request $request, ManagerRegistry $doctrine): Response
     {
         $studentClasses = new StudentClass;
-        $form = $this->createForm(StudentClasseType::class, $studentClasses);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(StudentClasseType::class, $studentClasses, ['ecole' => $ecole]);
         $form->handleRequest($request);
     
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $doctrine->getManager();
-    
+            $studentClasses->setEcoles($ecole);
             // Récupérer les élèves sélectionnés
             $selectedStudents = $form->get('students')->getData();
             
@@ -72,6 +75,7 @@ class StudentClasseController extends AbstractController
     #[Route('/admin/classe/edit/{id}', name: 'admin_studentclasse_edit')]
     public function edit(Request $request, StudentClass $studentClass, ManagerRegistry $doctrine): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         // Récupérer les élèves de la classe
         $studentsInClass = $studentClass->getStudents();
     
@@ -81,6 +85,7 @@ class StudentClasseController extends AbstractController
         // Créer le formulaire et pré-remplir les étudiants de la classe
         $form = $this->createForm(StudentClasseType::class, $studentClass, [
             'studentsInClass' => $studentsInClass,
+            'ecole' => $ecole
         ]);
         $form->handleRequest($request);
     

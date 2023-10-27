@@ -23,7 +23,7 @@ class MatièresClassesController extends AbstractController
             $events = array_merge($events, $studentClass->getEvents()->toArray());
         }
         
-        // Récupérer toutes les matières liées aux événements
+        // Récupérer toutes les Disciplines liées aux événements
         $matieres = [];
         foreach ($events as $event) {
             $matiere = $event->getMatieres();
@@ -45,7 +45,7 @@ class MatièresClassesController extends AbstractController
         // Récupérer les événements où l'utilisateur est enseignant
         $teacherEvents = $user->getEventsteacher()->toArray();
     
-        // Organiser les heures passées par classe d'étudiants et matière
+        // Organiser les heures passées par classe d'étudiants et Discipline
         foreach ($teacherEvents as $event) {
             $eventStudentClass = $event->getStudentClass();
             $matiere = $event->getMatieres();

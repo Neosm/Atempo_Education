@@ -27,7 +27,8 @@ class LeconsController extends AbstractController
      */
     public function index(LeconsRepository $leconsRepository): Response
     {
-        $lecons = $leconsRepository->findAll();
+        $ecole = $this->getUser()->getEcoles();
+        $lecons = $leconsRepository->findBy(['ecoles' => $ecole]);
 
         return $this->render('admin/lecons/index.html.twig',[
             'lecons' => $lecons
@@ -40,10 +41,15 @@ class LeconsController extends AbstractController
     public function ajouter(Request $request, SluggerInterface $slugger): Response
     {
         $lecon = new Lecons();
-        $form = $this->createForm(LeconsType::class, $lecon, ['required' => true]);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(LeconsType::class, $lecon, [
+            'ecole' => $ecole,
+        ]);
         $form->handleRequest($request);
+        
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $lecon->setEcoles($ecole);
             $lecon->addUser($this->getUser());
             $images = $form->get('thumbnails')->getData();
             
@@ -96,7 +102,10 @@ class LeconsController extends AbstractController
      */
     public function modifierLecon(Request $request, Lecons $lecons, SluggerInterface $slugger): Response
     {
-        $form = $this->createForm(LeconsType::class, $lecons, ['required' => false]);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(LeconsType::class, $lecons, [
+            'ecole' => $ecole,
+        ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
 

@@ -78,7 +78,7 @@
 
     <div class="row mb-3">
         <div class="col">
-            <label for="{{ form.studentswitch.vars.id }}">Activer le boutton si vous faites cours à un ou plusieurs élève(s)</label>
+            <label for="{{ form.studentswitch.vars.id }}">Sélectionner le ou les élèves concerné(s)</label>
         </div>
     </div>
     
@@ -117,6 +117,15 @@
             </div>
         </div>
     {% endif %}
+
+        {% if form.modificationScope is defined %}
+        <div class="row mb-3">
+            <div class="col">
+                {{ form_row(form.modificationScope) }}
+            </div>
+        </div>
+    {% endif %}
+
 
     <div class="row">
         <div class="col">

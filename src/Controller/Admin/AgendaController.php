@@ -64,8 +64,11 @@ class AgendaController extends AbstractController
         // Récupérer l'utilisateur connecté (vous pouvez adapter cela selon votre logique d'authentification)
         $user = $this->getUser();
 
+        $ecole = $user->getEcoles();
+
         // Récupérer les événements associés à l'utilisateur
-        $events = $this->getDoctrine()->getRepository(Event::class)->findAll();
+        $events = $this->getDoctrine()->getRepository(Event::class)->findBy(['ecoles' => $ecole]);
+
 
         // Convertir les événements en un format compatible avec FullCalendar (par exemple, JSON)
         $formattedEvents = [];
@@ -162,13 +165,15 @@ class AgendaController extends AbstractController
     }
 
     /**
-     * @Route("/create", name="create_event")
+     * @Route("/creation", name="create_event")
      */
     public function admincreateEvent(Request $request): Response
     {
         $event = new Event();
 
-        $form = $this->createForm(EventFormType::class, $event);
+        $ecole =  $this->getUser()->getEcoles();
+
+        $form = $this->createForm(EventFormType::class, $event, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -204,6 +209,8 @@ class AgendaController extends AbstractController
             $end = clone $start;
             $end->modify("+$duration minutes");
             $event->setEnd($end);
+
+            $event->setEcoles($ecole);
 
             // Enregistrer l'événement dans la base de données
             $entityManager = $this->getDoctrine()->getManager();
@@ -265,6 +272,8 @@ class AgendaController extends AbstractController
             $recurringEvent->addStudent($student);
         }
         $recurringEvent->setTeacher($form->get('teacher')->getData());
+        
+        $recurringEvent->setEcoles($parentEvent->getEcoles());
     
         $recurringEvent->setStart($start);
         $recurringEvent->setRoom($form->get('room')->getData());
@@ -304,7 +313,9 @@ class AgendaController extends AbstractController
         // Sauvegardez l'heure de début d'origine
         $originalStart = $event->getStart();
 
-        $form = $this->createForm(EventFormType::class, $event);
+        $ecole =  $this->getUser()->getEcoles();
+
+        $form = $this->createForm(EventFormType::class, $event, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
 
@@ -883,6 +894,8 @@ class AgendaController extends AbstractController
         // Récupérer les données envoyées via AJAX
         $zoomlink = $request->query->get('zoomlink');
 
+        $ecole = $this->getUser()->getEcoles();
+
         $duration = $request->query->get('duration'); // Récupérer la durée depuis la requête
         $startTime = new \DateTime($start);
         $end = clone $startTime;
@@ -899,6 +912,7 @@ class AgendaController extends AbstractController
 
         // Récupérer l'ID de l'événement que vous modifiez (si applicable)
         $eventId = $request->query->get('eventId'); // Remplacez 'eventId' par la clé réelle
+        dump($eventId);
 
         if ($eventId) {
             // Récupérer l'événement en fonction de son ID
@@ -920,7 +934,7 @@ class AgendaController extends AbstractController
         } else {
             if (empty(array_filter($materialIdsArray))) {
                 // Si aucun équipement n'est sélectionné, renvoyer toutes les salles
-                $filteredRooms = $this->roomRepository->findAll();
+                $filteredRooms = $this->roomRepository->findBy(['ecoles' => $ecole]);
             } else {
                 // Créer le QueryBuilder filtré pour les matériaux sélectionnés
                 $queryBuilder = $this->roomRepository->createFilteredQuery($materialIdsArray);
@@ -935,8 +949,6 @@ class AgendaController extends AbstractController
         
             $availableRooms = array_values($availableRooms); // Réindexer le tableau
         }
-
-        dump($availableRooms);
         $roomData = [];
         foreach ($availableRooms as $room) {
             $roomData[] = [

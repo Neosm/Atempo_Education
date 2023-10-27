@@ -16,6 +16,7 @@ class StudentClasseType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $ecole = $options['ecole'];
         $builder
             ->add('name', TypeTextType::class, [
                 "label" => 'Nom de la classe'
@@ -23,11 +24,13 @@ class StudentClasseType extends AbstractType
             ->add('students', EntityType::class, [
                 'label' => 'Élèves',
                 'class' => Users::class,
-                'query_builder' => function (EntityRepository $er) use ($options) {
+                'query_builder' => function (EntityRepository $er)  use ($ecole, $options) {
                     $qb = $er->createQueryBuilder('u')
-                        ->andWhere('u.roles LIKE :val')
-                        ->andWhere('u.studentClass IS NULL')
-                        ->setParameter('val', '%["ROLE_STUDENT"]%');
+                    ->join('u.ecoles', 'e')
+                    ->andWhere('u.roles LIKE :val')
+                    ->andWhere('e.id = :ecoleId')
+                    ->setParameter('val', '%["ROLE_STUDENT"]%')
+                    ->setParameter('ecoleId', $ecole->getId());
 
                     // Si vous êtes en mode d'édition et que des élèves sont déjà associés à la classe,
                     // excluez-les de la requête pour éviter de les réafficher
@@ -62,6 +65,7 @@ class StudentClasseType extends AbstractType
         $resolver->setDefaults([
             'data_class' => StudentClass::class,
             'studentsInClass' => [], // Ajoutez cette option pour recevoir les étudiants pré-remplis
+            'ecole' => null,
         ]);
     }
 }

@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
  * @Route ("/admin/categories", name="admin_categories_")
@@ -32,13 +33,16 @@ class  CategoriesController extends AbstractController
     /**
      * @Route("/ajout", name="ajout")
      */
-    public function ajoutCategorie(Request $request): Response
+    public function ajoutCategorie(Request $request, SluggerInterface $slugger): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         $categorie = new Categories;
-        $form = $this->createForm(CategoriesType::class, $categorie);
+        $form = $this->createForm(CategoriesType::class, $categorie, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $categorie->setEcoles($ecole);
+            $categorie->setSlug($slugger->slug($form->get('name')->getData()));
             $em = $this->getDoctrine()->getManager();
             $em->persist($categorie);
             $em->flush();
@@ -55,7 +59,8 @@ class  CategoriesController extends AbstractController
      */
     public function modifierCategorie(Request $request, categories $categorie): Response
     {
-        $form = $this->createForm(CategoriesType::class, $categorie);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(CategoriesType::class, $categorie, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

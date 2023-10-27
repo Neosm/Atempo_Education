@@ -21,7 +21,9 @@ class RoomController extends AbstractController
     #[Route('/admin/room', name: 'admin_salle_liste')]
     public function index(RoomRepository $roomRepository): Response
     {
-        $rooms = $roomRepository->findAll();
+        
+        $ecole = $this->getUser()->getEcoles();
+        $rooms = $roomRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('admin/room/index.html.twig', [
             'rooms' => $rooms,
@@ -32,10 +34,12 @@ class RoomController extends AbstractController
     public function create(Request $request, ManagerRegistry $doctrine): Response
     {
         $room = new Room();
-        $form = $this->createForm(RoomType::class, $room);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(RoomType::class, $room, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $room->setEcoles($ecole);
             $entityManager = $doctrine->getManager();
             $entityManager->persist($room);
             $entityManager->flush();
@@ -53,7 +57,8 @@ class RoomController extends AbstractController
     #[Route('/admin/salle/edit/{id}', name: 'admin_salle_edit')]
     public function edit(Request $request, Room $room, ManagerRegistry $doctrine): Response
     {
-        $form = $this->createForm(RoomType::class, $room);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(RoomType::class, $room, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -120,7 +125,9 @@ class RoomController extends AbstractController
     #[Route('/admin/salle/details/{id}', name: 'admin_salle_liste_details')]
     public function details(Room $room, RoomRepository $roomRepository): Response
     {
-        $rooms = $roomRepository->findAll();
+        
+        $ecole = $this->getUser()->getEcoles();
+        $rooms = $roomRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('admin/room/index.html.twig', [
             'room' => $room,
@@ -134,7 +141,9 @@ class RoomController extends AbstractController
     #[Route('/admin/salle/equipement', name: 'admin_salle_equipement_liste')]
     public function equipement(MaterialsRepository $materialRepository): Response
     {
-        $materials = $materialRepository->findAll();
+        
+        $ecole = $this->getUser()->getEcoles();
+        $materials = $materialRepository->findBy(["ecoles" => $ecole]);
     
         return $this->render('admin/room/equipement/index.html.twig', [
             'materials' => $materials,
@@ -144,30 +153,28 @@ class RoomController extends AbstractController
     #[Route('/admin/salle/equipement/creer', name: 'admin_salle_equipement_create')]
     public function equipementCreer(Request $request, ManagerRegistry $doctrine): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         $material = new Materials();
-        $form = $this->createForm(EquipementType::class, $material);
+        $form = $this->createForm(EquipementType::class, $material, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $doctrine->getManager();
 
             $selectedRooms = $form->get('rooms')->getData();
-
+            $material->setEcoles($ecole);
             $entityManager->persist($material);
 
-            dump($selectedRooms);
 
             foreach ($selectedRooms as $room) {
                 $room->addMaterial($material);
-                dump($room);
                 $entityManager->persist($room);
             }
 
-            dump($material);
             $entityManager->flush();
 
             $this->addFlash('success', 'Équipement créé avec succès.');
-            // return $this->redirectToRoute('admin_salle_equipement'); 
+            return $this->redirectToRoute('admin_salle_equipement'); 
         }
         return $this->render('admin/room/equipement/new.html.twig', ['form' => $form->createView(),]);
     }
@@ -176,6 +183,7 @@ class RoomController extends AbstractController
     #[Route('/admin/salle/equipement/modifier/{id}', name: 'admin_salle_equipement_edit')]
     public function equipementEdit(Request $request, Materials $material, ManagerRegistry $doctrine): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         // Récupérer les salles associées à l'équipement
         $roomsWithMaterial = $material->getRooms();
         
@@ -183,7 +191,7 @@ class RoomController extends AbstractController
         $originalRooms = clone $roomsWithMaterial;
         
         // Créer le formulaire et pré-remplir les salles associées à l'équipement
-        $form = $this->createForm(EquipementType::class, $material);
+        $form = $this->createForm(EquipementType::class, $material, ['ecole' => $ecole]);
         $form->handleRequest($request);
         
         if ($form->isSubmitted() && $form->isValid()) {
@@ -233,7 +241,9 @@ class RoomController extends AbstractController
     #[Route('/admin/salle/equipement/details/{id}', name: 'admin_salle_equipement_liste_details')]
     public function equipementDetails(Materials $material, MaterialsRepository $materialRepository): Response
     {
-        $materials = $materialRepository->findAll();
+        
+        $ecole = $this->getUser()->getEcoles();
+        $materials = $materialRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('admin/room/equipement/index.html.twig', [
             'material' => $material,

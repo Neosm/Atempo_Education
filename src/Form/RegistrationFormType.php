@@ -67,7 +67,7 @@ class RegistrationFormType extends AbstractType
                 ]
             ])
             ->add('thumbnail', FileType::class, [
-                'label' => 'Photo de profile',
+                'label' => 'Photo de profil',
                 'mapped'=>false,
                 'multiple'=>false,
                 'required'=>false,
@@ -76,7 +76,7 @@ class RegistrationFormType extends AbstractType
                 ],
                 'constraints' => [
                     new File([
-                        'maxSize' => '600k',
+                        'maxSize' => '1500k',
                         'mimeTypes' => [
                             'image/png',
                             'image/jpg',

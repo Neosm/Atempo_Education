@@ -164,10 +164,11 @@ class EventController extends AbstractController
     public function createEvent(Request $request): Response
     {
         $event = new Event();
+        $ecole =  $this->getUser()->getEcoles();
 
-        $form = $this->createForm(EventFormType::class, $event);
+        $form = $this->createForm(EventFormType::class, $event, ['ecole' => $ecole]);
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
             // Calculer l'heure de fin en fonction de l'heure de début et de la durée
             $start = $form->get('start')->getData(); // Récupérer l'objet DateTime depuis le formulaire
@@ -177,6 +178,7 @@ class EventController extends AbstractController
             $studentClass = $form->get('studentClass')->getData();
             $studentsData = $form->get('students')->getData();
             $numberOfStudents = count($studentsData);
+            $event->setEcoles($ecole);
 
             if ($studentClass) {
                 $title .= $studentClass;
@@ -252,11 +254,14 @@ class EventController extends AbstractController
     private function createRecurringEvent(FormInterface $form, \DateTime $start, \DateTime $end, int $duration, Event $parentEvent): Event
     {
         $recurringEvent = new Event();
+        
+        $ecole =  $this->getUser()->getEcoles();
     
         $recurringEvent->setTitle($parentEvent->getTitle());
         $recurringEvent->setMatieres($form->get('matieres')->getData());
         $recurringEvent->setStudentClass($form->get('studentClass')->getData());
         $students = $form->get('students')->getData();
+        $recurringEvent->setEcoles($ecole);
         foreach ($students as $student) {
             $recurringEvent->addStudent($student);
         }
@@ -298,8 +303,9 @@ class EventController extends AbstractController
     {
        // Sauvegardez l'heure de début d'origine
         $originalStart = $event->getStart();
+        $ecole =  $this->getUser()->getEcoles();
 
-        $form = $this->createForm(EventFormType::class, $event);
+        $form = $this->createForm(EventFormType::class, $event, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
 
@@ -1015,6 +1021,7 @@ class EventController extends AbstractController
         $start = $request->query->get('start');
         // Récupérer les données envoyées via AJAX
         $zoomlink = $request->query->get('zoomlink');
+        $ecole = $this->getUser()->getEcoles();
 
         $duration = $request->query->get('duration'); // Récupérer la durée depuis la requête
         $startTime = new \DateTime($start);
@@ -1054,7 +1061,7 @@ class EventController extends AbstractController
         } else {
             if (empty(array_filter($materialIdsArray))) {
                 // Si aucun équipement n'est sélectionné, renvoyer toutes les salles
-                $filteredRooms = $this->roomRepository->findAll();
+                $filteredRooms = $this->roomRepository->findBy(['ecoles' => $ecole]);
             } else {
                 // Créer le QueryBuilder filtré pour les matériaux sélectionnés
                 $queryBuilder = $this->roomRepository->createFilteredQuery($materialIdsArray);

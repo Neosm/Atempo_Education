@@ -18,16 +18,19 @@ class DelayController extends AbstractController
     #[Route('/admin/agenda/event/{eventId}/retard/create', name: 'admin_delay_create')]
     public function admincreate(Request $request, $eventId): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         $entityManager = $this->getDoctrine()->getManager();
         $event = $entityManager->getRepository(Event::class)->find($eventId);
 
         $delay = new Delay();
         $delay->setEvent($event);
 
-        $form = $this->createForm(DelayType::class, $delay);
+        $form = $this->createForm(DelayType::class, $delay, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
+        $ecole = $this->getUser()->getEcoles();
         if ($form->isSubmitted() && $form->isValid()) {
+            $delay->setEcoles($ecole);
             $entityManager->persist($delay);
             $entityManager->flush();
 
@@ -42,10 +45,11 @@ class DelayController extends AbstractController
     #[Route('/admin/agenda/event/{eventId}/retard/edit/{delayId}', name: 'admin_delay_edit')]
     public function adminedit(Request $request, $eventId, $delayId): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         $entityManager = $this->getDoctrine()->getManager();
         $delay = $entityManager->getRepository(Delay::class)->find($delayId);
 
-        $form = $this->createForm(DelayType::class, $delay);
+        $form = $this->createForm(DelayType::class, $delay, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -81,14 +85,17 @@ class DelayController extends AbstractController
     public function admin_professeur_delay_create(Request $request): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
+        $ecole = $this->getUser()->getEcoles();
         $ajouterChampEvent = true;
         $delay = new Delay();
         $user = $this->getUser();
 
-        $form = $this->createForm(delayType::class, $delay, ['admin_creer_delay' => $ajouterChampEvent, 'userid' => $user->getId()]);
+        $form = $this->createForm(delayType::class, $delay, ['admin_creer_delay' => $ajouterChampEvent, 'userid' => $user->getId(), 'ecole' => $ecole]);
         $form->handleRequest($request);
 
+        $ecole = $this->getUser()->getEcoles();
         if ($form->isSubmitted() && $form->isValid()) {
+            $delay->setEcoles($ecole);
 
 
             $entityManager->persist($delay);
@@ -103,29 +110,36 @@ class DelayController extends AbstractController
     }
 
     #[Route('/admin/retard/liste-retards', name: 'admin_liste_delay_liste')]
-    public function admin_professeur_delay_liste(DelayRepository $delayRepository): Response
+    public function admin_professeur_delay_liste(DelayRepository $delayRepository, UsersRepository $usersRepository): Response
     {
-        
+        $user = $this->getUser();
+        $ecoleId = $user->getEcoles()->getId();
+    
         $delays = $delayRepository->createQueryBuilder('delay')
-        ->join('delay.event', 'event') // Joindre la relation event
-        ->orderBy('event.start', 'DESC') // Trier par la date de début de l'événement
-        ->getQuery()
-        ->getResult();
-
+            ->join('delay.event', 'event') // Joindre la relation event
+            ->join('event.ecoles', 'ecoles') // Joindre la relation ecoles
+            ->where('ecoles.id = :ecoleId') // Filtrer les retards par l'ID de l'école
+            ->setParameter('ecoleId', $ecoleId)
+            ->orderBy('event.start', 'DESC') // Trier par la date de début de l'événement
+            ->getQuery()
+            ->getResult();
+    
         return $this->render('admin/delay/index.html.twig', [
             "delay" => $delays
         ]);
     }
+    
 
     #[Route('/admin/delay/edit/{delayId}', name: 'admin_liste_delay_edit')]
     public function adminlisteedit(Request $request, $delayId, DelayRepository $delayRepository, UsersRepository $usersRepository): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         $entityManager = $this->getDoctrine()->getManager();
         $delay = $delayRepository->find($delayId);
-        $user = $usersRepository->findAllStudent();
+        $user = $usersRepository->findAllStudentByEcole($ecole);
         $ajouterChampEvent = true;
 
-        $form = $this->createForm(delayType::class, $delay, ['admin_creer_delay' => $ajouterChampEvent, 'userid' => $user]);
+        $form = $this->createForm(delayType::class, $delay, ['admin_creer_delay' => $ajouterChampEvent, 'userid' => $user, 'ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

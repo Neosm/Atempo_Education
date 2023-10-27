@@ -21,6 +21,9 @@ class Materials
     #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'materials')]
     private Collection $rooms;
 
+    #[ORM\ManyToOne(inversedBy: 'materials')]
+    private ?Ecoles $ecoles = null;
+
     public function __construct()
     {
         $this->rooms = new ArrayCollection();
@@ -66,6 +69,18 @@ class Materials
         if ($this->rooms->removeElement($room)) {
             $room->removeMaterial($this);
         }
+
+        return $this;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
 
         return $this;
     }

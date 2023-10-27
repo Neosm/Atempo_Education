@@ -41,19 +41,21 @@ class AdminController extends AbstractController
         AbsenceRepository $absenceRepository,
         ArticlesRepository $articlesRepository): Response
     {
-        $students = $userRepository->findAllStudent();
-        $teachers = $userRepository->findAllTeacher();
-        $studentClasses = $studentClassRepository->findAll();
-        $rooms = $roomRepository->findAll();
-        $notes = $notesRepository->findAll();
-        $lecons = $leconsRepository->findAll();
-        $programmes = $programmesRepository->findAll();
-        $delays = $delayRepository->findAll();
-        $absences = $absenceRepository->findAll();
-        $latestArticle = $articlesRepository->findAll();
-        $matieres = $matieresRepository->findAll();
+        $ecole = $this->getUser()->getEcoles();
 
-        $events = $eventRepository->findAll();
+        $students = $userRepository->findAllStudentByEcole($ecole);
+        $teachers = $userRepository->findAllTeacherByEcole($ecole);
+        $studentClasses = $studentClassRepository->findBy(['ecoles' => $ecole]);
+        $rooms = $roomRepository->findBy(['ecoles' => $ecole]);
+        $notes = $notesRepository->findBy(['ecoles' => $ecole]);
+        $lecons = $leconsRepository->findBy(['ecoles' => $ecole]);
+        $programmes = $programmesRepository->findBy(['ecoles' => $ecole]);
+        $delays = $delayRepository->findBy(['ecoles' => $ecole]);
+        $absences = $absenceRepository->findBy(['ecoles' => $ecole]);
+        $latestArticle = $articlesRepository->findBy(['ecoles' => $ecole]);
+        $matieres = $matieresRepository->findBy(['ecoles' => $ecole]);
+        $events = $eventRepository->findBy(['ecoles' => $ecole]);
+
         //CALENDAR
         // Récupérer les événements associés à l'utilisateur
         // Convertir les événements en un format compatible avec FullCalendar (par exemple, JSON)

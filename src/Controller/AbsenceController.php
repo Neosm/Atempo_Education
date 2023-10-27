@@ -15,6 +15,7 @@ class AbsenceController extends AbstractController
     #[Route('/agenda/event/{eventId}/absence/create', name: 'absence_event_create')]
     public function create(Request $request, $eventId): Response
     {
+        $ecole = $this->getUser()->getEcoles();
         $entityManager = $this->getDoctrine()->getManager();
         $event = $entityManager->getRepository(Event::class)->find($eventId);
 
@@ -22,10 +23,12 @@ class AbsenceController extends AbstractController
         $absence->setEvent($event);
         $absence->setAbsenceDate($event->getStart());
 
-        $form = $this->createForm(absenceType::class, $absence);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(absenceType::class, $absence, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $absence->setEcoles($ecole);
             $entityManager->persist($absence);
             $entityManager->flush();
 
@@ -43,7 +46,8 @@ class AbsenceController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $absence = $entityManager->getRepository(absence::class)->find($absenceId);
 
-        $form = $this->createForm(absenceType::class, $absence);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(absenceType::class, $absence, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -76,14 +80,17 @@ class AbsenceController extends AbstractController
         $ajouterChampEvent = true;
         $absence = new absence();
         $user = $this->getUser();
+        
+        $ecole = $user->getEcoles();
 
-        $form = $this->createForm(absenceType::class, $absence, ['creer_absence_professeur' => $ajouterChampEvent, 'userid' => $user->getId()]);
+        $form = $this->createForm(absenceType::class, $absence, ['creer_absence_professeur' => $ajouterChampEvent, 'userid' => $user->getId(), 'ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
             $event = $form->get('event')->getData();
             $absence->setAbsenceDate($event->getStart());
+            $absence->setEcoles($ecole);
 
             $entityManager->persist($absence);
             $entityManager->flush();
@@ -103,12 +110,15 @@ class AbsenceController extends AbstractController
 
         $entityManager = $this->getDoctrine()->getManager();
         $absenceRepository = $entityManager->getRepository(Absence::class);
-    
+        $ecoleId = $user->getEcoles()->getId();
         // Récupérer toutes les absences avec un événement dont le teacher id correspond à l'ID de l'utilisateur
         $absences = $absenceRepository->createQueryBuilder('a')
             ->leftJoin('a.event', 'e')
+            ->join('event.ecoles', 'ecoles')
+            ->where('ecoles.id = :ecoleId')
             ->andWhere('e.teacher = :teacherId')
             ->setParameter('teacherId', $user->getId())
+            ->setParameter('ecoleId', $ecoleId)
             ->getQuery()
             ->getResult();
 

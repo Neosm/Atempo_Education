@@ -67,7 +67,11 @@
                 <div class="card-body">
                     <h4 class="card-title">Catégorie</h4>
                     <p class="card-text">
+                    {% if article.categories is not null %}
                             <a href="{{ path('actualites_home') }}?categories={{article.categories.id}}&page=1" class="badge badge-primary">{{ article.categories }}</a>
+                    {% else %}
+                        Aucune catégorie
+                        {% endif %}
                     </p>
                 </div>
             </div>

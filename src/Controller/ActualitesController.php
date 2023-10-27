@@ -26,7 +26,8 @@ class ActualitesController extends AbstractController
      */
     public function index(ArticlesRepository $artsRepo, CategoriesRepository $catsRepo, Request $request): Response
     {
-        $articles = $artsRepo->findBy(['active' =>true], ['id'=>'DESC']);
+        $ecole = $this->getUser()->getEcoles();
+        $articles = $artsRepo->findBy(['active' =>true], ['id'=>'DESC'], ['ecoles' => $ecole]);
 
         // On définit le nombre d'éléments par page
         $limit = 8;

@@ -20,6 +20,7 @@
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 		<link href="{{ asset('assets/css/light.css') }}" rel="stylesheet">
 		<link href="{{ asset('assets/css/atempo-education.css') }}" rel="stylesheet">
+		<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 	</head>
 	<body style="background: #293042">
 		<div class="wrapper">
@@ -113,20 +114,20 @@
 													</li>
 												</ul>
 											</li>
-											<!-- Section Matière -->
+											<!-- Section Discipline -->
 											<li class="sidebar-item  {% if app.request.attributes.get('_route') starts with 'admin_matiere_' %}active{% endif %}">
-												<a data-bs-target="#matières" data-bs-toggle="collapse" class="sidebar-link collapsed" aria-expanded="{% if app.request.attributes.get('_route') starts with 'admin_matiere_' %}true{% else %}false{% endif %}">
+												<a data-bs-target="#Disciplines" data-bs-toggle="collapse" class="sidebar-link collapsed" aria-expanded="{% if app.request.attributes.get('_route') starts with 'admin_matiere_' %}true{% else %}false{% endif %}">
 													<svg class="bi me-2" width="16" height="16">
 														<use xlink:href=""></use>
 													</svg>
-													<span class="align-middle">Matières</span>
+													<span class="align-middle">Disciplines</span>
 												</a>
-												<ul id="matières" class="sidebar-dropdown list-unstyled collapse {% if app.request.attributes.get('_route') starts with 'admin_matiere_' %}show{% endif %}">
+												<ul id="Disciplines" class="sidebar-dropdown list-unstyled collapse {% if app.request.attributes.get('_route') starts with 'admin_matiere_' %}show{% endif %}">
 													<li class="sidebar-item  {% if app.request.attributes.get('_route') starts with 'admin_matiere_liste' %}active{% endif %}">
-														<a href="{{ path('admin_matiere_liste') }}" class="sidebar-link">Voir les matières</a>
+														<a href="{{ path('admin_matiere_liste') }}" class="sidebar-link">Voir les Disciplines</a>
 													</li>
 													<li class="sidebar-item  {% if app.request.attributes.get('_route') starts with 'admin_matiere_create' %}active{% endif %}">
-														<a href="{{ path('admin_matiere_create') }}" class="sidebar-link">Ajouter une matière</a>
+														<a href="{{ path('admin_matiere_create') }}" class="sidebar-link">Ajouter une Discipline</a>
 													</li>
 												</ul>
 											</li>
@@ -287,7 +288,7 @@
 									</svg>
 								</a>
 								<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
-									<img src="{{ asset('/uploads/profil_pics/' ~ app.user.thumbnail)|imagine_filter('thumbnail') }}" class="avatar img-fluid rounded-circle me-1" alt="Photo de profil de {{ app.user.firstname }}">
+									<img src="{{ asset('/uploads/profile_pics/' ~ app.user.thumbnail)|imagine_filter('thumbnail') }}" class="avatar img-fluid rounded-circle me-1" alt="Photo de profil de {{ app.user.firstname }}">
 									<span class="text-white">{{ app.user.firstname }}</span>
 								</a>
 								<div class="dropdown-menu dropdown-menu-end">

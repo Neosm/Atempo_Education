@@ -36,6 +36,9 @@ class Programmes
     #[ORM\ManyToMany(targetEntity: Event::class, mappedBy: 'programme')]
     private Collection $events;
 
+    #[ORM\ManyToOne(inversedBy: 'programmes')]
+    private ?Ecoles $ecoles = null;
+
     public function __construct()
     {
         $this->lecons = new ArrayCollection();
@@ -173,6 +176,18 @@ class Programmes
         if ($this->events->removeElement($event)) {
             $event->removeProgramme($this);
         }
+
+        return $this;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
 
         return $this;
     }

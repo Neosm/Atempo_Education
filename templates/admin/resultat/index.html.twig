@@ -10,7 +10,7 @@
                 <thead>
                     <tr>
                         <th>User</th>
-                        <th>Matière</th>
+                        <th>Discipline</th>
                         <th>Note</th>
                         <th>Coefficient</th>
                         <th>Date</th>
@@ -24,7 +24,7 @@
                             {% if note.matiere is not null %}
                                 <td>{{ note.matiere.name }}</td>
                             {% else %}
-                                <td>Matière supprimer ou inexistante</td>
+                                <td>Discipline supprimer ou inexistante</td>
                             {% endif %}
                             <td>{{ note.note }}</td>
                             <td>{{ note.coefficient }}</td>

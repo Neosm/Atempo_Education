@@ -75,46 +75,51 @@ class UsersRepository extends ServiceEntityRepository implements PasswordUpgrade
     }
 
 
-    public function findAllAdmin()
+    public function findAllAdminByEcole($ecole)
     {
         return $this->createQueryBuilder('u')
             ->andWhere('u.roles LIKE :val')
+            ->andWhere('u.ecoles = :ecole')
             ->setParameter('val', '%["ROLE_ADMIN"]%')
+            ->setParameter('ecole', $ecole)
             ->orderBy('u.id', 'DESC')
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
-
-    public function findAllStudent()
+    
+    public function findAllStudentByEcole($ecole)
     {
         return $this->createQueryBuilder('u')
             ->andWhere('u.roles LIKE :val')
+            ->andWhere('u.ecoles = :ecole')
             ->setParameter('val', '%["ROLE_STUDENT"]%')
+            ->setParameter('ecole', $ecole)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
-
-    public function findAllTeacher()
+    
+    public function findAllTeacherByEcole($ecole)
     {
         return $this->createQueryBuilder('u')
             ->andWhere('u.roles LIKE :val')
+            ->andWhere('u.ecoles = :ecole')
             ->setParameter('val', '%["ROLE_TEACHER"]%')
+            ->setParameter('ecole', $ecole)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
-
-    public function findWithoutUser($userId)
+    
+    public function findWithoutUserAndEcole($userId, $ecole)
     {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.id NOT LIKE :val')
+            ->andWhere('u.id != :val')
+            ->andWhere('u.ecoles = :ecole')
             ->setParameter('val', $userId)
+            ->setParameter('ecole', $ecole)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
+    
 
     public function findUserNotes($user)
     {

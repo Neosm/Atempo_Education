@@ -27,6 +27,8 @@ class AccessDeniedSubscriber implements EventSubscriberInterface
                 $event->setResponse(new RedirectResponse('/admin/'));
             } elseif ($this->security->isGranted('ROLE_TEACHER') || $this->security->isGranted('ROLE_STUDENT')) {
                 $event->setResponse(new RedirectResponse('/'));
+            }elseif ($this->security->isGranted('ROLE_SUPERADMIN')) {
+                $event->setResponse(new RedirectResponse('/superadmin/ecoles/'));
             }
         }
     }

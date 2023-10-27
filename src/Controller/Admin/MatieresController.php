@@ -18,7 +18,8 @@ class MatieresController extends AbstractController
     #[Route('/admin/matieres', name: 'admin_matiere_liste')]
     public function index(MatieresRepository $matieresRepository): Response
     {
-        $matieres = $matieresRepository->findAll();
+        $ecole = $this->getUser()->getEcoles();
+        $matieres = $matieresRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('admin/matieres/index.html.twig', [
             'matieres' => $matieres,
@@ -33,12 +34,14 @@ class MatieresController extends AbstractController
         
         $form->handleRequest($request);
         
+        $ecole = $this->getUser()->getEcoles();
         if ($form->isSubmitted() && $form->isValid()) {
+            $matiere->setEcoles($ecole);
             $entityManager = $doctrine->getManager();
             $entityManager->persist($matiere);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Matière créée avec succès.');
+            $this->addFlash('success', 'Discipline créée avec succès.');
             
             return $this->redirectToRoute('admin_matiere_liste');
         }
@@ -59,7 +62,7 @@ class MatieresController extends AbstractController
             $entityManager = $doctrine->getManager();
             $entityManager->flush();
 
-            $this->addFlash('success', 'Matière mise à jour avec succès.');
+            $this->addFlash('success', 'Discipline mise à jour avec succès.');
             
             return $this->redirectToRoute('admin_matiere_liste');
         }
@@ -75,11 +78,11 @@ class MatieresController extends AbstractController
     {
         $entityManager = $doctrine->getManager();
 
-        // Suppression de la matière des entités associées (Notes et Event)
+        // Suppression de la Discipline des entités associées (Notes et Event)
         $notesRepository = $doctrine->getRepository(Notes::class);
         $eventsRepository = $doctrine->getRepository(Event::class);
 
-        # Suppression des notes associées à la matière
+        # Suppression des notes associées à la Discipline
         $notes = $notesRepository->findBy(['matiere' => $matiere]);
         foreach ($notes as $note) {
             if ($note->getMatiere() === $matiere) {
@@ -88,7 +91,7 @@ class MatieresController extends AbstractController
             }
         }
 
-        # Suppression des events associés à la matière
+        # Suppression des events associés à la Discipline
         $events = $eventsRepository->findBy(['matieres' => $matiere]);
         foreach ($events as $event) {
             if ($event->getMatieres() === $matiere) {
@@ -97,16 +100,16 @@ class MatieresController extends AbstractController
             }
         }
 
-        # Enfin, supprimez la matière elle-même
+        # Enfin, supprimez la Discipline elle-même
         $entityManager->remove($matiere);
         $entityManager->flush();
 
 
-        // Suppression de la matière elle-même
+        // Suppression de la Discipline elle-même
         $entityManager->remove($matiere);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Matière supprimée avec succès.');
+        $this->addFlash('success', 'Discipline supprimée avec succès.');
 
         return $this->redirectToRoute('admin_matiere_liste');
     }

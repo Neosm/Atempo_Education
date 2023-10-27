@@ -18,6 +18,7 @@ class NoteType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $ecole = $options['ecole'];
         $builder
             ->add('note', IntegerType::class, [
                 'label' => 'Note',
@@ -36,20 +37,30 @@ class NoteType extends AbstractType
             ])
             ->add('coefficient', IntegerType::class, [
                 'label' => 'Coefficient',
+                'required' => false,
             ])
             ->add('user', EntityType::class, [
                 'label' => 'Élèves',
                 'class' => Users::class,
-                'query_builder' => function (EntityRepository $er) {
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
                     return $er->createQueryBuilder('u')
+                    ->join('u.ecoles', 'e')
                     ->andWhere('u.roles LIKE :val')
-                    ->setParameter('val', '%["ROLE_STUDENT"]%');
-                },
+                    ->andWhere('e.id = :ecoleId')
+                    ->setParameter('val', '%["ROLE_STUDENT"]%')
+                    ->setParameter('ecoleId', $ecole->getId());
+            },
                 'choice_label' => 'UserIdentifier',
             ])
             ->add('matiere', EntityType::class, [
-                'label' => 'Matière',
+                'label' => 'Discipline',
                 'class' => Matieres::class,
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
+                    return $er->createQueryBuilder('m')
+                        ->join('m.ecoles', 'ec')
+                        ->andWhere('ec.id = :ecole')
+                        ->setParameter('ecole', $ecole);
+                },
                 'choice_label' => 'name',
             ])
             ->add('submit',SubmitType::class, [
@@ -65,6 +76,7 @@ class NoteType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Notes::class,
+            'ecole' => null,
         ]);
     }
 }

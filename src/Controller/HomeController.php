@@ -53,7 +53,9 @@ class HomeController extends AbstractController
     #[Route("/", name: "home")]
     public function index(UsersRepository $usersRepository, NotesRepository $notesRepository, ArticlesRepository $artsRepo): Response
     {
-        $articles = $artsRepo->findBy(['active' =>true], ['id'=>'DESC']);
+        
+        $ecole =  $this->getUser()->getEcoles();
+        $articles = $artsRepo->findBy(['active' =>true], ['id'=>'DESC'], ['ecoles' => $ecole]);
 
         // Récupérer l'utilisateur connecté (vous pouvez adapter cela selon votre logique d'authentification)
         $user = $this->getUser();
@@ -78,7 +80,7 @@ class HomeController extends AbstractController
                     'title' => $event->getTitle(),
                     'start' => $event->getStart()->format('Y-m-d H:i:s'),
                     'objectif' => $event->getObjectif(),
-                    'matière' => $event->getMatieres(),
+                    'Discipline' => $event->getMatieres(),
                 ];
             }
         }
@@ -113,7 +115,7 @@ class HomeController extends AbstractController
 
         //MATIERE RECAP
         
-            // Récupérer toutes les matières liées aux événements
+            // Récupérer toutes les Disciplines liées aux événements
             $matieres = [];
             foreach ($events as $event) {
                 $matiere = $event->getMatieres();
@@ -142,14 +144,14 @@ class HomeController extends AbstractController
             // Initialiser les variables pour le mois
             $monthlyAverages = [];
 
-            // Parcourir les matières
+            // Parcourir les Disciplines
             foreach ($matieres as $matiere) {
                 $matiereId = $matiere->getId();
 
-                // Récupérer toutes les notes associées à la matière pour l'utilisateur donné et le mois donné
+                // Récupérer toutes les notes associées à la Discipline pour l'utilisateur donné et le mois donné
                 $matiereNotes = $notesRepository->findByMonthAndMatiere($user, $matiere, $month);
 
-                // Calculer la moyenne de la matière pour le mois donné
+                // Calculer la moyenne de la Discipline pour le mois donné
                 $matiereMonthlyAverage = $this->calculateMatiereAverage($matiereNotes);
                 if ($matiereMonthlyAverage !== null) {
                     $monthlyAverages[] = $matiereMonthlyAverage;
@@ -192,11 +194,11 @@ class HomeController extends AbstractController
         $objectifs = [];
         $now = new \DateTime(); // Date et heure actuelles
         
-        // Filtrer les événements futurs et les trier par matière
+        // Filtrer les événements futurs et les trier par Discipline
         $filteredEvents = [];
         foreach ($events as $event) {
             if ($event->getStart() > $now && $event->getObjectif() !== null) {
-                $matiere = $event->getMatieres()->getName(); // Vous pouvez utiliser l'ID de la matière comme clé
+                $matiere = $event->getMatieres()->getName(); // Vous pouvez utiliser l'ID de la Discipline comme clé
                 $filteredEvents[$matiere][] = [
                     'title' => $event->getTitle(),
                     'start' => $event->getStart()->format('Y-m-d H:i:s'),
@@ -205,7 +207,7 @@ class HomeController extends AbstractController
             }
         }
         
-        // Tri des événements par matière
+        // Tri des événements par Discipline
         ksort($filteredEvents);
         
         // Formatage des objectifs
@@ -244,11 +246,11 @@ class HomeController extends AbstractController
     #[Route('/historique/heure/endpoint', name: 'historique_heures_endpoint')]
     public function historiqueHeuresEndpoint(Request $request)
     {
-        // Récupérer l'ID de la matière depuis la requête
+        // Récupérer l'ID de la Discipline depuis la requête
         $matiereId = $request->query->get('matiereId');
 
         // Effectuer les opérations nécessaires pour obtenir les données mises à jour
-        // en fonction de l'ID de la matière
+        // en fonction de l'ID de la Discipline
 
         // Exemple de données pour la réponse JSON
         $matiere = $this->getDoctrine()->getRepository(Matieres::class)->find($matiereId);

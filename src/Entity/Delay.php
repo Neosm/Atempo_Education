@@ -23,6 +23,9 @@ class Delay
     #[ORM\Column(type: 'integer')]
     private ?int $delayMinutes = null;
 
+    #[ORM\ManyToOne(inversedBy: 'delay')]
+    private ?Ecoles $ecoles = null;
+
 
     public function getId(): ?int
     {
@@ -74,5 +77,17 @@ class Delay
         }
 
         return null;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
+
+        return $this;
     }
 }

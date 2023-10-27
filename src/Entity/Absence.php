@@ -23,6 +23,9 @@ class Absence
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $absenceDate = null;
 
+    #[ORM\ManyToOne(inversedBy: 'absence')]
+    private ?Ecoles $ecoles = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +63,18 @@ class Absence
     public function setAbsenceDate(\DateTimeInterface $absenceDate): self
     {
         $this->absenceDate = $absenceDate;
+
+        return $this;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
 
         return $this;
     }

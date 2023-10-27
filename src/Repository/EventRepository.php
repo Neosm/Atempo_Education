@@ -70,6 +70,7 @@ class EventRepository extends ServiceEntityRepository
             ->setParameter('end', new \DateTime($end))
             ->andWhere('room.id = r.id');
 
+
         $reservedRooms = $qb->getQuery()->getResult();
 
         return $reservedRooms;

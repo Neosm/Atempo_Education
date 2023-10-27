@@ -46,6 +46,7 @@ security:
         - { path: ^/utilisateur, roles: IS_AUTHENTICATED_FULLY }
         
         - { path: ^/admin/, roles: ROLE_ADMIN }
+        - { path: ^/superadmin/, roles: ROLE_SUPERADMIN }
         - { path: ^/, roles: [ROLE_TEACHER, ROLE_STUDENT] }
 
 

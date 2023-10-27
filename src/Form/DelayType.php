@@ -17,6 +17,7 @@ class DelayType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $ecole = $options['ecole'];
         $builder
         ->add('delayMinutes', IntegerType::class, [
             'label' => 'Minutes de retard',
@@ -24,10 +25,13 @@ class DelayType extends AbstractType
         ->add('student', EntityType::class, [
             'label' => 'Élèves',
             'class' => Users::class,
-            'query_builder' => function (EntityRepository $er) {
+            'query_builder' => function (EntityRepository $er)  use ($ecole) {
                 return $er->createQueryBuilder('u')
+                ->join('u.ecoles', 'e')
                 ->andWhere('u.roles LIKE :val')
-                ->setParameter('val', '%["ROLE_STUDENT"]%');
+                ->andWhere('e.id = :ecoleId')
+                ->setParameter('val', '%["ROLE_STUDENT"]%')
+                ->setParameter('ecoleId', $ecole->getId());
             },
             'choice_label' => 'UserIdentifier',
             'attr' => [
@@ -59,6 +63,12 @@ class DelayType extends AbstractType
                     'label' => 'Cours conserné',
                     'class' => Event::class,
                     'choice_label' => 'getTitleAndStart',
+                    'query_builder' => function (EntityRepository $er) use ($ecole) {
+                        return $er->createQueryBuilder('ev')
+                            ->join('ev.ecoles', 'ec')
+                            ->andWhere('ec.id = :ecole')
+                            ->setParameter('ecole', $ecole);
+                    },
                 ]);
         }
     }
@@ -70,6 +80,7 @@ class DelayType extends AbstractType
             'ajouter_creer_delay' => false,
             'admin_creer_delay' => false, // Valeur par défaut pour l'option personnalisée
             'userid' => null,
+            'ecole' => null,
         ]);
     }
 }

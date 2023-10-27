@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Materials;
 use App\Entity\Room;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -15,9 +16,10 @@ class EquipementType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $ecole = $options['ecole'];
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Nom de la salle',
+                'label' => 'Nom de l\'équipement',
             ])
             ->add('rooms', EntityType::class, [
                 'label' => 'Ajouter des salles pour affilié l\'équipement à la salle',
@@ -25,6 +27,12 @@ class EquipementType extends AbstractType
                 'choice_label' => 'name',
                 'multiple' => true,
                 'required' => false,
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
+                    return $er->createQueryBuilder('r')
+                        ->join('r.ecoles', 'ec')
+                        ->andWhere('ec.id = :ecole')
+                        ->setParameter('ecole', $ecole);
+                },
                 'attr' => [
                     'class' => 'room-field'
                 ],
@@ -45,6 +53,7 @@ class EquipementType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Materials::class,
+            'ecole' => null,
         ]);
     }
 }

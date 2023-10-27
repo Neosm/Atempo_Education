@@ -38,13 +38,16 @@ class ArticlesController extends AbstractController
     public function ajoutArticle(Request $request, SluggerInterface $slugger): Response
     {
         $article = new Articles;
-        $form = $this->createForm(ArticlesType::class, $article);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(ArticlesType::class, $article, ['ecole' => $ecole]);
         $form->handleRequest($request);
+
 
         if ($form->isSubmitted() && $form->isValid()) {
             $article->setUsers($this->getUser());
             $article->setActive(true);
             $article->setSlug($slugger->slug($form->get('title')->getData()));
+            $article->setEcoles($ecole);
 
             $images = $form->get('illustrations')->getData();
 
@@ -82,7 +85,8 @@ class ArticlesController extends AbstractController
      */
     public function modifierArticle(Request $request, articles $article, SluggerInterface $slugger): Response
     {
-        $form = $this->createForm(ArticlesType::class, $article);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(ArticlesType::class, $article, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

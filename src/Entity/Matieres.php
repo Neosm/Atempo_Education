@@ -24,6 +24,9 @@ class Matieres
     #[ORM\OneToMany(mappedBy: 'matiere', targetEntity: Notes::class)]
     private Collection $notes;
 
+    #[ORM\ManyToOne(inversedBy: 'matieres')]
+    private ?Ecoles $ecoles = null;
+
     public function __construct()
     {
         $this->Event = new ArrayCollection();
@@ -108,6 +111,18 @@ class Matieres
                 $note->setMatiere(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
 
         return $this;
     }

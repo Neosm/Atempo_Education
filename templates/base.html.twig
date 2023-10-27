@@ -19,7 +19,8 @@
 		<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 		<link href="{{ asset('assets/css/light.css') }}" rel="stylesheet">
-		<link href="{{ asset('assets/css/atempo-education.css') }}" rel="stylesheet">
+		<link href="{{ asset('assets/css/atempo-education.css') }}" rel="stylesheet">	
+		<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 	</head>
 
 
@@ -134,7 +135,7 @@
 																<circle cx="12" cy="8" r="7"></circle>
 																<polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
 															</svg>
-															<span class="align-middle">Noter</span>
+															<span class="align-middle">Évaluation</span>
 														</a>
 													</li>
 												<li class="sidebar-item {% if app.request.attributes.get('_route') starts with 'professeur_absence' %}active{% endif %}">
@@ -161,7 +162,7 @@
 															<polyline points="2 17 12 22 22 17"></polyline>
 															<polyline points="2 12 12 17 22 12"></polyline>
 														</svg>
-														<span class="align-middle">Mes matières</span>
+														<span class="align-middle">Mes Disciplines</span>
 													</a>
 												</li>
 													<li class="sidebar-item {% if app.request.attributes.get('_route') == 'app_resultat' %}active{% endif %}">
@@ -340,7 +341,7 @@
 									</a>
 
 									<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
-										<img src="{{ asset('/uploads/Profil_pics/' ~ app.user.thumbnail)|imagine_filter('thumbnail') }}" class="avatar img-fluid rounded-circle me-1" alt="Photo de Profil de {{ app.user.firstname }}">
+										<img src="{{ asset('/uploads/profile_pics/' ~ app.user.thumbnail)|imagine_filter('thumbnail') }}" class="avatar img-fluid rounded-circle me-1" alt="Photo de Profil de {{ app.user.firstname }}">
 										<span class="text-dark">{{ app.user.firstname }}</span>
 									</a>
 									<div class="dropdown-menu dropdown-menu-end">

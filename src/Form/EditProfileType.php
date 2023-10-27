@@ -42,7 +42,7 @@ class EditProfileType extends AbstractType
                 ]
             ])
             ->add('thumbnail', FileType::class, [
-                'label' => 'Photo de profile',
+                'label' => 'Photo de profil',
                 'mapped'=>false,
                 'multiple'=>false,
                 'required'=>false,
@@ -51,7 +51,7 @@ class EditProfileType extends AbstractType
                 ],
                 'constraints' => [
                     new File([
-                        'maxSize' => '600k',
+                        'maxSize' => '1500k',
                         'mimeTypes' => [
                             'image/png',
                             'image/jpg',

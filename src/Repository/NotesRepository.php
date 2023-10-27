@@ -68,7 +68,7 @@ class NotesRepository extends ServiceEntityRepository
 
 public function findByMonthAndMatiere(Users $user, Matieres $matiere, string $month)
 {
-    // Récupérer la première note de l'utilisateur pour la matière donnée
+    // Récupérer la première note de l'utilisateur pour la Discipline donnée
     $firstNote = $this->createQueryBuilder('n')
         ->leftJoin('n.user', 'u')
         ->addSelect('u')

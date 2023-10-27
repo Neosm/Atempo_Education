@@ -27,7 +27,9 @@ class ProgrammesController extends AbstractController
      */
     public function index(ProgrammesRepository $programmesRepository): Response
     {
-        $allprogrammes = $programmesRepository->findAll();
+        
+        $ecole = $this->getUser()->getEcoles();
+        $allprogrammes = $programmesRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('admin/programmes/index.html.twig', [
             'programmes'=>$allprogrammes,
@@ -40,10 +42,15 @@ class ProgrammesController extends AbstractController
     public function ajouter(Request $request, SluggerInterface $slugger): Response
     {
         $programme = new Programmes();
-        $form = $this->createForm(ProgrammesType::class, $programme);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(ProgrammesType::class, $programme, [
+            'ecole' => $ecole,
+        ]);
         $form->handleRequest($request);
 
+        
         if ($form->isSubmitted() && $form->isValid()) {
+            $programme->setEcoles($ecole);
             $programme->setSlug($slugger->slug($form->get('nom')->getData()));
             $programme->addUser($this->getUser());
             $images = $form->get('image')->getData();
@@ -74,12 +81,15 @@ class ProgrammesController extends AbstractController
         ]);
     }
 
-     /**
+    /**
      * @Route("/modifier/{id}", name="edit")
      */
     public function modifierProgramme(Request $request, Programmes $programme, SluggerInterface $slugger): Response
     {
-        $form = $this->createForm(EditProgrammesType::class, $programme);
+        $ecole = $this->getUser()->getEcoles();
+        $form = $this->createForm(EditProgrammesType::class, $programme, [
+            'ecole' => $ecole,
+        ]);
         $form->handleRequest($request);
         $user = $this->getUser();
         if ($form->isSubmitted() && $form->isValid()) {

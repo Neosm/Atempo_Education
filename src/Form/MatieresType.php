@@ -15,7 +15,7 @@ class MatieresType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
-                'label' => 'Nom de la matière',
+                'label' => 'Nom de la Discipline',
             ])
             ->add('submit',SubmitType::class, [
                 'label' => 'Valider',

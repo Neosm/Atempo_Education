@@ -43,7 +43,7 @@ class ResultatController extends AbstractController
             $events = array_merge($events, $studentClass->getEvents()->toArray());
         }
 
-        // Récupérer toutes les matières liées aux événements
+        // Récupérer toutes les Disciplines liées aux événements
         $matieres = [];
         foreach ($events as $event) {
             $matiere = $event->getMatieres();
@@ -53,24 +53,24 @@ class ResultatController extends AbstractController
             }
         }
 
-        // Calculer la moyenne générale de toutes les matières
+        // Calculer la moyenne générale de toutes les Disciplines
         $totalMoyenne = 0;
         $nombreMatieres = count($matieres);
 
-        // Tableau des résultats par matière
+        // Tableau des résultats par Discipline
         $resultatsMatieres = [];
 
-        // Parcourir les matières
+        // Parcourir les Disciplines
         foreach ($matieres as $matiere) {
-            // Récupérer toutes les notes associées à la matière pour l'utilisateur donné
+            // Récupérer toutes les notes associées à la Discipline pour l'utilisateur donné
             $matiereNotes = $notesRepository->findBy(['user' => $user, 'matiere' => $matiere]);
 
-            // Calculer la moyenne de la matière
+            // Calculer la moyenne de la Discipline
             $matiereMoyenne = $this->calculateMatiereAverage($matiereNotes);
             $totalMoyenne += $matiereMoyenne;
 
 
-            // Enregistrer les résultats par matière dans le tableau
+            // Enregistrer les résultats par Discipline dans le tableau
             $resultatsMatieres[] = [
                 'matiere' => $matiere,
                 'moyenne' => $matiereMoyenne,
@@ -79,7 +79,7 @@ class ResultatController extends AbstractController
         }
 
         if ($nombreMatieres > 0 ) {
-            // Calculer la moyenne générale de toutes les matières
+            // Calculer la moyenne générale de toutes les Disciplines
             $moyenneGenerale = $totalMoyenne / $nombreMatieres;
         } else {
             $moyenneGenerale = -1;
@@ -104,11 +104,13 @@ class ResultatController extends AbstractController
     public function add(Request $request): Response
     {
         $note = new Notes();
+        $ecole = $this->getUser()->getEcoles();
 
-        $form = $this->createForm(NoteType::class, $note);
+        $form = $this->createForm(NoteType::class, $note, ['ecole' => $ecole]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $note->setEcoles($ecole);
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($note);
             $entityManager->flush();

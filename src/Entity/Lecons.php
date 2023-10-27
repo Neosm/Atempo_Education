@@ -19,7 +19,7 @@ class Lecons
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $thumbnails = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -51,6 +51,9 @@ class Lecons
 
     #[ORM\ManyToMany(targetEntity: Event::class, mappedBy: 'Lecons')]
     private Collection $events;
+
+    #[ORM\ManyToOne(inversedBy: 'lecons')]
+    private ?Ecoles $ecoles = null;
 
     public function __construct()
     {
@@ -231,6 +234,18 @@ class Lecons
         if ($this->events->removeElement($event)) {
             $event->removeLecon($this);
         }
+
+        return $this;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
 
         return $this;
     }

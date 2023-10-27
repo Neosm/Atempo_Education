@@ -31,7 +31,8 @@ class ProgrammesType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $allusers = $this->usersRepository->findAllStudent();
+        $ecole = $options['ecole'];
+        $allusers = $this->usersRepository->findAllStudentByEcole($ecole);
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom du programme'
@@ -61,8 +62,8 @@ class ProgrammesType extends AbstractType
             ->add('ProgrammesLecons', EntityType::class, [
                 'class' => ProgrammesLecons::class,
                 'choice_label'=>'name',
-                'label'=>'Programme privé ou publique',
-                'placeholder' => 'Choisir entre programme publique ou privé',
+                'label'=>'Programme privé ou public',
+                'placeholder' => 'Choisir entre programme public ou privé',
             ])
             ->add('users', EntityType::class, [
                 'class' => Users::class,
@@ -85,6 +86,7 @@ class ProgrammesType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Programmes::class,
+            'ecole' => null,
         ]);
     }
 }

@@ -28,7 +28,9 @@ class LeconsType extends AbstractType
     }
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $allusers = $this->usersRepository->findAllStudent();
+        $ecole = $options['ecole'];
+        dump($ecole);
+        $allusers = $this->usersRepository->findAllStudentByEcole($ecole);
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom de la leçon'
@@ -58,13 +60,13 @@ class LeconsType extends AbstractType
                 'label' => 'Illustration',
                 'mapped'=>false,
                 'multiple'=>false,
-                'required' => $options['required'],
+                'required' => false,
                 'row_attr'=>[
                     'class'=>'mb-3'
                 ],
                 'constraints' => [
                     new File([
-                        'maxSize' => '600k',
+                        'maxSize' => '1500k',
                         'mimeTypes' => [
                             'image/png',
                             'image/jpg',
@@ -122,7 +124,7 @@ class LeconsType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Lecons::class,
-
+            'ecole' => null,
         ]);
     }
 }

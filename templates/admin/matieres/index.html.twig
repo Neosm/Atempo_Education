@@ -1,11 +1,11 @@
 {% extends 'admin.html.twig' %}
 
-{% block title %}Liste des Matières{% endblock %}
+{% block title %}Liste des Disciplines{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>Liste des Matières</h1>
-    <a href="{{ path('admin_matiere_create') }}" class="btn btn-info float-lg-right">Ajouter une matière</a>
+    <h1>Liste des Disciplines</h1>
+    <a href="{{ path('admin_matiere_create') }}" class="btn btn-info float-lg-right">Ajouter une Discipline</a>
     
     <br>
     <br>
@@ -19,7 +19,7 @@
         <thead>
             <tr>
                 <th scope="col">#</th>
-                <th scope="col">Nom de la Matière</th>
+                <th scope="col">Nom de la Discipline</th>
                 <th scope="col">Actions</th>
             </tr>
         </thead>
@@ -30,7 +30,7 @@
                     <td>{{ matiere.name }}</td>
                     <td>
                         <a href="{{ path('admin_matiere_edit', {'id': matiere.id}) }}" class="btn btn-primary">Modifier</a>
-                        <a href="{{ path('admin_matiere_delete', {'id': matiere.id}) }}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette matière ? Si des cours ou des notes sont affiliés à cette matière, ils deviendront orphelins')">Supprimer</a>
+                        <a href="{{ path('admin_matiere_delete', {'id': matiere.id}) }}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette Discipline ? Si des cours ou des notes sont affiliés à cette Discipline, ils deviendront orphelins')">Supprimer</a>
                     </td>
                 </tr>
             {% endfor %}

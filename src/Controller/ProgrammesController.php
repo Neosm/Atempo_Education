@@ -26,7 +26,8 @@ class ProgrammesController extends AbstractController
      */
     public function index(ProgrammesRepository $programmesRepository): Response
     {
-        $allprogrammes = $programmesRepository->findAll();
+        $ecole =  $this->getUser()->getEcoles();
+        $allprogrammes = $programmesRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('programmes/index.html.twig', [
             'programmes'=>$allprogrammes,
@@ -40,12 +41,16 @@ class ProgrammesController extends AbstractController
     public function ajouter(Request $request, SluggerInterface $slugger): Response
     {
         $programme = new Programmes();
-        $form = $this->createForm(ProgrammesType::class, $programme);
+        $ecole =  $this->getUser()->getEcoles();
+        $form = $this->createForm(ProgrammesType::class, $programme, [
+            'ecole' => $ecole,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) { 
             $programme->setSlug($slugger->slug($form->get('nom')->getData()));
             $programme->addUser($this->getUser());
+            $programme->setEcoles($ecole);
             $images = $form->get('image')->getData();
             if ($images) {
                 $originalFilename = pathinfo($images->getClientOriginalName(), PATHINFO_FILENAME);
@@ -79,7 +84,10 @@ class ProgrammesController extends AbstractController
      */
     public function modifierProgramme(Request $request, Programmes $programme, SluggerInterface $slugger): Response
     {
-        $form = $this->createForm(EditProgrammesType::class, $programme);
+        $ecole =  $this->getUser()->getEcoles();
+        $form = $this->createForm(EditProgrammesType::class, $programme, [
+            'ecole' => $ecole,
+        ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $programme->setSlug($slugger->slug($form->get('nom')->getData()));
@@ -141,11 +149,13 @@ class ProgrammesController extends AbstractController
     }
 
     /**
-    * @Route("/publiques", name="all_public")
+    * @Route("/publics", name="all_public")
     */
     public function allProgrammespblq(ProgrammesRepository $programmesRepository): Response
     {
-        $allprogrammes = $programmesRepository->findAll();
+        
+        $ecole =  $this->getUser()->getEcoles();
+        $allprogrammes = $programmesRepository->findBy(["ecoles" => $ecole]);
 
         return $this->render('programmes/all.html.twig', [
             'programmes'=>$allprogrammes,
@@ -157,7 +167,8 @@ class ProgrammesController extends AbstractController
     */
     public function allProgrammesprvt(ProgrammesRepository $programmesRepository): Response
     {
-        $allprogrammes = $programmesRepository->findAll();
+        $ecole =  $this->getUser()->getEcoles();
+        $allprogrammes = $programmesRepository->findBy(['ecoles' => $ecole]);
 
         return $this->render('programmes/all.html.twig', [
             'programmes'=>$allprogrammes,

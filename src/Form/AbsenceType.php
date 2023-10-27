@@ -15,15 +15,19 @@ class AbsenceType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $ecole = $options['ecole'];
         $builder
             ->add('student', EntityType::class, [
                 'label' => 'Élèves',
                 'class' => Users::class,
-                'query_builder' => function (EntityRepository $er) {
+                'query_builder' => function (EntityRepository $er) use ($ecole) {
                     return $er->createQueryBuilder('u')
+                    ->join('u.ecoles', 'e')
                     ->andWhere('u.roles LIKE :val')
-                    ->setParameter('val', '%["ROLE_STUDENT"]%');
-                },
+                    ->andWhere('e.id = :ecoleId')
+                    ->setParameter('val', '%["ROLE_STUDENT"]%')
+                    ->setParameter('ecoleId', $ecole->getId());
+            },
                 'choice_label' => 'UserIdentifier',
                 'attr' => [
                     'class' => 'students-field select2'
@@ -33,6 +37,7 @@ class AbsenceType extends AbstractType
                 ],
                 
             ]);
+            
 
             if ($options['creer_absence_professeur']) {
                 $userid = $options['userid'];
@@ -54,6 +59,12 @@ class AbsenceType extends AbstractType
                         'label' => 'Cours conserné',
                         'class' => Event::class,
                         'choice_label' => 'getTitleAndStart',
+                        'query_builder' => function (EntityRepository $er) use ($ecole) {
+                            return $er->createQueryBuilder('ev')
+                                ->join('ev.ecoles', 'ec')
+                                ->andWhere('ec.id = :ecole')
+                                ->setParameter('ecole', $ecole);
+                        },
                     ]);
             }
     }
@@ -65,6 +76,7 @@ class AbsenceType extends AbstractType
             'creer_absence_professeur' => false,        
             'creer_absence_admin' => false, // Valeur par défaut pour l'option personnalisée
             'userid' => null,
+            'ecole' => null,
         ]);
     }
 }

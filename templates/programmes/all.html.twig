@@ -16,13 +16,13 @@
 		<div class="col-12">
 			<div class="card">
 				<div class="card-header">
-					<h2 class="card-title h5">Programmes publiques</h2>
-					<p class="card-subtitle text-muted h6">Tous les programmes publiques.</p>
+					<h2 class="card-title h5">Programmes publics</h2>
+					<p class="card-subtitle text-muted h6">Tous les programmes publics.</p>
 				</div>
 				<div class="card-body p-3">
 					{% if app.user.roles == ["ROLE_TEACHER"] %}
 						{% for programme in app.user.programmes|sort((a, b) => b.id <=> a.id) %}
-							{% if programme.ProgrammesLecons.name == "Publique" and programme.lecons|length > 0 %}
+							{% if programme.ProgrammesLecons.name == "Publique" %}
 								<div id="tasks-upcoming">
 									<div class="card mb-3 d-block">
 										{% if is_granted("ROLE_TEACHER") %}
@@ -75,7 +75,6 @@
 					{% else %}
 						{% for programme in programmes|sort((a, b) => b.id <=> a.id) %}
 							{% if programme.ProgrammesLecons.name == "Publique" %}
-								{% if programme.lecons|length > 0 %}
 									<div id="tasks-upcoming">
 										<div class="card mb-3 d-block">
 											{% if is_granted("ROLE_TEACHER") %}
@@ -123,7 +122,6 @@
 											</div>
 										</div>
 									</div>
-								{% endif %}
 							{% endif %}
 						{% endfor %}
 					{% endif %}

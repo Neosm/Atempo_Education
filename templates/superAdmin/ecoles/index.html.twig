@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des écoles{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h2 class="text-center mb-4">Liste des écoles</h2>
+                <a href="{{ path('superadmin_app_ecole_ajouter') }}" class="btn btn-primary float-end">Ajouter</a>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nom</th>
+                            <th scope="col">Numéro</th>
+                            <th scope="col">Ville</th>
+                            <th scope="col">Campus</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ecole in ecoles %}
+                            <tr>
+                                <th scope="row">{{ ecole.id }}</th>
+                                <td>{{ ecole.nom }}</td>
+                                <td>{{ ecole.numero }}</td>
+                                <td>{{ ecole.ville }}</td>
+                                <td>{{ ecole.campus }}</td>
+                                <td>
+                                    <a href="{{ path('superadmin_app_ecole_modifier', { 'id': ecole.id }) }}" class="btn btn-warning">Modifier</a>
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ ecole.id }}">Supprimer</button>
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="deleteModal{{ ecole.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteModalLabel">Confirmation de suppression</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Êtes-vous sûr de vouloir supprimer cette école ?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                    <form action="{{ path('superadmin_app_ecole_supprimer', { 'id': ecole.id }) }}" method="post">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('supprimer' ~ ecole.id) }}">
+                                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

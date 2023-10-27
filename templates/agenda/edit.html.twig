@@ -43,7 +43,7 @@
 <script>
 $(document).ready(function() {
     $('.students-field').select2({
-        placeholder: "Choisissez l'élève ou les élèves à qui vous allez faire cours. (Désactivez le bouton si vous faites cours à une classe entière)",
+        placeholder: "Sélectionner le ou les élèves concerné(s)",
         closeOnSelect: false,
     });
 
@@ -190,6 +190,8 @@ $(document).ready(function() {
 			apiUrl += '&duration=' + durationValue;
 			apiUrl += '&zoomlink=' + zoomlinkValue;
 			// Ajouter la valeur du champ zoomlink
+            var eventId = "{{ event.id }}"; // Remplacez par la méthode de récupération de l'ID de l'événement appropriée
+		    apiUrl += '&eventId=' + eventId;
 
 			// Fetch des salles en fonction des équipements sélectionnés, de l'heure et de la durée
 			fetch(apiUrl).then(function(response) {

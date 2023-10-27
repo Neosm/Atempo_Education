@@ -82,6 +82,9 @@ class Event
     #[ORM\OneToMany(mappedBy: 'parentEvent', targetEntity: self::class)]
     private Collection $events;
 
+    #[ORM\ManyToOne(inversedBy: 'event')]
+    private ?Ecoles $ecoles = null;
+
     public function __construct()
     {
         $this->students = new ArrayCollection();
@@ -452,6 +455,18 @@ class Event
                 $event->setParentEvent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getEcoles(): ?Ecoles
+    {
+        return $this->ecoles;
+    }
+
+    public function setEcoles(?Ecoles $ecoles): static
+    {
+        $this->ecoles = $ecoles;
 
         return $this;
     }

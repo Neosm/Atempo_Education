@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier une école{% endblock %}
+
+{% block content %}
+    <h1>Modifier une école</h1>
+
+    {{ form_start(form) }}
+    {{ form_row(form.nom) }}
+    {{ form_row(form.numero) }}
+    {{ form_row(form.ville) }}
+    {{ form_row(form.campus) }}
+
+    <button type="submit" class="btn btn-primary">Modifier</button>
+
+    {{ form_end(form) }}
+
+    <a href="{{ path('superadmin_app_ecole') }}">Retour à la liste</a>
+{% endblock %}

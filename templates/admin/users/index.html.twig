@@ -38,7 +38,7 @@ Tous les utilisateurs
 							<th>Email</th>
 							<th>Téléphone</th>
 							{% if app.request.attributes.get('_route') == 'admin_users_teacher' %}
-								<th>Matière</th>
+								<th>Discipline</th>
 							{% elseif app.request.attributes.get('_route') == 'admin_users_student' %}
 								<th>Classe</th>
 								{% elseif app.request.attributes.get('_route') == 'admin_users_admin' %}

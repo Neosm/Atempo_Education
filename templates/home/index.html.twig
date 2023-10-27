@@ -333,7 +333,7 @@
 						<form>
 							<div class="form-group">
 								<select class="form-control" id="matiereDropdown" onchange="updateHeuresPassees()">
-									<option value="0">Sélectionnez une matière</option>
+									<option value="0">Sélectionnez une Discipline</option>
 									{% for matiere in matieres %}
 										<option value="{{ matiere.id }}">{{ matiere.name }}</option>
 									{% endfor %}
@@ -347,7 +347,7 @@
 					<div id="historiqueHeures"></div>
 				</div>
 				<div class="card-footer">
-					<a href="{{ path('my_matieres') }}" class="btn btn-bitbucket text-center text-uppercase w-100 mt-1">Voir toutes mes matières</a>
+					<a href="{{ path('my_matieres') }}" class="btn btn-bitbucket text-center text-uppercase w-100 mt-1">Voir toutes mes Disciplines</a>
 				</div>
 			</div>
 		</div>
@@ -455,7 +455,7 @@
 								</th>
 							{% elseif is_granted ('ROLE_STUDENT')%}
 								<th tabindex="0" rowspan="1" colspan="1" style="width: 47px;">
-									matière
+									Discipline
 								</th>
 							{% endif %}
 							<th tabindex="0" rowspan="1" colspan="1" style="width: 47px;">
@@ -629,17 +629,17 @@ var chart = new Chart(ctx, {
                 xhr.open('GET', '/historique/heure/endpoint?matiereId=' + matiereId, true);
                 xhr.send();
             } else {
-                // Afficher un message indiquant qu'aucune matière n'a été sélectionnée
-                historiqueHeuresElement.innerHTML = "Veuillez sélectionner une matière.";
+                // Afficher un message indiquant qu'aucune Discipline n'a été sélectionnée
+                historiqueHeuresElement.innerHTML = "Veuillez sélectionner une Discipline.";
             }
         }
 
         function generateHistoriqueHeuresHTML(data) {
-            var html = '<h3>Historique des heures pour la matière sélectionnée :</h3>';
+            var html = '<h3>Historique des heures pour la Discipline sélectionnée :</h3>';
             html += '<div>';
 
-            // Matière
-            html += '<strong>Matière:</strong> ' + data.matiere + '<br>';
+            // Discipline
+            html += '<strong>Discipline:</strong> ' + data.matiere + '<br>';
 
             // Temps total
             html += '<strong>Temps total:</strong> ' + data.tempsTotal + '<br>';

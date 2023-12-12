@@ -2,9 +2,9 @@
 
 {% block title %}
     {% if app.request.attributes.get('_route') == 'admin_resultats_ajouter' %}
-        Ajouter une Note
+        Ajouter une appréciation
     {% else %}
-        Modifier une Note
+        Modifier une appréciation
     {% endif %}
 {% endblock %}
 
@@ -14,9 +14,9 @@
 {% block content %}
     <h1 class="h3 mb-3">
         {% if app.request.attributes.get('_route') == 'admin_resultats_ajouter' %}
-            Ajouter une note
+            Ajouter une appréciation
         {% else %}
-            Modifier une note
+            Modifier une appréciation
         {% endif %}
     </h1>
 

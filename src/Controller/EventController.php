@@ -1054,7 +1054,6 @@ class EventController extends AbstractController
                 });
             }
         }
-        dump($zoomlink);
         if (!empty($zoomlink)) {
             // Si le champ "zoomlink" est rempli, aucune salle ne sera affichée
             $availableRooms = [];
@@ -1077,7 +1076,6 @@ class EventController extends AbstractController
             $availableRooms = array_values($availableRooms); // Réindexer le tableau
         }
 
-        dump($availableRooms);
         $roomData = [];
         foreach ($availableRooms as $room) {
             $roomData[] = [

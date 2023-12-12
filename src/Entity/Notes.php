@@ -14,7 +14,7 @@ class Notes
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable:true)]
     private ?int $note = null;
 
     #[ORM\ManyToOne(inversedBy: 'notes')]
@@ -31,6 +31,9 @@ class Notes
 
     #[ORM\ManyToOne(inversedBy: 'notes')]
     private ?Ecoles $ecoles = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $comment = null;
 
     public function getId(): ?int
     {
@@ -105,6 +108,18 @@ class Notes
     public function setEcoles(?Ecoles $ecoles): static
     {
         $this->ecoles = $ecoles;
+
+        return $this;
+    }
+
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
+
+    public function setComment(?string $comment): static
+    {
+        $this->comment = $comment;
 
         return $this;
     }

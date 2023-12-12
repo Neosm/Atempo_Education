@@ -14,11 +14,10 @@
                     <th scope="col">Id</th>
                     <th scope="col">Titre</th>
                     <th scope="col">Catégorie</th>
-                    <th scope="col">Slug</th>
                     <th scope="col">Créateur</th>
                     <th scope="col">Créé le :</th>
                     <th scope="col">Actif</th>
-                    <th scope="col" colspan="2">Actions</th>
+                    <th scope="col" colspan="3">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,7 +26,6 @@
                     <th scope="row"> {{ article.id }} </th>
                     <td>{{ article.title }}</td>
                     <td>{{ article.categories }}</td>
-                    <td>{{ article.slug }}</td>
                     <td>{{ article.users.firstname }} {{ article.users.lastname }}</td>
                     <td>{{ article.createdAt|date }}</td>
                     <td>
@@ -36,6 +34,7 @@
                             <label class="form-check-label" for="flexSwitchCheckDefault"></label>
                         </div>
                     </td>
+                    <td><a href="{{ path('admin_articles_details', {slug: article.slug}) }}" class="btn btn-primary">Voir</a></td>
                     <td><a href="{{ path('admin_articles_modifier', {id: article.id}) }}" class="btn btn-secondary">Modifier</a></td>
                     <td>
                         <a href="#" class="btn btn-danger modal-trigger" type="button" data-bs-toggle="modal"

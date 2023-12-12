@@ -29,7 +29,6 @@ class LeconsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $ecole = $options['ecole'];
-        dump($ecole);
         $allusers = $this->usersRepository->findAllStudentByEcole($ecole);
         $builder
             ->add('nom', TextType::class, [

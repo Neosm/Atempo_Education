@@ -58,23 +58,85 @@
         </div>
         <hr>
         <br><br>
-        <h2 class="h3">Mes prochains cours</h2>
-        <div class="row">
-            <div class="col-sm-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Special title treatment</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                        <a href="#" class="btn btn-info">Go somewhere</a>
+        {% if not is_granted('ROLE_ADMIN') %}
+            <h2 class="h3">Mes prochains cours</h2>
+            <div class="row">
+                {% set today = "now"|date("Y-m-d H:i", 'Europe/Paris') %}
+                {% set nextEvents = [] %}
+                {% if not is_granted('ROLE_TEACHER') %}
+                    {% for event in app.user.events %}
+                        {% if event.start|date("Y-m-d H:i") >= today %}
+                            {% set nextEvents = nextEvents|merge([event]) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if app.user.studentClass is not null %}
+                        {% for event in app.user.studentClass.events %}
+                            {% if event.start|date("Y-m-d H:i") >= today %}
+                                {% set nextEvents = nextEvents|merge([event]) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% elseif is_granted('ROLE_TEACHER') %}
+                    {% for event in app.user.eventsteacher %}
+                        {% if event.start|date("Y-m-d H:i") >= today %}
+                            {% set nextEvents = nextEvents|merge([event]) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if app.user.studentClass is not null %}
+                        {% for event in app.user.studentClass.events %}
+                            {% if event.start|date("Y-m-d H:i") >= today %}
+                                {% set nextEvents = nextEvents|merge([event]) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+
+                {% set nextEvents = nextEvents|sort((a, b) => a.start <=> b.start)|slice(0, 2) %}
+                {% if nextEvents|length > 0 %}
+                    <div class="col-sm-4">
+                        {% for event in nextEvents %}
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        {% if not is_granted ('ROLE_TEACHER') %}
+                                            {{ event.title }}
+                                            -
+                                            {{ event.teacher.UserIdentifier }}
+                                        {% elseif is_granted('ROLE_TEACHER')%}
+                                            {{ event.title }}
+                                        {% endif %}
+                                    </h5>
+                                    <p class="card-text">
+                                        <span class="badge badge-soft-success me-2">
+                                            {{ event.start|format_datetime(pattern='eeee d MMM à HH:mm',locale='fr') }}
+                                        </span>
+                                        <span class="text-muted">
+                                            {% if event.room is not null %}
+                                                Salle :
+                                                {{ event.room.name }}</span>
+                                        {% elseif event.zoomlink is not null %}
+                                            <a href="{{ event.zoomlink }}" target="_blank" rel="noopener noreferrer">Lien Zoom</a>
+                                        {% endif %}
+                                    </p>
+                                    {% if not loop.last %}
+                                        <hr>
+                                    {% endif %}
+                                    <a href="{{ path('agenda_home') }}" class="btn btn-info">Voir l'Agenda</a>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                </div>
+                {% else %}
+                <p>PAS DE PROCHAIN COURS POUR LE MOMENT</p>
+                <a href="{{ path('agenda_home') }}" class="btn btn-info">Voir l'Agenda</a>
+                {% endif %}
             </div>
-            <a href="{{ path('agenda_home') }}" class="link-info"><p class="text-end">Voir l'Agenda</p></a>
-        </div>
+        <br>
         <hr>
         <br>
+        {% endif %}
         <h2 class="h3">Derniers articles écrits</h2>
-        {% if app.user.articles %}
+        {% if app.user.articles is not empty %}
             <div class="row">
                 {% for articles in app.user.articles|reverse|slice(0,3) %}
                     <div class="col-sm-4">
@@ -82,7 +144,12 @@
                             <div class="card-body">
                                 <h3 class="card-title">{{ articles.title }}</h3>
                                 <p class="card-text">{{ articles.content|striptags|u.truncate(275, '...')|raw }}</p>
+                                
+                            {% if not is_granted('ROLE_ADMIN') %}
                                 <a href="{{ path('actualites_details', {slug: articles.slug}) }}" class="btn btn-info">Lire plus</a>
+                            {% else %}
+                                <a href="{{ path('admin_articles_details', {slug: articles.slug}) }}" class="btn btn-info">Lire plus</a>
+                            {% endif %}
                             </div>
                         </div>
                     </div>
@@ -91,9 +158,11 @@
             <br>
             <hr>
             <br>
+        {% else %}
+            <p>Aucun article écrit</p>
         {% endif %}
         <h2 class="h3">Articles en Favoris</h2>
-        {% if app.user.favoris %}
+        {% if app.user.favoris is not empty %}
             <div class="row">
                 {% for articles in app.user.favoris|reverse|slice(0,3) %}
                     <div class="col-sm-4">
@@ -101,13 +170,19 @@
                             <div class="card-body">
                                 <h3 class="card-title">{{ articles.title }}</h3>
                                 <p class="card-text">{{ articles.content|striptags|u.truncate(275, '...')|raw }}</p>
+                            {% if not is_granted('ROLE_ADMIN') %}
                                 <a href="{{ path('actualites_details', {slug: articles.slug}) }}" class="btn btn-info">Lire plus</a>
+                            {% else %}
+                                <a href="{{ path('admin_articles_details', {slug: articles.slug}) }}" class="btn btn-info">Lire plus</a>
+                            {% endif %}
+                            </div>
                             </div>
                         </div>
                     </div>
                 {% endfor %}
-                <a href="" class="link-info"><p class="text-end">Voir plus</p></a>
             </div>
+        {% else %}
+            <p>Aucun article en favoris</p>
         {% endif %}
     </div>
 

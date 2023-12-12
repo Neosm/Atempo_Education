@@ -912,7 +912,6 @@ class AgendaController extends AbstractController
 
         // Récupérer l'ID de l'événement que vous modifiez (si applicable)
         $eventId = $request->query->get('eventId'); // Remplacez 'eventId' par la clé réelle
-        dump($eventId);
 
         if ($eventId) {
             // Récupérer l'événement en fonction de son ID

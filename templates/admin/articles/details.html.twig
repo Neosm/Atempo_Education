@@ -1,5 +1,5 @@
 
-{% extends 'base.html.twig' %}
+{% extends 'admin.html.twig' %}
 
 {% block title %}{{ article.title }} - Actus{% endblock %}
 
@@ -69,7 +69,7 @@
                     <h4 class="card-title">Catégorie</h4>
                     <p class="card-text">
                     {% if article.categories is not null %}
-                            <a href="{{ path('actualites_home') }}?categories={{article.categories.id}}&page=1" class="badge badge-primary">{{ article.categories }}</a>
+                            {{ article.categories }}
                     {% else %}
                         Aucune catégorie
                         {% endif %}
@@ -80,33 +80,6 @@
                 <div class="card-body">
                     <h4 class="card-title">Date de publication</h4>
                     <p class="card-text">{{ article.createdAt|date }}</p>
-                </div>
-            </div>
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h2 class="mb-0">Vous aimerez aussi</h2>
-                </div>
-                <div class="card-body">
-                {% if similarArticles|length == 0 %}
-                    <p>Aucun articles similaires</p>
-                {% else %}
-                    {% for similarArticle in similarArticles %}
-                        <div class="mb-4">
-                            <h6><a href="{{ path('actualites_details', {'slug': similarArticle.slug}) }}">{{ similarArticle.title }}</a></h6>
-                            <p class="mb-1">{{ similarArticle.content|striptags|slice(0,97) ~ '...' }}</p>
-                            <p class="text-1000">Catégorie :
-                                <a href="{{ path('actualites_home') }}?categories={{similarArticle.categories.id}}&page=1" class="badge badge-secondary">{{ similarArticle.categories }}</a>
-                            </p>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                </div>
-                <div class="card-footer bg-light p-0 border-top">
-                    <a class="btn btn-link d-block w-100" href="{{ path('actualites_home') }}">
-                        Tous les articles
-                        <span class="bi bi-chevron-right ms-1 fs--2"></span>
-                    </a>
                 </div>
             </div>
         </div>

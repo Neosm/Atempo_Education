@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class MatièresClassesController extends AbstractController
+class MatieresClassesController extends AbstractController
 {
     #[Route('/mes-matieres', name: 'my_matieres')]
     public function matiere(): Response
@@ -31,7 +31,7 @@ class MatièresClassesController extends AbstractController
                 $matieres[] = $matiere;
             }
         }
-        return $this->render('MatièresClasses/matières.html.twig', [
+        return $this->render('matieres_classes/matieres.html.twig', [
             'matieres' => $matieres,
         ]);
     }
@@ -83,7 +83,7 @@ class MatièresClassesController extends AbstractController
             }
         }
     
-        return $this->render('MatièresClasses/classes.html.twig', [
+        return $this->render('matieres_classes/classes.html.twig', [
             'studentClassesByMatiere' => $studentClassesByMatiere,
         ]);
     }

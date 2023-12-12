@@ -11,6 +11,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -22,6 +23,7 @@ class NoteType extends AbstractType
         $builder
             ->add('note', IntegerType::class, [
                 'label' => 'Note',
+                'required' => false,
                 'attr' => [
                     'min' => 0,
                     'max' => 20,
@@ -62,6 +64,10 @@ class NoteType extends AbstractType
                         ->setParameter('ecole', $ecole);
                 },
                 'choice_label' => 'name',
+            ])
+            ->add('comment', TextType::class, [
+                'label' => 'Commentaires et appréciations',
+                'required' => false,
             ])
             ->add('submit',SubmitType::class, [
                 'label' => 'Valider',

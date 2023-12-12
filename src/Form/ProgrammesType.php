@@ -41,6 +41,7 @@ class ProgrammesType extends AbstractType
                 'label' => 'Illustration',
                 'mapped'=>false,
                 'multiple'=>false,
+                'required'=>false,
                 'row_attr'=>[
                     'class'=>'mb-3'
                 ],

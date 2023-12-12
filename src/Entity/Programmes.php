@@ -21,7 +21,7 @@ class Programmes
     #[ORM\Column(length: 255)]
     private ?string $slug = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable:true)]
     private ?string $image = null;
 
     #[ORM\OneToMany(mappedBy: 'programmes', targetEntity: Lecons::class)]

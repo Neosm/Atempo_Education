@@ -261,14 +261,14 @@
             <!-- Contenu pour les Notes -->
             <div class="card-body">
                 <h6 class="mb-3">Notes</h6>
-                <p>Nombre total de notes : {{ notes | length }}</p>
-                <p>Les 4 dernières notes :</p>
+                <p>Nombre total d'appréciations : {{ notes | length }}</p>
+                <p>Les 4 dernières appréciations :</p>
                 <ul>
                     {% for note in notes | slice(-4) %}
                         <li>{{ note.note }} <sup>{{ note.coefficient }}</sup> - {{ note.user.userIdentifier }}</li>
                     {% endfor %}
                 </ul>
-                <a href="{{ path('admin_resultats_liste') }}" class="btn btn-primary">Aller aux notes</a>
+                <a href="{{ path('admin_resultats_liste') }}" class="btn btn-primary">Aller aux appréciations</a>
             </div>
         </div>
     </div>

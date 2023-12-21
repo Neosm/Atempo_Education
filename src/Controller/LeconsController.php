@@ -67,6 +67,8 @@ class LeconsController extends AbstractController
                 } catch (FileException $e) {
                 }
                 $lecon->setThumbnails($newFilename);
+            }else{
+                $lecon->setThumbnails('default-profile-pic.jpg');
             }
             $pdf = $form->get('pdf')->getData();
             if ($pdf) {

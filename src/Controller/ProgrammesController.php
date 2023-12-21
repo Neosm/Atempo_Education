@@ -65,6 +65,8 @@ class ProgrammesController extends AbstractController
                 } catch (FileException $e) {
                 }
                 $programme->setImage($newFilename);
+            }else{
+                $programme->setImage('default-profile-pic.jpg');
             }
             $em = $this->getDoctrine()->getManager();
             $em->persist($programme);

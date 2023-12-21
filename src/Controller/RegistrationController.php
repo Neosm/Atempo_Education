@@ -56,7 +56,7 @@ class RegistrationController extends AbstractController
                 }
                 $user->setThumbnail($newFilename);
             }else{
-                $user->setThumbnail('default-profil-pic.jpg');
+                $user->setThumbnail('default-profile-pic.jpg');
             }
             if (!$search_email) {
                 $password = $passwordHasher->hashPassword($user, $user->getPassword());

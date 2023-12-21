@@ -68,6 +68,8 @@ class ArticlesController extends AbstractController
 
                 }
                 $article->setIllustrations($newFilename);
+            }else{
+                $article->setIllustrations('default-thumbnails.jpg');
             }
 
             $em = $this->getDoctrine()->getManager();

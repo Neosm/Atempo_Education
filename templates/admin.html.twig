@@ -160,14 +160,14 @@
 													<svg class="bi me-2" width="16" height="16">
 														<use xlink:href=""></use>
 													</svg>
-													<span class="align-middle">Notes</span>
+													<span class="align-middle">Appréciations</span>
 												</a>
 												<ul id="notes" class="sidebar-dropdown list-unstyled collapse {% if app.request.attributes.get('_route') starts with 'admin_resultats_' %}show{% endif %}">
 													<li class="sidebar-item  {% if app.request.attributes.get('_route') starts with 'admin_resultats_liste' %}active{% endif %}">
-														<a href="{{ path('admin_resultats_liste') }}" class="sidebar-link">Voir les notes</a>
+														<a href="{{ path('admin_resultats_liste') }}" class="sidebar-link">Voir les appréciations</a>
 													</li>
 													<li class="sidebar-item  {% if app.request.attributes.get('_route') starts with 'admin_resultats_ajouter' %}active{% endif %}">
-														<a href="{{ path('admin_resultats_ajouter') }}" class="sidebar-link">Ajouter une note</a>
+														<a href="{{ path('admin_resultats_ajouter') }}" class="sidebar-link">Ajouter une appréciation</a>
 													</li>
 												</ul>
 											</li>

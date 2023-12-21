@@ -30,7 +30,7 @@
                     <td>{{ matiere.name }}</td>
                     <td>
                         <a href="{{ path('admin_matiere_edit', {'id': matiere.id}) }}" class="btn btn-primary">Modifier</a>
-                        <a href="{{ path('admin_matiere_delete', {'id': matiere.id}) }}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette Discipline ? Si des cours ou des notes sont affiliés à cette Discipline, ils deviendront orphelins')">Supprimer</a>
+                        <a href="{{ path('admin_matiere_delete', {'id': matiere.id}) }}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette Discipline ? Si des cours ou des appréciations sont affiliés à cette Discipline, ils deviendront orphelins')">Supprimer</a>
                     </td>
                 </tr>
             {% endfor %}

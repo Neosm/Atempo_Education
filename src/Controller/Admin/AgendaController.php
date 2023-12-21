@@ -351,342 +351,345 @@ class AgendaController extends AbstractController
             $end->modify("+$duration minutes");
             $event->setEnd($end);
 
-            // Récupérez le champ `modificationScope` de la soumission du formulaire
-            $modificationScope = $form->get('modificationScope')->getData();
+            if ($event->getRecurrence() == 1 || $event->getParentEvent() !== null ){
+// Récupérez le champ `modificationScope` de la soumission du formulaire
+$modificationScope = $form->get('modificationScope')->getData();
 
-            // Selon la portée de la modification, appliquez la logique appropriée
-            switch ($modificationScope) {
-                case 'this_event':
-                    // Ne rien faire de plus, car l'événement actuel est déjà modifié
-                break;
-                case 'all_events':
-                    // Initialiser un tableau d'identifiants d'événements à modifier
-                    $eventIdsToModify = [];   
-                    // Vérifiez si l'événement a une récurrence ou un parentEventId
-                    if ($event->getRecurrence() == 1) {
-                        // Récupérez tous les événements ayant le même parentEvent
-                        $eventsToModify = $entityManager->getRepository(Event::class)->createQueryBuilder('e')
-                            ->where('e.parentEvent = :parentEvent')
-                            ->andWhere('e.id != :eventId') // Excluez l'événement actuel
-                            ->setParameters([
-                                'parentEvent' => $event,
-                                'eventId' => $event->getId(), // Ajoutez l'ID de l'événement actuel
-                            ])
-                            ->getQuery()
-                            ->getResult();
-                        
-                        foreach ($eventsToModify as $eventToModify) {
-                            $eventIdsToModify[] = $eventToModify->getId();
-                        }
-                    } elseif ($event->getParentEvent() !== null) {
-                        // Récupérez tous les événements ayant le même parentEvent ou l'ID du parentEvent
-                        $eventsToModify = $entityManager->getRepository(Event::class)->createQueryBuilder('e')
-                            ->where('e.parentEvent = :parentEvent OR (e.id = :parentId AND e.id != :eventId)') // Excluez l'événement actuel
-                            ->setParameters([
-                                'parentEvent' => $event->getParentEvent(),
-                                'parentId' => $event->getParentEvent()->getId(),
-                                'eventId' => $event->getId(), // Ajoutez l'ID de l'événement actuel
-                            ])
-                            ->getQuery()
-                            ->getResult();
-                        
-                        foreach ($eventsToModify as $eventToModify) {
-                            $eventIdsToModify[] = $eventToModify->getId();
-                        }
-                    }
-
-                    
-                    // Obtenez la différence entre l'heure de début d'origine et la nouvelle heure de début
-                    $startDifference = $originalStart->diff($event->getStart());
-                    // Récupérez les événements à modifier en utilisant les identifiants
-                    $eventsToModify = $entityManager->getRepository(Event::class)->findBy(['id' => $eventIdsToModify]);
-                    // Modifiez tous ces événements
-                    foreach ($eventsToModify as $eventToModify) {
-                        if ($eventToModify !== $event) {
-                            // Appliquez les modifications nécessaires
-                            $newStart = clone $eventToModify->getStart();
-
-                            // Extrait l'heure et les minutes de $event->getStart()
-                            $startTime = $event->getStart()->format('H:i');
-                            // Extrait l'heure de $startTime
-                            list($hours, $minutes) = explode(':', $startTime);
-                            
-                            // Ajoutez ou soustrayez la différence en minutes à l'heure de début de l'événement
-                            $newStart->add($startDifference);
-                            $newStart->setTime($hours, $minutes);
-
-                            $eventToModify->setStart($newStart);
-
-                            // Vous pouvez ajouter d'autres modifications ici si nécessaire
-                            $eventToModify->setRoom($form->get('room')->getData());
-                            $eventToModify->setTeacher($form->get('teacher')->getData());
-                            $eventToModify->setMatieres($form->get('matieres')->getData());
-                            $eventToModify->setDuration($form->get('duration')->getData());
-                            $eventToModify->setZoomLink($form->get('zoomlink')->getData());
-                            // Code pour gérer la modification des relations de programme
-                            $newProgrammes = $form->get('programme')->getData();
-                            $currentProgrammes = $eventToModify->getProgramme();
-                            
-                            // Supprimez les programmes qui ne sont plus sélectionnés
-                            foreach ($currentProgrammes as $programme) {
-                                if (!$newProgrammes->contains($programme)) {
-                                    $eventToModify->removeProgramme($programme);
-                                }
-                            }
-                            
-                            // Ajoutez les nouveaux programmes
-                            foreach ($newProgrammes as $programme) {
-                                if (!$currentProgrammes->contains($programme)) {
-                                    $eventToModify->addProgramme($programme);
-                                }
-                            }
-                            // Code pour gérer la modification des relations "lecons"
-                            $newLecons = $form->get('lecons')->getData();
-                            $currentLecons = $eventToModify->getLecons();
-
-                            // Supprimez les leçons qui ne sont plus sélectionnées
-                            foreach ($currentLecons as $lecon) {
-                                if (!$newLecons->contains($lecon)) {
-                                    $eventToModify->removeLecon($lecon);
-                                }
-                            }
-
-                            // Ajoutez les nouvelles leçons
-                            foreach ($newLecons as $lecon) {
-                                if (!$currentLecons->contains($lecon)) {
-                                    $eventToModify->addLecon($lecon);
-                                }
-                            }
-
-                            // Code pour gérer la modification des relations "students"
-                            $studentClass = $form->get('studentClass')->getData();
-                            $newStudents = $form->get('students')->getData();
-                            $currentStudents = $eventToModify->getStudents();
-
-                            // Supprimez les étudiants qui ne sont plus sélectionnés
-                            foreach ($currentStudents as $student) {
-                                if (!$newStudents->contains($student)) {
-                                    $eventToModify->removeStudent($student);
-                                }
-                            }
-
-                            // Ajoutez les nouveaux étudiants
-                            foreach ($newStudents as $student) {
-                                if (!$currentStudents->contains($student)) {
-                                    $eventToModify->addStudent($student);
-                                }
-                            }
-
-                            // Mettez à jour la classe d'étudiant
-                            $eventToModify->setStudentClass($studentClass);
-
-                            $title = $form->get('matieres')->getData() . ' - ';
-                            $studentClass = $form->get('studentClass')->getData();
-                            $studentsData = $form->get('students')->getData();
-                            $numberOfStudents = count($studentsData);
-
-                            if ($studentClass) {
-                                $title .= $studentClass;
-                            } elseif ($numberOfStudents > 0) {
-                                $title .= $studentsData[0];
-
-                                if ($numberOfStudents > 1) {
-                                    $title .= ', ';
-
-                                    if ($numberOfStudents > 2) {
-                                        $title .= $studentsData[1] . ', ...';
-                                    } else {
-                                        $title .= $studentsData[1];
-                                    }
-                                }
-                            }
-                            $eventToModify->setTitle($title);
-                            
-
-                            $duration = $event->getDuration();
-
-                            $end = clone $newStart;
-                            $end->modify("+$duration minutes");
-                            $eventToModify->setEnd($end);
-
-                            // Enregistrez l'événement modifié dans la base de données
-                            $entityManager->persist($eventToModify);
-                        } 
-                    }
-                break;
-                    
-                case 'future_events':
-                    // Initialiser un tableau d'identifiants d'événements à modifier
-                    $eventIdsToModify = [];
-
-                    // Vérifiez si l'événement a une récurrence ou un parentEventId
-                    if ($event->getRecurrence() == 1) {
-                        // Récupérez tous les événements ayant le même parentEvent
-                        $eventsToModify = $entityManager->getRepository(Event::class)->createQueryBuilder('e')
-                            ->where('e.parentEvent = :parentEvent')
-                            ->andWhere('e.id != :eventId') // Excluez l'événement actuel
-                            ->setParameters([
-                                'parentEvent' => $event,
-                                'eventId' => $event->getId(), // Ajoutez l'ID de l'événement actuel
-                            ])
-                            ->getQuery()
-                            ->getResult();
-
-                        // Filtrer les événements futurs
-                        $startEvent = $event->getStart();
-                        $eventsToModify = array_filter($eventsToModify, function ($eventToModify) use ($startEvent) {
-                            return $eventToModify->getStart() > $startEvent;
-                        });
-
-                        foreach ($eventsToModify as $eventToModify) {
-                            $eventIdsToModify[] = $eventToModify->getId();
-                        }
-                    } elseif ($event->getParentEvent() !== null) {
-                        // Récupérez tous les événements ayant le même parentEvent ou l'ID du parentEvent
-                        $eventsToModify = $entityManager->getRepository(Event::class)->createQueryBuilder('e')
-                            ->where('e.parentEvent = :parentEvent OR (e.id = :parentId AND e.id != :eventId)') // Excluez l'événement actuel
-                            ->setParameters([
-                                'parentEvent' => $event->getParentEvent(),
-                                'parentId' => $event->getParentEvent()->getId(),
-                                'eventId' => $event->getId(), // Ajoutez l'ID de l'événement actuel
-                            ])
-                            ->getQuery()
-                            ->getResult();
-
-                        // Filtrer les événements futurs
-                        $startEvent = $event->getStart();
-                        $eventsToModify = array_filter($eventsToModify, function ($eventToModify) use ($startEvent) {
-                            return $eventToModify->getStart() > $startEvent;
-                        });
-
-                        foreach ($eventsToModify as $eventToModify) {
-                            $eventIdsToModify[] = $eventToModify->getId();
-                        }
-                    }
-
-                    // Obtenez la différence entre l'heure de début d'origine et la nouvelle heure de début
-                    $startDifference = $originalStart->diff($event->getStart());
-                    // Récupérez les événements à modifier en utilisant les identifiants
-                    $eventsToModify = $entityManager->getRepository(Event::class)->findBy(['id' => $eventIdsToModify]);
-                    // Modifiez tous ces événements
-                    foreach ($eventsToModify as $eventToModify) {
-                        if ($eventToModify !== $event) {
-                            // Appliquez les modifications nécessaires
-                            $newStart = clone $eventToModify->getStart();
-
-                            // Extrait l'heure et les minutes de $event->getStart()
-                            $startTime = $event->getStart()->format('H:i');
-                            // Extrait l'heure de $startTime
-                            list($hours, $minutes) = explode(':', $startTime);
-                            
-                            // Ajoutez ou soustrayez la différence en minutes à l'heure de début de l'événement
-                            $newStart->add($startDifference);
-                            $newStart->setTime($hours, $minutes);
-
-                            $eventToModify->setStart($newStart);
-
-                            // Vous pouvez ajouter d'autres modifications ici si nécessaire
-                            $eventToModify->setRoom($form->get('room')->getData());
-                            $eventToModify->setTeacher($form->get('teacher')->getData());
-                            $eventToModify->setMatieres($form->get('matieres')->getData());
-                            $eventToModify->setDuration($form->get('duration')->getData());
-                            $eventToModify->setZoomLink($form->get('zoomlink')->getData());
-                            // Code pour gérer la modification des relations de programme
-                            $newProgrammes = $form->get('programme')->getData();
-                            $currentProgrammes = $eventToModify->getProgramme();
-
-                            // Supprimez les programmes qui ne sont plus sélectionnés
-                            foreach ($currentProgrammes as $programme) {
-                                if (!$newProgrammes->contains($programme)) {
-                                    $eventToModify->removeProgramme($programme);
-                                }
-                            }
-
-                            // Ajoutez les nouveaux programmes
-                            foreach ($newProgrammes as $programme) {
-                                if (!$currentProgrammes->contains($programme)) {
-                                    $eventToModify->addProgramme($programme);
-                                }
-                            }
-                            // Code pour gérer la modification des relations "lecons"
-                            $newLecons = $form->get('lecons')->getData();
-                            $currentLecons = $eventToModify->getLecons();
-
-                            // Supprimez les leçons qui ne sont plus sélectionnées
-                            foreach ($currentLecons as $lecon) {
-                                if (!$newLecons->contains($lecon)) {
-                                    $eventToModify->removeLecon($lecon);
-                                }
-                            }
-
-                            // Ajoutez les nouvelles leçons
-                            foreach ($newLecons as $lecon) {
-                                if (!$currentLecons->contains($lecon)) {
-                                    $eventToModify->addLecon($lecon);
-                                }
-                            }
-
-                            // Code pour gérer la modification des relations "students"
-                            $studentClass = $form->get('studentClass')->getData();
-                            $newStudents = $form->get('students')->getData();
-                            $currentStudents = $eventToModify->getStudents();
-
-                            // Supprimez les étudiants qui ne sont plus sélectionnés
-                            foreach ($currentStudents as $student) {
-                                if (!$newStudents->contains($student)) {
-                                    $eventToModify->removeStudent($student);
-                                }
-                            }
-
-                            // Ajoutez les nouveaux étudiants
-                            foreach ($newStudents as $student) {
-                                if (!$currentStudents->contains($student)) {
-                                    $eventToModify->addStudent($student);
-                                }
-                            }
-
-                            // Mettez à jour la classe d'étudiant
-                            $eventToModify->setStudentClass($studentClass);
-
-                            $title = $form->get('matieres')->getData() . ' - ';
-                            $studentClass = $form->get('studentClass')->getData();
-                            $studentsData = $form->get('students')->getData();
-                            $numberOfStudents = count($studentsData);
-
-                            if ($studentClass) {
-                                $title .= $studentClass;
-                            } elseif ($numberOfStudents > 0) {
-                                $title .= $studentsData[0];
-
-                                if ($numberOfStudents > 1) {
-                                    $title .= ', ';
-
-                                    if ($numberOfStudents > 2) {
-                                        $title .= $studentsData[1] . ', ...';
-                                    } else {
-                                        $title .= $studentsData[1];
-                                    }
-                                }
-                            }
-                            $eventToModify->setTitle($title);
-
-
-                            $duration = $event->getDuration();
-
-                            $end = clone $newStart;
-                            $end->modify("+$duration minutes");
-                            $eventToModify->setEnd($end);
-
-                            // Enregistrez l'événement modifié dans la base de données
-                            $entityManager->persist($eventToModify);
-                        } 
-                    }
-                break;
-                default:
-                    // Par défaut, ne rien faire
-                break;
+// Selon la portée de la modification, appliquez la logique appropriée
+switch ($modificationScope) {
+    case 'this_event':
+        // Ne rien faire de plus, car l'événement actuel est déjà modifié
+    break;
+    case 'all_events':
+        // Initialiser un tableau d'identifiants d'événements à modifier
+        $eventIdsToModify = [];   
+        // Vérifiez si l'événement a une récurrence ou un parentEventId
+        if ($event->getRecurrence() == 1) {
+            // Récupérez tous les événements ayant le même parentEvent
+            $eventsToModify = $entityManager->getRepository(Event::class)->createQueryBuilder('e')
+                ->where('e.parentEvent = :parentEvent')
+                ->andWhere('e.id != :eventId') // Excluez l'événement actuel
+                ->setParameters([
+                    'parentEvent' => $event,
+                    'eventId' => $event->getId(), // Ajoutez l'ID de l'événement actuel
+                ])
+                ->getQuery()
+                ->getResult();
+            
+            foreach ($eventsToModify as $eventToModify) {
+                $eventIdsToModify[] = $eventToModify->getId();
             }
+        } elseif ($event->getParentEvent() !== null) {
+            // Récupérez tous les événements ayant le même parentEvent ou l'ID du parentEvent
+            $eventsToModify = $entityManager->getRepository(Event::class)->createQueryBuilder('e')
+                ->where('e.parentEvent = :parentEvent OR (e.id = :parentId AND e.id != :eventId)') // Excluez l'événement actuel
+                ->setParameters([
+                    'parentEvent' => $event->getParentEvent(),
+                    'parentId' => $event->getParentEvent()->getId(),
+                    'eventId' => $event->getId(), // Ajoutez l'ID de l'événement actuel
+                ])
+                ->getQuery()
+                ->getResult();
+            
+            foreach ($eventsToModify as $eventToModify) {
+                $eventIdsToModify[] = $eventToModify->getId();
+            }
+        }
 
+        
+        // Obtenez la différence entre l'heure de début d'origine et la nouvelle heure de début
+        $startDifference = $originalStart->diff($event->getStart());
+        // Récupérez les événements à modifier en utilisant les identifiants
+        $eventsToModify = $entityManager->getRepository(Event::class)->findBy(['id' => $eventIdsToModify]);
+        // Modifiez tous ces événements
+        foreach ($eventsToModify as $eventToModify) {
+            if ($eventToModify !== $event) {
+                // Appliquez les modifications nécessaires
+                $newStart = clone $eventToModify->getStart();
+
+                // Extrait l'heure et les minutes de $event->getStart()
+                $startTime = $event->getStart()->format('H:i');
+                // Extrait l'heure de $startTime
+                list($hours, $minutes) = explode(':', $startTime);
+                
+                // Ajoutez ou soustrayez la différence en minutes à l'heure de début de l'événement
+                $newStart->add($startDifference);
+                $newStart->setTime($hours, $minutes);
+
+                $eventToModify->setStart($newStart);
+
+                // Vous pouvez ajouter d'autres modifications ici si nécessaire
+                $eventToModify->setRoom($form->get('room')->getData());
+                $eventToModify->setTeacher($form->get('teacher')->getData());
+                $eventToModify->setMatieres($form->get('matieres')->getData());
+                $eventToModify->setDuration($form->get('duration')->getData());
+                $eventToModify->setZoomLink($form->get('zoomlink')->getData());
+                // Code pour gérer la modification des relations de programme
+                $newProgrammes = $form->get('programme')->getData();
+                $currentProgrammes = $eventToModify->getProgramme();
+                
+                // Supprimez les programmes qui ne sont plus sélectionnés
+                foreach ($currentProgrammes as $programme) {
+                    if (!$newProgrammes->contains($programme)) {
+                        $eventToModify->removeProgramme($programme);
+                    }
+                }
+                
+                // Ajoutez les nouveaux programmes
+                foreach ($newProgrammes as $programme) {
+                    if (!$currentProgrammes->contains($programme)) {
+                        $eventToModify->addProgramme($programme);
+                    }
+                }
+                // Code pour gérer la modification des relations "lecons"
+                $newLecons = $form->get('lecons')->getData();
+                $currentLecons = $eventToModify->getLecons();
+
+                // Supprimez les leçons qui ne sont plus sélectionnées
+                foreach ($currentLecons as $lecon) {
+                    if (!$newLecons->contains($lecon)) {
+                        $eventToModify->removeLecon($lecon);
+                    }
+                }
+
+                // Ajoutez les nouvelles leçons
+                foreach ($newLecons as $lecon) {
+                    if (!$currentLecons->contains($lecon)) {
+                        $eventToModify->addLecon($lecon);
+                    }
+                }
+
+                // Code pour gérer la modification des relations "students"
+                $studentClass = $form->get('studentClass')->getData();
+                $newStudents = $form->get('students')->getData();
+                $currentStudents = $eventToModify->getStudents();
+
+                // Supprimez les étudiants qui ne sont plus sélectionnés
+                foreach ($currentStudents as $student) {
+                    if (!$newStudents->contains($student)) {
+                        $eventToModify->removeStudent($student);
+                    }
+                }
+
+                // Ajoutez les nouveaux étudiants
+                foreach ($newStudents as $student) {
+                    if (!$currentStudents->contains($student)) {
+                        $eventToModify->addStudent($student);
+                    }
+                }
+
+                // Mettez à jour la classe d'étudiant
+                $eventToModify->setStudentClass($studentClass);
+
+                $title = $form->get('matieres')->getData() . ' - ';
+                $studentClass = $form->get('studentClass')->getData();
+                $studentsData = $form->get('students')->getData();
+                $numberOfStudents = count($studentsData);
+
+                if ($studentClass) {
+                    $title .= $studentClass;
+                } elseif ($numberOfStudents > 0) {
+                    $title .= $studentsData[0];
+
+                    if ($numberOfStudents > 1) {
+                        $title .= ', ';
+
+                        if ($numberOfStudents > 2) {
+                            $title .= $studentsData[1] . ', ...';
+                        } else {
+                            $title .= $studentsData[1];
+                        }
+                    }
+                }
+                $eventToModify->setTitle($title);
+                
+
+                $duration = $event->getDuration();
+
+                $end = clone $newStart;
+                $end->modify("+$duration minutes");
+                $eventToModify->setEnd($end);
+
+                // Enregistrez l'événement modifié dans la base de données
+                $entityManager->persist($eventToModify);
+            } 
+        }
+    break;
+        
+    case 'future_events':
+        // Initialiser un tableau d'identifiants d'événements à modifier
+        $eventIdsToModify = [];
+
+        // Vérifiez si l'événement a une récurrence ou un parentEventId
+        if ($event->getRecurrence() == 1) {
+            // Récupérez tous les événements ayant le même parentEvent
+            $eventsToModify = $entityManager->getRepository(Event::class)->createQueryBuilder('e')
+                ->where('e.parentEvent = :parentEvent')
+                ->andWhere('e.id != :eventId') // Excluez l'événement actuel
+                ->setParameters([
+                    'parentEvent' => $event,
+                    'eventId' => $event->getId(), // Ajoutez l'ID de l'événement actuel
+                ])
+                ->getQuery()
+                ->getResult();
+
+            // Filtrer les événements futurs
+            $startEvent = $event->getStart();
+            $eventsToModify = array_filter($eventsToModify, function ($eventToModify) use ($startEvent) {
+                return $eventToModify->getStart() > $startEvent;
+            });
+
+            foreach ($eventsToModify as $eventToModify) {
+                $eventIdsToModify[] = $eventToModify->getId();
+            }
+        } elseif ($event->getParentEvent() !== null) {
+            // Récupérez tous les événements ayant le même parentEvent ou l'ID du parentEvent
+            $eventsToModify = $entityManager->getRepository(Event::class)->createQueryBuilder('e')
+                ->where('e.parentEvent = :parentEvent OR (e.id = :parentId AND e.id != :eventId)') // Excluez l'événement actuel
+                ->setParameters([
+                    'parentEvent' => $event->getParentEvent(),
+                    'parentId' => $event->getParentEvent()->getId(),
+                    'eventId' => $event->getId(), // Ajoutez l'ID de l'événement actuel
+                ])
+                ->getQuery()
+                ->getResult();
+
+            // Filtrer les événements futurs
+            $startEvent = $event->getStart();
+            $eventsToModify = array_filter($eventsToModify, function ($eventToModify) use ($startEvent) {
+                return $eventToModify->getStart() > $startEvent;
+            });
+
+            foreach ($eventsToModify as $eventToModify) {
+                $eventIdsToModify[] = $eventToModify->getId();
+            }
+        }
+
+        // Obtenez la différence entre l'heure de début d'origine et la nouvelle heure de début
+        $startDifference = $originalStart->diff($event->getStart());
+        // Récupérez les événements à modifier en utilisant les identifiants
+        $eventsToModify = $entityManager->getRepository(Event::class)->findBy(['id' => $eventIdsToModify]);
+        // Modifiez tous ces événements
+        foreach ($eventsToModify as $eventToModify) {
+            if ($eventToModify !== $event) {
+                // Appliquez les modifications nécessaires
+                $newStart = clone $eventToModify->getStart();
+
+                // Extrait l'heure et les minutes de $event->getStart()
+                $startTime = $event->getStart()->format('H:i');
+                // Extrait l'heure de $startTime
+                list($hours, $minutes) = explode(':', $startTime);
+                
+                // Ajoutez ou soustrayez la différence en minutes à l'heure de début de l'événement
+                $newStart->add($startDifference);
+                $newStart->setTime($hours, $minutes);
+
+                $eventToModify->setStart($newStart);
+
+                // Vous pouvez ajouter d'autres modifications ici si nécessaire
+                $eventToModify->setRoom($form->get('room')->getData());
+                $eventToModify->setTeacher($form->get('teacher')->getData());
+                $eventToModify->setMatieres($form->get('matieres')->getData());
+                $eventToModify->setDuration($form->get('duration')->getData());
+                $eventToModify->setZoomLink($form->get('zoomlink')->getData());
+                // Code pour gérer la modification des relations de programme
+                $newProgrammes = $form->get('programme')->getData();
+                $currentProgrammes = $eventToModify->getProgramme();
+
+                // Supprimez les programmes qui ne sont plus sélectionnés
+                foreach ($currentProgrammes as $programme) {
+                    if (!$newProgrammes->contains($programme)) {
+                        $eventToModify->removeProgramme($programme);
+                    }
+                }
+
+                // Ajoutez les nouveaux programmes
+                foreach ($newProgrammes as $programme) {
+                    if (!$currentProgrammes->contains($programme)) {
+                        $eventToModify->addProgramme($programme);
+                    }
+                }
+                // Code pour gérer la modification des relations "lecons"
+                $newLecons = $form->get('lecons')->getData();
+                $currentLecons = $eventToModify->getLecons();
+
+                // Supprimez les leçons qui ne sont plus sélectionnées
+                foreach ($currentLecons as $lecon) {
+                    if (!$newLecons->contains($lecon)) {
+                        $eventToModify->removeLecon($lecon);
+                    }
+                }
+
+                // Ajoutez les nouvelles leçons
+                foreach ($newLecons as $lecon) {
+                    if (!$currentLecons->contains($lecon)) {
+                        $eventToModify->addLecon($lecon);
+                    }
+                }
+
+                // Code pour gérer la modification des relations "students"
+                $studentClass = $form->get('studentClass')->getData();
+                $newStudents = $form->get('students')->getData();
+                $currentStudents = $eventToModify->getStudents();
+
+                // Supprimez les étudiants qui ne sont plus sélectionnés
+                foreach ($currentStudents as $student) {
+                    if (!$newStudents->contains($student)) {
+                        $eventToModify->removeStudent($student);
+                    }
+                }
+
+                // Ajoutez les nouveaux étudiants
+                foreach ($newStudents as $student) {
+                    if (!$currentStudents->contains($student)) {
+                        $eventToModify->addStudent($student);
+                    }
+                }
+
+                // Mettez à jour la classe d'étudiant
+                $eventToModify->setStudentClass($studentClass);
+
+                $title = $form->get('matieres')->getData() . ' - ';
+                $studentClass = $form->get('studentClass')->getData();
+                $studentsData = $form->get('students')->getData();
+                $numberOfStudents = count($studentsData);
+
+                if ($studentClass) {
+                    $title .= $studentClass;
+                } elseif ($numberOfStudents > 0) {
+                    $title .= $studentsData[0];
+
+                    if ($numberOfStudents > 1) {
+                        $title .= ', ';
+
+                        if ($numberOfStudents > 2) {
+                            $title .= $studentsData[1] . ', ...';
+                        } else {
+                            $title .= $studentsData[1];
+                        }
+                    }
+                }
+                $eventToModify->setTitle($title);
+
+
+                $duration = $event->getDuration();
+
+                $end = clone $newStart;
+                $end->modify("+$duration minutes");
+                $eventToModify->setEnd($end);
+
+                // Enregistrez l'événement modifié dans la base de données
+                $entityManager->persist($eventToModify);
+            } 
+        }
+    break;
+    default:
+        // Par défaut, ne rien faire
+    break;
+}
+
+            }
+            
             // Enregistrez l'événement actuel dans la base de données
             $entityManager->persist($event);
             $entityManager->flush();
